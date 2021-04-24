@@ -1,89 +1,46 @@
-#
-# 'make'        build executable file 'main'
-# 'make clean'  removes all .o and executable files
-#
+CXX 				:= g++
+CXXFLAGS		:= -std=c++17 -Wall -Wextra -g
+LFLAGS 			:= -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf
+OUTPUT			:= output
+BUILD 			:= build
+SRC					:= src
+INCLUDE			:= include
+LIB					:= lib
 
-# define the Cpp compiler to use
-CXX = g++
-
-# define any compile-time flags
-CXXFLAGS	:= -std=c++17 -Wall -Wextra -g
-
-# define library paths in addition to /usr/lib
-#   if I wanted to include libraries not in /usr/lib I'd specify
-#   their path using -Lpath, something like:
-LFLAGS := -lSDL
-
-# define output directory
-OUTPUT	:= output
-
-# define source directory
-SRC		:= src
-
-# define include directory
-INCLUDE	:= include
-
-# define lib directory
-LIB		:= lib
-
-ifeq ($(OS),Windows_NT)
-MAIN	:= main.exe
-SOURCEDIRS	:= $(SRC)
-INCLUDEDIRS	:= $(INCLUDE)
-LIBDIRS		:= $(LIB)
-FIXPATH = $(subst /,\,$1)
-RM			:= del /q /f
-MD	:= mkdir
-else
-MAIN	:= main
+MAIN				:= main
 SOURCEDIRS	:= $(shell find $(SRC) -type d)
 INCLUDEDIRS	:= $(shell find $(INCLUDE) -type d)
-LIBDIRS		:= $(shell find $(LIB) -type d)
-FIXPATH = $1
-RM = rm -f
-MD	:= mkdir -p
-endif
+LIBDIRS			:= $(shell find $(LIB) -type d)
+FIXPATH 		:= $1
+RM 					:= rm -f
+MD					:= mkdir -p
 
-# define any directories containing header files other than /usr/include
-INCLUDES	:= $(patsubst %,-I%, $(INCLUDEDIRS:%/=%))
+INCLUDES		:= $(patsubst %,-I%, $(INCLUDEDIRS:%/=%))
+LIBS				:= $(patsubst %,-L%, $(LIBDIRS:%/=%))
+SOURCES			:= $(wildcard $(patsubst %,%/*.cpp, $(SOURCEDIRS)))
+OBJECTS			:= $(addprefix $(BUILD)/, $(SOURCES:.cpp=.o))
 
-# define the C libs
-LIBS		:= $(patsubst %,-L%, $(LIBDIRS:%/=%))
+OUTPUTMAIN := $(OUTPUT)/$(MAIN)
 
-# define the C source files
-SOURCES		:= $(wildcard $(patsubst %,%/*.cpp, $(SOURCEDIRS)))
-
-# define the C object files 
-OBJECTS		:= $(SOURCES:.cpp=.o)
-
-#
-# The following part of the makefile is generic; it can be used to 
-# build any executable just by changing the definitions above and by
-# deleting dependencies appended to the file from 'make depend'
-#
-
-OUTPUTMAIN	:= $(call FIXPATH,$(OUTPUT)/$(MAIN))
-
-all: $(OUTPUT) $(MAIN)
+all: $(OUTPUT) $(BUILD)/$(SOURCEDIRS) $(MAIN) 
 	@echo Executing 'all' complete!
 
 $(OUTPUT):
 	$(MD) $(OUTPUT)
 
-$(MAIN): $(OBJECTS) 
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(OUTPUTMAIN) $(OBJECTS) $(LFLAGS)  
+$(BUILD)/$(SOURCEDIRS):
+	$(MD) $(BUILD)/$(SOURCEDIRS)
 
-# this is a suffix replacement rule for building .o's from .c's
-# it uses automatic variables $<: the name of the prerequisite of
-# the rule(a .c file) and $@: the name of the target of the rule (a .o file) 
-# (see the gnu make manual section about automatic variables)
-.cpp.o:
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $<  -o $@ -lSDL
+$(MAIN): $(OBJECTS) 
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(LFLAGS) -o $(OUTPUTMAIN) $(OBJECTS)   
+
+$(BUILD)/%.o: %.cpp 
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@ 
 
 .PHONY: clean
 clean:
 	$(RM) $(OUTPUTMAIN)
-	$(RM) $(call FIXPATH,$(OBJECTS))
+	$(RM) $(OBJECTS)
 	@echo Cleanup complete!
 
 run: all

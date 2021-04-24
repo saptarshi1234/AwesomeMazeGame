@@ -1,0 +1,18 @@
+{
+  "files.associations": {
+    "*.conf": "xml",
+    "*.lex": "lex",
+    "*.yacc": "yacc",
+    "iostream": "cpp",
+    "ostream": "cpp",
+    "vector": "cpp",
+    "atomic": "cpp",
+    "memory_resource": "cpp",
+    "stop_token": "cpp"
+  },
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2,
+  "editor.maxTokenizationLineLength": 20000,
+  "C_Cpp.codeFolding": "Disabled",
+  "C_Cpp.clang_format_style": "google"
+}

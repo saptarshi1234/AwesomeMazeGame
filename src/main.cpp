@@ -1,54 +1,42 @@
 #include <SDL2/SDL.h>
-#include <stdio.h>
+
 #include <iostream>
-using namespace std;
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
 
-int main( int argc, char* args[] )
-{
-    //The window we'll be rendering to
-    SDL_Window* window = NULL;
-    
-    //The surface contained by the window
-    SDL_Surface* screenSurface = NULL;
+#include "application.hpp"
+#include "game.hpp"
+#include "params.hpp"
+#include "window.hpp"
 
-    //Initialize SDL
-    if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
-    {
-        cout<< "SDL could not initialize! SDL_Error:"<< SDL_GetError()<<endl;
-    }
-    else
-    {
-        //Create window
-        window = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
-        SDL_Delay(200);
+const char* window_name = "GAME";
 
-        if( window == NULL )
-        {
-            cout<< "Window could not be created! SDL_Error:"<< SDL_GetError() <<endl;
-        }
-        else
-        {
-            //Get window surface
-            screenSurface = SDL_GetWindowSurface( window );
+int main(int argc, char* args[]) {
+  if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0)
+    std::cout << "could not iniitialize SDL";
+  std::cout << "SDL loaded" << std::endl;
 
-            //Fill the surface white
-            SDL_FillRect( screenSurface, NULL, SDL_MapRGB( screenSurface->format, 0xFF, 0xFF, 0xFF ) );
-            
-            //Update the surface
-            SDL_UpdateWindowSurface( window );
+  WindowManager window(window_name, Params::SCREEN_HEIGHT,
+                       Params::SCREEN_WIDTH);
+  Game game(window);
 
-            //Wait two seconds
-            SDL_Delay( 2000 );
-        }
-    }
-    //Destroy window
-    SDL_DestroyWindow( window );
+  srand((unsigned int)time(NULL));
+  game.initialize();
+  game.loadGame();
 
-    //Quit SDL subsystems
-    SDL_Quit();
+  while (game.isRunning()) {
+    game.handleEvents();
+    if (!game.isRunning()) break;
 
-    return 0;
+    game.update();
+    window.clearWindow();
 
+    game.render();
+    window.display();
+
+    game.wait();
+  }
+
+  game.quit();
+  SDL_Quit();
+
+  return 0;
 }
