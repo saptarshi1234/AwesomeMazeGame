@@ -1,8 +1,10 @@
 #pragma once
 
-#include "entity.hpp"
-#include "window.hpp"
+#include <vector>
 
+#include "entity.hpp"
+#include "player.hpp"
+#include "window.hpp"
 class Game {
  private:
   WindowManager win;
@@ -20,5 +22,6 @@ class Game {
   void quit();
   bool isRunning();
 
-  Entity e1;
+  Player player1;
+  std::vector<Bullet> bullets;
 };
