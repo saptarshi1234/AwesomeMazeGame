@@ -32,7 +32,7 @@ $(BUILD)/$(SOURCEDIRS):
 	$(MD) $(BUILD)/$(SOURCEDIRS)
 
 $(MAIN): $(OBJECTS) 
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $(LFLAGS) -o $(OUTPUTMAIN) $(OBJECTS)   
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(OUTPUTMAIN) $(OBJECTS) $(LFLAGS)   
 
 $(BUILD)/%.o: %.cpp 
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@ 

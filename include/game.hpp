@@ -5,10 +5,12 @@
 #include "entity.hpp"
 #include "player.hpp"
 #include "window.hpp"
+
 class Game {
  private:
   WindowManager win;
   bool running;
+  std::vector<Direction> dkey_stack;
 
  public:
   Game(WindowManager win);

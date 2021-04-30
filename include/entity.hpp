@@ -16,6 +16,7 @@ class Entity {
   int velocity;
 
   Direction dir;
+  bool is_moving;
 
  public:
   Entity();
@@ -28,6 +29,8 @@ class Entity {
   Direction getDirection();
 
   void move();
+  void stopMoving();
+  bool isMoving();
   void setDirection(Direction d);
   void setLocation(SDL_Rect rect);
 };

@@ -16,6 +16,7 @@ void Entity::init(SDL_Rect loc, SDL_Texture* tex) {
   offsetX = 0;
   offsetY = 0;
   dir = STOP;
+  is_moving = false;
 }
 
 void Entity::setSize(int w, int h) {
@@ -30,34 +31,46 @@ void Entity::setLocation(SDL_Rect rect) { location = rect; }
 Direction Entity::getDirection() { return dir; }
 
 void Entity::move() {
-  switch (dir) {
-    case TOP:
-      if (location.y - velocity >= 0)
-        location.y -= velocity;
-      else
-        dir = STOP;
-      break;
-    case BOTTOM:
-      if (location.y + location.h + velocity <= Params::SCREEN_HEIGHT)
-        location.y += velocity;
-      else
-        dir = STOP;
-      break;
-    case LEFT:
-      if (location.x - velocity >= 0)
-        location.x -= velocity;
-      else
-        dir = STOP;
-      break;
-    case RIGHT:
-      if (location.x + location.w + velocity <= Params::SCREEN_WIDTH)
-        location.x += velocity;
-      else
-        dir = STOP;
-      break;
-    default:
-      break;
+  if (is_moving) {
+    switch (dir) {
+      case TOP:
+        if (location.y - velocity >= 0)
+          location.y -= velocity;
+        else {
+          is_moving = false;
+        }
+        break;
+      case BOTTOM:
+        if (location.y + location.h + velocity <= Params::SCREEN_HEIGHT)
+          location.y += velocity;
+        else {
+          is_moving = false;
+        }
+        break;
+      case LEFT:
+        if (location.x - velocity >= 0)
+          location.x -= velocity;
+        else {
+          is_moving = false;
+        }
+        break;
+      case RIGHT:
+        if (location.x + location.w + velocity <= Params::SCREEN_WIDTH)
+          location.x += velocity;
+        else {
+          is_moving = false;
+        }
+        break;
+      default:
+        break;
+    }
   }
 }
 
-void Entity::setDirection(Direction d) { dir = d; }
+void Entity::stopMoving() { is_moving = false; }
+bool Entity::isMoving() { return is_moving; }
+
+void Entity::setDirection(Direction d) {
+  dir = d;
+  is_moving = true;
+}

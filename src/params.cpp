@@ -1,3 +1,3 @@
 #include "params.hpp"
 
-Params::Params() {}
+// Params::Params() {}
