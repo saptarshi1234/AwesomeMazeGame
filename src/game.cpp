@@ -5,13 +5,31 @@
 
 #include "bullet.hpp"
 #include "entity.hpp"
+#include "maze.hpp"
 #include "window.hpp"
 
 Game::Game(WindowManager win) : win(win) {
   player1.init({0, 0, 20, 20}, win.loadTexture("res/textures/player0.png"));
 }
 
-void Game::initialize() {}
+void Game::initialize() {
+  Maze m;
+  m.setSize(15, 10);
+  m.setPathLength(2);
+  m.setWallLength(2);
+  m.generate();
+  std::vector<std::vector<int>> v = m.render();
+  std::cout << v.size() << "\n";
+  for (auto m : v) {
+    for (auto k : m) {
+      if (k == 0)
+        std::cout << "  ";
+      else
+        std::cout << "* ";
+    }
+    std::cout << "\n";
+  }
+}
 
 void Game::loadGame() { running = true; }
 
@@ -134,3 +152,7 @@ void Game::quit() {
 }
 
 bool Game::isRunning() { return running; };
+
+// 0 0 0 0 0 1
+// 0 0 0 0 0
+// 1 1 1
