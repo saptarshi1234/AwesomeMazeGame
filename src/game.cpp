@@ -14,9 +14,9 @@ Game::Game(WindowManager win) : win(win) {
 
 void Game::initialize() {
   Maze m;
-  m.setSize(15, 10);
+  m.setSize(25, 20);
   m.setPathLength(2);
-  m.setWallLength(2);
+  m.setWallLength(1);
   m.generate();
   std::vector<std::vector<int>> v = m.render();
   std::cout << v.size() << "\n";

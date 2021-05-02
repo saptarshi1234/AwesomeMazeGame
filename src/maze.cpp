@@ -92,14 +92,12 @@ void Maze::generate() {
 }
 
 std::vector<std::vector<int>> Maze::render() {
-  pixelV.resize(
-      (mazeWidth) * (pathLength + wallLength) - wallLength,
-      std::vector<int>((mazeHeight) * (pathLength + wallLength) - wallLength));
+  int arrW = (mazeWidth) * (pathLength + wallLength) - wallLength;
+  int arrH = (mazeHeight) * (pathLength + wallLength) - wallLength;
+  pixelV.resize(arrW, std::vector<int>(arrH));
 
-  for (int i = 0; i < (mazeWidth) * (pathLength + wallLength) - wallLength;
-       i++) {
-    for (int j = 0; j < (mazeHeight) * (pathLength + wallLength) - wallLength;
-         j++) {
+  for (int i = 0; i < arrW; i++) {
+    for (int j = 0; j < arrH; j++) {
       pixelV[i][j] = 1;
     }
   }
@@ -112,11 +110,34 @@ std::vector<std::vector<int>> Maze::render() {
       int h = pathLength;
       if (maze[i][j].down) h += wallLength;
       if (maze[i][j].right) w += wallLength;
+      int temp = rand() % 5;
+      int temp2 = rand() % 5;
+
+      if (i != mazeWidth - 1 && temp < 2) w = pathLength + wallLength;
+
+      if (j != mazeHeight - 1 && temp2 < 2) h = pathLength + wallLength;
+
       for (int x = startX; x < startX + w; x++) {
         for (int y = startY; y < startY + h; y++) {
-          pixelV[x][y] = 0;
+          if (x < startX + pathLength || y < startY + pathLength)
+            pixelV[x][y] = 0;
         }
       }
+    }
+  }
+  for (int i = 0; i < mazeWidth - 1; i++) {
+    for (int j = 0; j < mazeHeight - 1; j++) {
+      int wallX = pathLength + (pathLength + wallLength) * i;
+      int wallY = pathLength + (pathLength + wallLength) * j;
+      if (pixelV[wallX - 1][wallY] + pixelV[wallX][wallY - 1] +
+              pixelV[wallX + wallLength][wallY] +
+              pixelV[wallX][wallY + wallLength] ==
+          0)
+        for (int x = wallX; x < wallX + wallLength; x++) {
+          for (int y = wallY; y < wallY + wallLength; y++) {
+            pixelV[x][y] = 0;
+          }
+        }
     }
   }
   return pixelV;
