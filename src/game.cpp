@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <string>
 
 #include "bullet.hpp"
 #include "entity.hpp"
@@ -9,7 +10,25 @@
 #include "params.hpp"
 #include "window.hpp"
 
-Game::Game(WindowManager win) : win(win) {}
+using std::cout;
+using std::endl;
+
+Game::Game(WindowManager win, bool isServer, char *ip)
+    : win(win), isServer(isServer) {
+  if (isServer) {
+    cout << "Server" << endl;
+    server.initialize();
+    server.bind();
+    server.listen();
+    server.accept();
+
+  } else {
+    cout << "Client" << endl;
+    client.initialize();
+    client.connect(ip);
+    client.send("hello", 5);
+  }
+}
 
 void printMaze(std::vector<std::vector<int>> v) {
   std::cout << v.size() << " " << v[0].size() << "\n";
@@ -24,23 +43,60 @@ void printMaze(std::vector<std::vector<int>> v) {
   }
 }
 
+std::string serialize(std::vector<std::vector<int>> v) {
+  std::string s;
+  for (auto row : v) {
+    for (auto i : row) {
+      s += std::to_string(i);
+    }
+  }
+  return s;
+}
+
+std::vector<std::vector<int>> deserialize(std::string s) {
+  std::vector<std::vector<int>> v;
+  int pos = 0;
+  for (int i = 0; i < Params::SCREEN_HEIGHT / 10; i++) {
+    std::vector<int> row;
+    for (int j = 0; j < Params::SCREEN_WIDTH / 10; j++) {
+      row.push_back(s[pos++] - 48);
+    }
+    v.push_back(row);
+  }
+  return v;
+}
+
 void Game::initialize() {
   maze.setSize(Params::NUM_CELLS_X, Params::NUM_CELLS_Y);
   maze.setPathLength(Params::PATH_WIDTH);
   maze.setWallLength(Params::WALL_WIDTH);
-  maze.generate();
+
+  if (isServer) {
+    maze.generate();
+    maze.render();
+    maze.addPadding();
+
+    std::string s = serialize(maze.getPixelV());
+    server.send(s, s.size());
+
+  } else {
+    auto data =
+        client.recv(Params::SCREEN_HEIGHT / 10 * Params::SCREEN_WIDTH / 10);
+    maze.setPixelV(deserialize(data));
+  }
   maze.maze_tex = win.loadTexture("res/textures/ground.png");
-
-  maze.render();
-  maze.addPadding();
-
-  printMaze(maze.getPixelV());
 }
 
 void Game::loadGame() {
   int w = Params::ACTUAL_CELL_SIZE;
-  player1.init({w, w, 2 * w, 2 * w},
-               win.loadTexture("res/textures/player0.png"));
+  SDL_Texture *player_tex = win.loadTexture("res/textures/player0.png");
+  if (isServer) {
+    player1.init({w, w, 2 * w, 2 * w}, player_tex);
+    player2.init({Params::SCREEN_WIDTH - 3 * w, w, 2 * w, 2 * w}, player_tex);
+  } else {
+    player2.init({w, w, 2 * w, 2 * w}, player_tex);
+    player1.init({Params::SCREEN_WIDTH - 3 * w, w, 2 * w, 2 * w}, player_tex);
+  }
   running = true;
 }
 
@@ -143,7 +199,6 @@ void Game::handleEvents() {
 
 void Game::update() {
   player1.move(&maze);
-
   for (auto bullet_it = bullets.begin(); bullet_it != bullets.end();
        bullet_it++) {
     bullet_it->move(&maze);
@@ -156,6 +211,7 @@ void Game::update() {
 }
 void Game::render() {
   win.render(player1);
+  win.render(player2);
   for (auto &bullet : bullets) {
     win.render(bullet);
   }

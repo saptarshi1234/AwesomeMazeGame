@@ -38,4 +38,5 @@ class Maze {
   void addPadding();
   std::vector<std::vector<int>> render();
   std::vector<std::vector<int>> getPixelV();
+  void setPixelV(std::vector<std::vector<int>> v);
 };

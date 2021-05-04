@@ -1,11 +1,27 @@
 {
   "version": "0.2.0",
   "configurations": [{
-    "name": "Debug",
+    "name": "Server",
     "type": "cppdbg",
     "request": "launch",
     "program": "${workspaceRoot}/output/main",
     "args": [],
+    "stopAtEntry": false,
+    "cwd": "${workspaceFolder}",
+    "environment": [],
+    "externalConsole": false,
+    "linux": {
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "program": "${workspaceFolder}/output/main"
+    },
+    "preLaunchTask": "build"
+  }, {
+    "name": "Client",
+    "type": "cppdbg",
+    "request": "launch",
+    "program": "${workspaceRoot}/output/main",
+    "args": ["-c"],
     "stopAtEntry": false,
     "cwd": "${workspaceFolder}",
     "environment": [],

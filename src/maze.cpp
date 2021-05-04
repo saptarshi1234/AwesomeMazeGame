@@ -154,3 +154,5 @@ void Maze::addPadding() {
 }
 
 std::vector<std::vector<int>> Maze::getPixelV() { return pixelV; }
+
+void Maze::setPixelV(std::vector<std::vector<int>> v) { pixelV = v; }
