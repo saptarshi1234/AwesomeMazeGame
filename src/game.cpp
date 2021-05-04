@@ -55,8 +55,6 @@ void Game::handleEvents() {
 
     if (event.type == SDL_KEYUP) {
       std::vector<Direction>::iterator it;
-      int s;
-      s = dkey_stack.size();
       switch (event.key.keysym.sym) {
         case SDLK_UP:
           it = std::find(dkey_stack.begin(), dkey_stack.end(), TOP);
@@ -79,7 +77,6 @@ void Game::handleEvents() {
         case SDLK_LEFT:
         case SDLK_RIGHT: {
           if (it != dkey_stack.end()) dkey_stack.erase(it);
-          s = dkey_stack.size();
           if (dkey_stack.size() == 0)
             player1.stopMoving();
           else
