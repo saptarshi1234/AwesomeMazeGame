@@ -1,5 +1,8 @@
 #pragma once
 
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+
 #include <stack>
 #include <vector>
 
@@ -25,11 +28,14 @@ class Maze {
  public:
   Maze();
   ~Maze();
+  SDL_Texture* maze_tex;
 
   void setSize(int w, int h);
   void setPathLength(int l);
   void setWallLength(int l);
   void generate();
+  void draw();
+  void addPadding();
   std::vector<std::vector<int>> render();
   std::vector<std::vector<int>> getPixelV();
 };

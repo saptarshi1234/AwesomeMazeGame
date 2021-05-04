@@ -6,20 +6,15 @@
 #include "bullet.hpp"
 #include "entity.hpp"
 #include "maze.hpp"
+#include "params.hpp"
 #include "window.hpp"
 
 Game::Game(WindowManager win) : win(win) {
   player1.init({0, 0, 20, 20}, win.loadTexture("res/textures/player0.png"));
 }
 
-void Game::initialize() {
-  Maze m;
-  m.setSize(25, 20);
-  m.setPathLength(2);
-  m.setWallLength(1);
-  m.generate();
-  std::vector<std::vector<int>> v = m.render();
-  std::cout << v.size() << "\n";
+void printMaze(std::vector<std::vector<int>> v) {
+  std::cout << v.size() << " " << v[0].size() << "\n";
   for (auto m : v) {
     for (auto k : m) {
       if (k == 0)
@@ -29,6 +24,19 @@ void Game::initialize() {
     }
     std::cout << "\n";
   }
+}
+
+void Game::initialize() {
+  maze.setSize(Params::CELLS_W, Params::CELLS_H);
+  maze.setPathLength(Params::PATH_WIDTH);
+  maze.setWallLength(Params::WALL_WIDTH);
+  maze.generate();
+  maze.maze_tex = win.loadTexture("res/textures/ground.png");
+
+  maze.render();
+  maze.addPadding();
+
+  printMaze(maze.getPixelV());
 }
 
 void Game::loadGame() { running = true; }
@@ -142,6 +150,13 @@ void Game::render() {
   win.render(player1);
   for (auto &bullet : bullets) {
     win.render(bullet);
+  }
+  int w = 10;
+  auto maze_V = maze.getPixelV();
+  for (int x = 0; x < maze_V.size(); x++) {
+    for (int y = 0; y < maze_V[0].size(); y++) {
+      if (maze_V[x][y] == 1) win.render({w * y, w * x, w, w}, maze.maze_tex);
+    }
   }
 }
 void Game::wait() { SDL_Delay(10); }

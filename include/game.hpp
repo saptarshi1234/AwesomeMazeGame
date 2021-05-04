@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "entity.hpp"
+#include "maze.hpp"
 #include "player.hpp"
 #include "window.hpp"
 
@@ -10,6 +11,7 @@ class Game {
  private:
   WindowManager win;
   bool running;
+  Maze maze;
   std::vector<Direction> dkey_stack;
 
  public:

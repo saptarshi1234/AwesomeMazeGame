@@ -1,6 +1,7 @@
 #include "maze.hpp"
 
 #include <random>
+#include <vector>
 
 #include "params.hpp"
 
@@ -141,6 +142,15 @@ std::vector<std::vector<int>> Maze::render() {
     }
   }
   return pixelV;
+}
+
+void Maze::addPadding() {
+  for (auto& row : pixelV) {
+    row.push_back(1);
+    row.insert(row.begin(), 1);
+  }
+  pixelV.push_back(std::vector<int>(pixelV[0].size(), 1));
+  pixelV.insert(pixelV.begin(), std::vector<int>(pixelV[0].size(), 1));
 }
 
 std::vector<std::vector<int>> Maze::getPixelV() { return pixelV; }
