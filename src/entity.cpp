@@ -30,32 +30,37 @@ SDL_Texture* Entity::getTexture() { return texture; }
 void Entity::setLocation(SDL_Rect rect) { location = rect; }
 Direction Entity::getDirection() { return dir; }
 
-void Entity::move() {
+bool notWall(Maze* maze, int x, int y) {
+  auto m = maze->getPixelV();
+  return m[y / Params::ACTUAL_CELL_SIZE][x / Params::ACTUAL_CELL_SIZE] == 0;
+}
+
+void Entity::move(Maze* maze) {
   if (is_moving) {
     switch (dir) {
       case TOP:
-        if (location.y - velocity >= 0)
+        if (notWall(maze, location.x, location.y - velocity))
           location.y -= velocity;
         else {
           is_moving = false;
         }
         break;
       case BOTTOM:
-        if (location.y + location.h + velocity <= Params::SCREEN_HEIGHT)
+        if (notWall(maze, location.x, location.y + location.h + velocity - 1))
           location.y += velocity;
         else {
           is_moving = false;
         }
         break;
       case LEFT:
-        if (location.x - velocity >= 0)
+        if (notWall(maze, location.x - velocity, location.y))
           location.x -= velocity;
         else {
           is_moving = false;
         }
         break;
       case RIGHT:
-        if (location.x + location.w + velocity <= Params::SCREEN_WIDTH)
+        if (notWall(maze, location.x + location.w + velocity - 1, location.y))
           location.x += velocity;
         else {
           is_moving = false;

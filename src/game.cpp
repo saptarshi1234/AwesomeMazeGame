@@ -9,9 +9,7 @@
 #include "params.hpp"
 #include "window.hpp"
 
-Game::Game(WindowManager win) : win(win) {
-  player1.init({0, 0, 20, 20}, win.loadTexture("res/textures/player0.png"));
-}
+Game::Game(WindowManager win) : win(win) {}
 
 void printMaze(std::vector<std::vector<int>> v) {
   std::cout << v.size() << " " << v[0].size() << "\n";
@@ -27,7 +25,7 @@ void printMaze(std::vector<std::vector<int>> v) {
 }
 
 void Game::initialize() {
-  maze.setSize(Params::CELLS_W, Params::CELLS_H);
+  maze.setSize(Params::NUM_CELLS_X, Params::NUM_CELLS_Y);
   maze.setPathLength(Params::PATH_WIDTH);
   maze.setWallLength(Params::WALL_WIDTH);
   maze.generate();
@@ -39,7 +37,12 @@ void Game::initialize() {
   printMaze(maze.getPixelV());
 }
 
-void Game::loadGame() { running = true; }
+void Game::loadGame() {
+  int w = Params::ACTUAL_CELL_SIZE;
+  player1.init({w, w, 2 * w, 2 * w},
+               win.loadTexture("res/textures/player0.png"));
+  running = true;
+}
 
 void Game::handleEvents() {
   SDL_Event event;
@@ -70,12 +73,20 @@ void Game::handleEvents() {
         default:
           break;
       }
-      if (it != dkey_stack.end()) dkey_stack.erase(it);
-      s = dkey_stack.size();
-      if (dkey_stack.size() == 0)
-        player1.stopMoving();
-      else
-        player1.setDirection(dkey_stack[dkey_stack.size() - 1]);
+      switch (event.key.keysym.sym) {
+        case SDLK_UP:
+        case SDLK_DOWN:
+        case SDLK_LEFT:
+        case SDLK_RIGHT: {
+          if (it != dkey_stack.end()) dkey_stack.erase(it);
+          s = dkey_stack.size();
+          if (dkey_stack.size() == 0)
+            player1.stopMoving();
+          else
+            player1.setDirection(dkey_stack[dkey_stack.size() - 1]);
+          break;
+        }
+      }
     }
 
     if (event.type == SDL_KEYDOWN) {
@@ -134,11 +145,11 @@ void Game::handleEvents() {
 }
 
 void Game::update() {
-  player1.move();
+  player1.move(&maze);
 
   for (auto bullet_it = bullets.begin(); bullet_it != bullets.end();
        bullet_it++) {
-    bullet_it->move();
+    bullet_it->move(&maze);
     if (!bullet_it->isMoving()) {
       bullet_it = bullets.erase(bullet_it);
       bullet_it--;
@@ -151,7 +162,7 @@ void Game::render() {
   for (auto &bullet : bullets) {
     win.render(bullet);
   }
-  int w = 10;
+  int w = Params::ACTUAL_CELL_SIZE;
   auto maze_V = maze.getPixelV();
   for (int x = 0; x < maze_V.size(); x++) {
     for (int y = 0; y < maze_V[0].size(); y++) {

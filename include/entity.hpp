@@ -1,9 +1,10 @@
 #pragma once
-
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
 #include <vector>
+
+#include "maze.hpp"
 
 enum Direction { TOP, LEFT, BOTTOM, RIGHT, STOP };
 
@@ -28,7 +29,7 @@ class Entity {
   SDL_Texture* getTexture();
   Direction getDirection();
 
-  void move();
+  void move(Maze* maze);
   void stopMoving();
   bool isMoving();
   void setDirection(Direction d);
