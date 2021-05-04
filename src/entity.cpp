@@ -15,7 +15,7 @@ void Entity::init(SDL_Rect loc, SDL_Texture* tex) {
   velocity = 2;
   offsetX = 0;
   offsetY = 0;
-  dir = STOP;
+  dir = RIGHT;
   is_moving = false;
 }
 
@@ -37,37 +37,52 @@ bool notWall(Maze* maze, int x, int y) {
 
 void Entity::move(Maze* maze) {
   if (is_moving) {
+    int tempX = location.x, tempY = location.y;
     switch (dir) {
       case TOP:
-        if (notWall(maze, location.x, location.y - velocity))
-          location.y -= velocity;
-        else {
-          is_moving = false;
-        }
+        tempY -= velocity;
         break;
       case BOTTOM:
-        if (notWall(maze, location.x, location.y + location.h + velocity - 1))
-          location.y += velocity;
-        else {
-          is_moving = false;
-        }
+        tempY += velocity;
         break;
       case LEFT:
-        if (notWall(maze, location.x - velocity, location.y))
-          location.x -= velocity;
-        else {
-          is_moving = false;
-        }
+        tempX -= velocity;
         break;
       case RIGHT:
-        if (notWall(maze, location.x + location.w + velocity - 1, location.y))
-          location.x += velocity;
-        else {
-          is_moving = false;
-        }
+        tempX += velocity;
         break;
       default:
         break;
+    }
+    if (tempX != location.x || tempY != location.y) {
+      int x = location.x, fx = x + location.w, y = location.y,
+          fy = y + location.h;
+      if (tempX < x) {
+        fx = x;
+        x = tempX;
+      } else if (tempX > x) {
+        x = fx;
+        fx = x + velocity;
+      } else if (tempY < y) {
+        fy = y;
+        y = tempY;
+      } else {
+        y = fy;
+        fy = y + velocity;
+      }
+      for (int i = x; i < fx; i++) {
+        for (int j = y; j < fy; j++) {
+          if (i >= Params::SCREEN_WIDTH || j >= Params::SCREEN_HEIGHT ||
+              !notWall(maze, i, j)) {
+            is_moving = false;
+            break;
+          }
+        }
+      }
+      if (is_moving) {
+        location.x = tempX;
+        location.y = tempY;
+      }
     }
   }
 }
