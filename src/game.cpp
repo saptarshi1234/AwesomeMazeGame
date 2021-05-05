@@ -216,6 +216,17 @@ void Game::handleEvents() {
 }
 
 void Game::update() {
+  int w = Params::ACTUAL_CELL_SIZE;
+  int k = rand() % Params::MAX_BOTS;
+  if (k >= bots.size()) {
+    int row = rand() % Params::NUM_CELLS_X;
+    int col = rand() % Params::NUM_CELLS_Y;
+    Bot b;
+    int x = w * (row * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
+    int y = w * (col * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
+    b.init({x, y, 2 * w, 2 * w}, win.loadTexture("res/textures/player0.png"));
+  }
+
   player1.move(&maze);
   for (auto bullet_it = bullets.begin(); bullet_it != bullets.end();
        bullet_it++) {

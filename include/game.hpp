@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "bot.hpp"
 #include "client.hpp"
 #include "entity.hpp"
 #include "maze.hpp"
@@ -38,4 +39,5 @@ class Game {
   Player player1, player2;
   std::vector<Bullet> bullets;
   std::vector<Bullet> other_bullets;
+  std::vector<Bot> bots;
 };
