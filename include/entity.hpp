@@ -2,6 +2,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
+#include <string>
 #include <vector>
 
 #include "maze.hpp"
@@ -34,4 +35,6 @@ class Entity {
   bool isMoving();
   void setDirection(Direction d);
   void setLocation(SDL_Rect rect);
+  std::string to_string();
+  void from_string(std::string s);
 };

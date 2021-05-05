@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include "bullet.hpp"
@@ -22,11 +23,16 @@ Game::Game(WindowManager win, bool isServer, char *ip)
     server.listen();
     server.accept();
 
+    cout << server.recv() << endl;
+
+    c_sock = &server;
   } else {
     cout << "Client" << endl;
     client.initialize();
     client.connect(ip);
-    client.send("hello", 5);
+    client.send("hello");
+
+    c_sock = &client;
   }
 }
 
@@ -77,11 +83,10 @@ void Game::initialize() {
     maze.addPadding();
 
     std::string s = serialize(maze.getPixelV());
-    server.send(s, s.size());
+    server.send(s);
 
   } else {
-    auto data =
-        client.recv(Params::SCREEN_HEIGHT / 10 * Params::SCREEN_WIDTH / 10);
+    auto data = client.recv();
     maze.setPixelV(deserialize(data));
   }
   maze.maze_tex = win.loadTexture("res/textures/ground.png");
@@ -92,10 +97,23 @@ void Game::loadGame() {
   SDL_Texture *player_tex = win.loadTexture("res/textures/player0.png");
   if (isServer) {
     player1.init({w, w, 2 * w, 2 * w}, player_tex);
-    player2.init({Params::SCREEN_WIDTH - 3 * w, w, 2 * w, 2 * w}, player_tex);
-  } else {
     player2.init({w, w, 2 * w, 2 * w}, player_tex);
+    server.send(player1.to_string());
+    player2.from_string(server.recv());
+
+  } else {
     player1.init({Params::SCREEN_WIDTH - 3 * w, w, 2 * w, 2 * w}, player_tex);
+    player2.init({Params::SCREEN_WIDTH - 3 * w, w, 2 * w, 2 * w}, player_tex);
+
+    client.send(player1.to_string());
+    player2.from_string(client.recv());
+  }
+  SDL_Texture *tex = win.loadTexture("res/textures/player0.png");
+
+  for (int i = 0; i < 100; i++) {
+    Bullet b;
+    b.init({0, 0, 0, 0}, tex);
+    other_bullets.push_back(b);
   }
   running = true;
 }
@@ -205,22 +223,49 @@ void Game::update() {
     if (!bullet_it->isMoving()) {
       bullet_it = bullets.erase(bullet_it);
       bullet_it--;
-      // std::cout << "deleting bullet" << std::endl;
     }
   }
+
+  // c_sock->send(std::to_string(bullets.size()));
+  // int num_bullets = stoi(c_sock->recv());
+  std::stringstream ss_send;
+  for (Bullet &b : bullets) {
+    ss_send << b.to_string() << '\n';
+  }
+  c_sock->send(ss_send.str());
+  // SDL_Texture *tex = win.loadTexture("res/textures/player0.png");
+
+  // other_bullets.clear();
+  std::stringstream ss_recv(c_sock->recv());
+  char delim = '\n';
+  std::string word;
+  int num_bullets = 0;
+  while (std::getline(ss_recv, word, delim)) {
+    // Bullet b;
+    // b.init({0, 0, 0, 0}, tex);
+    other_bullets[num_bullets++].from_string(word);
+    // other_bullets.push_back(b);
+  }
+  num_other_bullets = num_bullets;
+
+  c_sock->send(player1.to_string());
+  player2.from_string(c_sock->recv());
 }
 void Game::render() {
-  win.render(player1);
-  win.render(player2);
-  for (auto &bullet : bullets) {
-    win.render(bullet);
-  }
   int w = Params::ACTUAL_CELL_SIZE;
   auto maze_V = maze.getPixelV();
   for (int x = 0; x < maze_V.size(); x++) {
     for (int y = 0; y < maze_V[0].size(); y++) {
       if (maze_V[x][y] == 1) win.render({w * y, w * x, w, w}, maze.maze_tex);
     }
+  }
+  win.render(player1);
+  win.render(player2);
+  for (auto &bullet : bullets) {
+    win.render(bullet);
+  }
+  for (int i = 0; i < num_other_bullets; i++) {
+    win.render(other_bullets[i]);
   }
 }
 void Game::wait() { SDL_Delay(10); }
@@ -231,7 +276,3 @@ void Game::quit() {
 }
 
 bool Game::isRunning() { return running; };
-
-// 0 0 0 0 0 1
-// 0 0 0 0 0
-// 1 1 1

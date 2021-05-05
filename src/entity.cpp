@@ -1,8 +1,10 @@
 #include "entity.hpp"
 
 #include <iostream>
+#include <sstream>
 
 #include "params.hpp"
+
 Entity::Entity() {}
 
 Entity::~Entity() {
@@ -93,4 +95,25 @@ bool Entity::isMoving() { return is_moving; }
 void Entity::setDirection(Direction d) {
   dir = d;
   is_moving = true;
+}
+
+std::string Entity::to_string() {
+  std::stringstream ss;
+  char space = ' ';
+  ss << location.x << space << location.y << space << location.h << space
+     << location.w << space << is_moving << space << dir;
+  return ss.str();
+}
+
+void Entity::from_string(std::string s) {
+  int int_dir;
+  std::stringstream ss(s);
+  ss >> location.x;
+  ss >> location.y;
+  ss >> location.h;
+  ss >> location.w;
+  ss >> is_moving;
+  ss >> int_dir;
+
+  dir = Direction(int_dir);
 }

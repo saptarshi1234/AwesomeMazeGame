@@ -5,6 +5,7 @@
 #include "client.hpp"
 #include "entity.hpp"
 #include "maze.hpp"
+#include "networking.hpp"
 #include "player.hpp"
 #include "server.hpp"
 #include "window.hpp"
@@ -17,6 +18,9 @@ class Game {
   Maze maze;
   Server server;
   Client client;
+  CustomSocket* c_sock;
+  int num_other_bullets;
+
   std::vector<Direction> dkey_stack;
 
  public:
@@ -33,4 +37,5 @@ class Game {
 
   Player player1, player2;
   std::vector<Bullet> bullets;
+  std::vector<Bullet> other_bullets;
 };
