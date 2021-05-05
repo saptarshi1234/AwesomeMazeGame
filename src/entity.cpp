@@ -37,43 +37,37 @@ bool notWall(Maze* maze, int x, int y) {
 
 void Entity::move(Maze* maze) {
   if (is_moving) {
-    int tempX = location.x, tempY = location.y;
+    int tempX = location.x, tempY = location.y, x = location.x,
+        fx = x + location.w, y = location.y, fy = y + location.h;
     switch (dir) {
       case TOP:
         tempY -= velocity;
+        fy = y;
+        y = tempY;
         break;
       case BOTTOM:
         tempY += velocity;
+        y = fy;
+        fy = y + velocity;
         break;
       case LEFT:
         tempX -= velocity;
+        fx = x;
+        x = tempX;
         break;
       case RIGHT:
         tempX += velocity;
+        x = fx;
+        fx = x + velocity;
         break;
       default:
         break;
     }
     if (tempX != location.x || tempY != location.y) {
-      int x = location.x, fx = x + location.w, y = location.y,
-          fy = y + location.h;
-      if (tempX < x) {
-        fx = x;
-        x = tempX;
-      } else if (tempX > x) {
-        x = fx;
-        fx = x + velocity;
-      } else if (tempY < y) {
-        fy = y;
-        y = tempY;
-      } else {
-        y = fy;
-        fy = y + velocity;
-      }
       for (int i = x; i < fx; i++) {
         for (int j = y; j < fy; j++) {
-          if (i >= Params::SCREEN_WIDTH || j >= Params::SCREEN_HEIGHT ||
-              !notWall(maze, i, j)) {
+          if (i < 0 || i >= Params::SCREEN_WIDTH || j < 0 ||
+              j >= Params::SCREEN_HEIGHT || !notWall(maze, i, j)) {
             is_moving = false;
             break;
           }
