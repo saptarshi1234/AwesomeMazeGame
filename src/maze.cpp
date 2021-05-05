@@ -1,6 +1,7 @@
 #include "maze.hpp"
 
-#include <queue>
+#include <deque>
+#include <iostream>
 #include <random>
 #include <vector>
 
@@ -168,27 +169,36 @@ int Maze::dist(int x1, int y1, int x2, int y2) {
     }
   }
   v[x1][y1] = 0;
-  std::queue<std::vector<int>> q;
-  q.push({x1, y1});
+  std::deque<std::vector<int>> q;
+  q.push_back({x1, y1});
+  int counter = 0;
   while (!q.empty()) {
+    if (counter % 50 == 0) {
+      int u = 0;
+    }
+    counter++;
+    for (auto it = q.begin(); it != q.end(); it++) {
+      std::cout << it->at(0) << " " << it->at(1) << " * ";
+    }
+    std::cout << std::endl;
     std::vector<int> co = q.front();
-    q.pop();
+    q.pop_front();
     int x = co[0], y = co[1];
-    if (x > 0 && v[x - 1][y] == -1) {
+    if (x > 0 && v[x - 1][y] == -1 && pixelV[x - 1][y] == 0) {
       v[x - 1][y] == v[x][y] + 1;
-      q.push({x - 1, y});
+      q.push_back({x - 1, y});
     }
-    if (x < rows - 1 && v[x + 1][y] == -1) {
+    if (x < rows - 1 && v[x + 1][y] == -1 && pixelV[x + 1][y] == 0) {
       v[x + 1][y] == v[x][y] + 1;
-      q.push({x + 1, y});
+      q.push_back({x + 1, y});
     }
-    if (y > 0 && v[x][y - 1] == -1) {
+    if (y > 0 && v[x][y - 1] == -1 && pixelV[x][y - 1] == 0) {
       v[x][y - 1] == v[x][y] + 1;
-      q.push({x, y - 1});
+      q.push_back({x, y - 1});
     }
-    if (y < cols - 1 && v[x][y + 1] == -1) {
+    if (y < cols - 1 && v[x][y + 1] == -1 && pixelV[x][y + 1] == 0) {
       v[x][y + 1] == v[x][y] + 1;
-      q.push({x, y + 1});
+      q.push_back({x, y + 1});
     }
     if (v[x2][y2] != -1) break;
   }

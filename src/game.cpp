@@ -224,7 +224,18 @@ void Game::update() {
     Bot b;
     int x = w * (row * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
     int y = w * (col * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
-    b.init({x, y, 2 * w, 2 * w}, win.loadTexture("res/textures/player0.png"));
+    b.init({x, y, 3 * w - 1, 3 * w - 1},
+           win.loadTexture("res/textures/player0.png"));
+    bots.push_back(b);
+  }
+  for (int i = 0; i < bots.size(); i++) {
+    if (bots[i].shouldUpdate()) bots[i].update(player1.getLocation(), &maze);
+    if (bots[i].shouldFire()) {
+      SDL_Texture *tex = win.loadTexture("res/textures/player0.png");
+      Bullet b = bots[i].fireBullet(tex);
+      bullets.push_back(b);
+    }
+    bots[i].move(&maze);
   }
 
   player1.move(&maze);
@@ -274,6 +285,9 @@ void Game::render() {
   win.render(player2);
   for (auto &bullet : bullets) {
     win.render(bullet);
+  }
+  for (auto &bot : bots) {
+    win.render(bot);
   }
   for (int i = 0; i < num_other_bullets; i++) {
     win.render(other_bullets[i]);

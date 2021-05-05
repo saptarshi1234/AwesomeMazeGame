@@ -122,6 +122,7 @@ bool Entity::canMove(Maze* maze) {
       }
       return true;
     }
+    return false;
   }
   return false;
 }

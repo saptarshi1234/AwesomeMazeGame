@@ -45,43 +45,42 @@ Direction convtInt(int i) {
 }
 
 void Bot::update(SDL_Rect loc, Maze* maze) {
-  waitFrame = (waitFrame + 1) % fireFreq;
-  int probs[] = {1, 1, 1, 1};
+  int probs[] = {2, 2, 2, 2};
   Direction dir = Entity::getDirection();
-  probs[convDir(dir)] += 4;
-  int curD = maze->dist(location.x / Params::ACTUAL_CELL_SIZE,
-                        location.y / Params::ACTUAL_CELL_SIZE,
-                        loc.x / Params::ACTUAL_CELL_SIZE,
-                        loc.y / Params::ACTUAL_CELL_SIZE);
-  int tot;
+  probs[convDir(dir)] += 8;
+  int curD = abs(location.x - loc.x) + abs(location.y - loc.y);
+  int tot = 0;
   for (int i = 0; i < 4; i++) {
     Direction dire = convtInt(i);
     Entity::setDirection(dire);
     if (!(Entity::canMove(maze))) {
       probs[i] = 0;
       continue;
+    } else {
+      int tempX = location.x, tempY = location.y;
+      switch (dire) {
+        case TOP:
+          tempY -= velocity;
+          break;
+        case BOTTOM:
+          tempY += velocity;
+          break;
+        case LEFT:
+          tempX -= velocity;
+          break;
+        case RIGHT:
+          tempX += velocity;
+          break;
+      }
+      int D = abs(tempX - loc.x) + abs(tempY - loc.y);
+      if (D < curD) probs[i] += 4;
+      tot += probs[i];
     }
-    int tempX = location.x, tempY = location.y;
-    switch (dire) {
-      case TOP:
-        tempY -= velocity;
-      case BOTTOM:
-        tempY += velocity;
-      case LEFT:
-        tempX -= velocity;
-      case RIGHT:
-        tempX += velocity;
-    }
-    int D = maze->dist(
-        tempX / Params::ACTUAL_CELL_SIZE, tempY / Params::ACTUAL_CELL_SIZE,
-        loc.x / Params::ACTUAL_CELL_SIZE, loc.y / Params::ACTUAL_CELL_SIZE);
-    if (D < curD) probs[i] += 3;
-    tot += probs[i];
   }
   int k = rand() % tot;
   int lef = 0;
   for (int i = 0; i < 4; i++) {
-    if (k >= lef; k < probs[i] + lef) {
+    if (k >= lef && k < probs[i] + lef) {
       Entity::setDirection(convtInt(i));
       break;
     }
@@ -91,4 +90,14 @@ void Bot::update(SDL_Rect loc, Maze* maze) {
 
 void Bot::setFireFreq(int f) { fireFreq = f; }
 
-bool Bot::shouldFire() { return (waitFrame == 0); }
+bool Bot::shouldFire() {
+  waitFire = (waitFire + 1) % fireFreq;
+  return (waitFire == 0);
+}
+
+void Bot::setUpdateFreq(int f) { updateFreq = f; }
+
+bool Bot::shouldUpdate() {
+  waitUpdate = (waitUpdate + 1) % updateFreq;
+  return (waitUpdate == 0);
+}
