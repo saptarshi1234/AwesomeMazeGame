@@ -81,6 +81,49 @@ void Entity::move(Maze* maze) {
   }
 }
 
+bool Entity::canMove(Maze* maze) {
+  if (is_moving) {
+    int tempX = location.x, tempY = location.y, x = location.x,
+        fx = x + location.w, y = location.y, fy = y + location.h;
+    switch (dir) {
+      case TOP:
+        tempY -= velocity;
+        fy = y;
+        y = tempY;
+        break;
+      case BOTTOM:
+        tempY += velocity;
+        y = fy;
+        fy = y + velocity;
+        break;
+      case LEFT:
+        tempX -= velocity;
+        fx = x;
+        x = tempX;
+        break;
+      case RIGHT:
+        tempX += velocity;
+        x = fx;
+        fx = x + velocity;
+        break;
+      default:
+        break;
+    }
+    if (tempX != location.x || tempY != location.y) {
+      for (int i = x; i < fx; i++) {
+        for (int j = y; j < fy; j++) {
+          if (i < 0 || i >= Params::SCREEN_WIDTH || j < 0 ||
+              j >= Params::SCREEN_HEIGHT || !notWall(maze, i, j)) {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
 void Entity::stopMoving() { is_moving = false; }
 bool Entity::isMoving() { return is_moving; }
 

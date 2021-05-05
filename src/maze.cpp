@@ -1,5 +1,6 @@
 #include "maze.hpp"
 
+#include <queue>
 #include <random>
 #include <vector>
 
@@ -154,3 +155,40 @@ void Maze::addPadding() {
 }
 
 std::vector<std::vector<int>> Maze::getPixelV() { return pixelV; }
+
+int Maze::dist(int x1, int y1, int x2, int y2) {
+  std::vector<std::vector<int>> v;
+  int rows = pixelV.size(), cols = pixelV[0].size();
+  v.resize(rows, std::vector<int>(cols));
+  for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < cols; j++) {
+      v[i][j] = -1;
+    }
+  }
+  v[x1][y1] = 0;
+  std::queue<std::vector<int>> q;
+  q.push({x1, y1});
+  while (!q.empty()) {
+    std::vector<int> co = q.front();
+    q.pop();
+    int x = co[0], y = co[1];
+    if (x > 0 && v[x - 1][y] == -1) {
+      v[x - 1][y] == v[x][y] + 1;
+      q.push({x - 1, y});
+    }
+    if (x < rows - 1 && v[x + 1][y] == -1) {
+      v[x + 1][y] == v[x][y] + 1;
+      q.push({x + 1, y});
+    }
+    if (y > 0 && v[x][y - 1] == -1) {
+      v[x][y - 1] == v[x][y] + 1;
+      q.push({x, y - 1});
+    }
+    if (y < cols - 1 && v[x][y + 1] == -1) {
+      v[x][y + 1] == v[x][y] + 1;
+      q.push({x, y + 1});
+    }
+    if (v[x2][y2] != -1) break;
+  }
+  return v[x2][y2];
+}

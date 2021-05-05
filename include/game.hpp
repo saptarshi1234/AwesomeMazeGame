@@ -2,9 +2,9 @@
 
 #include <vector>
 
+#include "bot.hpp"
 #include "entity.hpp"
 #include "maze.hpp"
-#include "player.hpp"
 #include "window.hpp"
 
 class Game {
@@ -28,4 +28,5 @@ class Game {
 
   Player player1;
   std::vector<Bullet> bullets;
+  std::vector<Bot> bots;
 };

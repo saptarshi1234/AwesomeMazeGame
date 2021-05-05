@@ -36,6 +36,7 @@ class Maze {
   void generate();
   void draw();
   void addPadding();
+  int dist(int x1, int y1, int x2, int y2);
   std::vector<std::vector<int>> render();
   std::vector<std::vector<int>> getPixelV();
 };

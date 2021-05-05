@@ -30,6 +30,7 @@ class Entity {
   Direction getDirection();
 
   void move(Maze* maze);
+  bool canMove(Maze* maze);
   void stopMoving();
   bool isMoving();
   void setDirection(Direction d);
