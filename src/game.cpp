@@ -110,11 +110,6 @@ void Game::loadGame() {
   }
   SDL_Texture *tex = win.loadTexture("res/textures/player0.png");
 
-  for (int i = 0; i < 100; i++) {
-    Bullet b;
-    b.init({0, 0, 0, 0}, tex);
-    other_bullets.push_back(b);
-  }
   running = true;
 }
 
@@ -198,6 +193,7 @@ void Game::handleEvents() {
           SDL_Texture *tex = win.loadTexture("res/textures/player0.png");
           Bullet b = player1.fireBullet(tex);
           bullets.push_back(b);
+          unsynced_bullets.push_back(b);
           break;
         }
         default:
@@ -210,35 +206,43 @@ void Game::handleEvents() {
         SDL_Texture *tex = win.loadTexture("res/textures/player0.png");
         Bullet b = player1.fireBullet(tex);
         bullets.push_back(b);
+        unsynced_bullets.push_back(b);
       }
     }
   }
 }
 
 void Game::update() {
-  int w = Params::ACTUAL_CELL_SIZE;
-  int k = rand() % Params::MAX_BOTS;
-  if (k >= bots.size()) {
-    int row = rand() % Params::NUM_CELLS_X;
-    int col = rand() % Params::NUM_CELLS_Y;
-    Bot b;
-    int x = w * (row * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
-    int y = w * (col * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
-    b.init({x, y, 3 * w - 1, 3 * w - 1},
-           win.loadTexture("res/textures/player0.png"));
-    bots.push_back(b);
-  }
-  for (int i = 0; i < bots.size(); i++) {
-    if (bots[i].shouldUpdate()) bots[i].update(player1.getLocation(), &maze);
-    if (bots[i].shouldFire()) {
-      SDL_Texture *tex = win.loadTexture("res/textures/player0.png");
-      Bullet b = bots[i].fireBullet(tex);
-      bullets.push_back(b);
+  unsynced_bullets.clear();
+
+  if (isServer) {
+    int w = Params::ACTUAL_CELL_SIZE;
+    int k = rand() % Params::MAX_BOTS;
+    if (k >= bots.size()) {
+      int row = rand() % Params::NUM_CELLS_X;
+      int col = rand() % Params::NUM_CELLS_Y;
+      Bot b;
+      int x = w * (row * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
+      int y = w * (col * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
+      b.init({x, y, 3 * w - 1, 3 * w - 1},
+             win.loadTexture("res/textures/player0.png"));
+      bots.push_back(b);
     }
-    bots[i].move(&maze);
+    for (int i = 0; i < bots.size(); i++) {
+      if (bots[i].shouldUpdate()) bots[i].update(player1.getLocation(), &maze);
+      // if (bots[i].shouldFire()) {
+      //   SDL_Texture *tex = win.loadTexture("res/textures/player0.png");
+      //   Bullet b = bots[i].fireBullet(tex);
+      //   bullets.push_back(b);
+      //   unsynced_bullets.push_back(b);
+      // }
+      bots[i].move(&maze);
+    }
   }
 
   player1.move(&maze);
+  player2.move(&maze);
+
   for (auto bullet_it = bullets.begin(); bullet_it != bullets.end();
        bullet_it++) {
     bullet_it->move(&maze);
@@ -248,31 +252,38 @@ void Game::update() {
     }
   }
 
-  // c_sock->send(std::to_string(bullets.size()));
-  // int num_bullets = stoi(c_sock->recv());
+  for (auto bullet_it = other_bullets.begin(); bullet_it != other_bullets.end();
+       bullet_it++) {
+    bullet_it->move(&maze);
+    if (!bullet_it->isMoving()) {
+      bullet_it = other_bullets.erase(bullet_it);
+      bullet_it--;
+    }
+  }
+}
+
+void Game::sync() {
   std::stringstream ss_send;
-  for (Bullet &b : bullets) {
+  for (Bullet &b : unsynced_bullets) {
     ss_send << b.to_string() << '\n';
   }
   c_sock->send(ss_send.str());
-  // SDL_Texture *tex = win.loadTexture("res/textures/player0.png");
 
-  // other_bullets.clear();
   std::stringstream ss_recv(c_sock->recv());
   char delim = '\n';
   std::string word;
-  int num_bullets = 0;
   while (std::getline(ss_recv, word, delim)) {
-    // Bullet b;
-    // b.init({0, 0, 0, 0}, tex);
-    other_bullets[num_bullets++].from_string(word);
-    // other_bullets.push_back(b);
+    SDL_Texture *tex = win.loadTexture("res/textures/player0.png");
+    Bullet b;
+    b.init({0, 0, 0, 0}, tex);
+    b.from_string(word);
+    other_bullets.push_back(b);
   }
-  num_other_bullets = num_bullets;
 
   c_sock->send(player1.to_string());
   player2.from_string(c_sock->recv());
 }
+
 void Game::render() {
   int w = Params::ACTUAL_CELL_SIZE;
   auto maze_V = maze.getPixelV();
@@ -283,17 +294,19 @@ void Game::render() {
   }
   win.render(player1);
   win.render(player2);
-  for (auto &bullet : bullets) {
-    win.render(bullet);
-  }
+
   for (auto &bot : bots) {
     win.render(bot);
   }
-  for (int i = 0; i < num_other_bullets; i++) {
-    win.render(other_bullets[i]);
+
+  for (auto &bullet : bullets) {
+    win.render(bullet);
+  }
+  for (auto &b : other_bullets) {
+    win.render(b);
   }
 }
-void Game::wait() { SDL_Delay(10); }
+void Game::wait(int delay) { SDL_Delay(delay); }
 
 void Game::quit() {
   running = false;

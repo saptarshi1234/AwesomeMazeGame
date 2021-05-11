@@ -14,7 +14,7 @@ Entity::~Entity() {
 void Entity::init(SDL_Rect loc, SDL_Texture* tex) {
   location = loc;
   texture = tex;
-  velocity = 2;
+  velocity = 4;
   offsetX = 0;
   offsetY = 0;
   dir = RIGHT;

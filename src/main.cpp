@@ -14,6 +14,17 @@ using std::endl;
 
 const char* window_name = "GAME";
 
+struct Clock {
+  int last_tick_time = 0;
+  int delta = 0;
+
+  void tick() {
+    int tick_time = SDL_GetTicks();
+    delta = tick_time - last_tick_time;
+    last_tick_time = tick_time;
+  }
+};
+
 int main(int argc, char* argv[]) {
   bool isServer = true;
   char* ip = "127.0.0.1";
@@ -41,17 +52,27 @@ int main(int argc, char* argv[]) {
   game.initialize();
   game.loadGame();
 
+  int index = 0, update_freq = 50;
+  Clock sleep_clk, stats_clk;
+
   while (game.isRunning()) {
+    sleep_clk.tick();
+    stats_clk.tick();
+
     game.handleEvents();
     if (!game.isRunning()) break;
 
     game.update();
+    game.sync();
     window.clearWindow();
 
     game.render();
     window.display();
 
-    game.wait();
+    sleep_clk.tick();
+    game.wait(std::max(0, 60 - sleep_clk.delta));
+
+    cout << stats_clk.delta << endl;
   }
 
   game.quit();

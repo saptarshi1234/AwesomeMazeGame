@@ -44,6 +44,13 @@ Direction convtInt(int i) {
   }
 }
 
+Bot::Bot() {
+  waitFire = 0;
+  waitUpdate = 0;
+  updateFreq = 50;
+  fireFreq = rand() % 50 + 50;
+}
+
 void Bot::update(SDL_Rect loc, Maze* maze) {
   int probs[] = {2, 2, 2, 2};
   Direction dir = Entity::getDirection();

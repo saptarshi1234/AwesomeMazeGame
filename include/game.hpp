@@ -29,15 +29,17 @@ class Game {
 
   void initialize();
   void loadGame();
+  void sync();
   void update();
   void handleEvents();
   void render();
-  void wait();
+  void wait(int);
   void quit();
   bool isRunning();
 
   Player player1, player2;
   std::vector<Bullet> bullets;
+  std::vector<Bullet> unsynced_bullets;
   std::vector<Bullet> other_bullets;
   std::vector<Bot> bots;
 };
