@@ -2,7 +2,7 @@
 
 namespace Params {
 const int WALL_WIDTH = 1;
-const int PATH_WIDTH = 1;
+const int PATH_WIDTH = 2;
 const int ACTUAL_CELL_SIZE = 20;
 const int NUM_CELLS_X = 15;
 const int NUM_CELLS_Y = 15;

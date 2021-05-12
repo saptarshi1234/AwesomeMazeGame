@@ -29,29 +29,15 @@ void WindowManager::destroy() { SDL_DestroyWindow(window); }
 
 void WindowManager::clearWindow() { SDL_RenderClear(renderer); }
 
-void WindowManager::render(SDL_Rect loc, SDL_Texture* tex) {
-  SDL_Rect src;
-  src.x = 0;
-  src.y = 0;
-  SDL_QueryTexture(tex, NULL, NULL, &src.w, &src.h);
-
-  SDL_Rect dst = loc;
-
+void WindowManager::render(SDL_Rect dst, SDL_Rect src, SDL_Texture* tex) {
   SDL_RenderCopy(renderer, tex, &src, &dst);
 }
 
 void WindowManager::render(Entity& entity) {
-  SDL_Rect src = entity.getLocation();
+  SDL_Rect src = entity.getCropArea();
   SDL_Rect dst = entity.getLocation();
 
-  SDL_Rect loc = entity.getLocation();
-  render(loc, entity.getTexture());
-
-  // dst.x = entity.getX() + p_entity.getAnimOffsetX(i);
-  // dst.y = entity.getY() + p_entity.getAnimOffsetY(i);
-  // dst.w = entity.getCurrentFrame().w;
-  // dst.h = entity.getCurrentFrame().h;
-  // SDL_RenderCopy(renderer, entity.getTexture(), &src, &dst);
+  render(dst, src, entity.getTexture());
 }
 
 void WindowManager::display() { SDL_RenderPresent(renderer); }

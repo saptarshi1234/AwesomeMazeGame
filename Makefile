@@ -43,6 +43,7 @@ clean:
 	$(RM) $(OBJECTS)
 	@echo Cleanup complete!
 
+fresh: clean all
 run: all
 	./$(OUTPUTMAIN)
 	@echo Executing 'run: all' complete!

@@ -98,7 +98,7 @@ void Game::loadGame() {
   int w = Params::ACTUAL_CELL_SIZE;
   int p = Params::PATH_WIDTH;
   int ww = Params::WALL_WIDTH;
-  SDL_Texture *player_tex = win.loadTexture("res/textures/player0.png");
+  SDL_Texture *player_tex = win.loadTexture("res/textures/body_all.png");
   if (isServer) {
     player1.init({w, w, p * w, p * w}, player_tex);
     player2.init({w, w, p * w, p * w}, player_tex);
@@ -312,7 +312,8 @@ void Game::render() {
   auto maze_V = maze.getPixelV();
   for (int x = 0; x < maze_V.size(); x++) {
     for (int y = 0; y < maze_V[0].size(); y++) {
-      if (maze_V[x][y] == 1) win.render({w * y, w * x, w, w}, maze.maze_tex);
+      if (maze_V[x][y] == 1)
+        win.render({w * y, w * x, w, w}, {0, 0, 10, 10}, maze.maze_tex);
     }
   }
   win.render(player1);

@@ -37,6 +37,14 @@ bool notWall(Maze* maze, int x, int y) {
   return m[y / Params::ACTUAL_CELL_SIZE][x / Params::ACTUAL_CELL_SIZE] == 0;
 }
 
+SDL_Rect Entity::getCropArea() {
+  SDL_Rect src;
+  src.x = 0;
+  src.y = 0;
+  SDL_QueryTexture(texture, NULL, NULL, &src.w, &src.h);
+  return src;
+}
+
 void Entity::move(Maze* maze) {
   if (is_moving) {
     int tempX = location.x, tempY = location.y, x = location.x,

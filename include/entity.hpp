@@ -27,6 +27,7 @@ class Entity {
   void init(SDL_Rect loc, SDL_Texture* tex);
   void setSize(int, int);
   SDL_Rect getLocation();
+  virtual SDL_Rect getCropArea();
   SDL_Texture* getTexture();
   Direction getDirection();
 

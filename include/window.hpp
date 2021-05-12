@@ -8,7 +8,7 @@ class WindowManager {
  public:
   WindowManager();
   WindowManager(const char* w_title, int w_height, int w_width);
-  void render(SDL_Rect loc, SDL_Texture* tex);
+  void render(SDL_Rect loc, SDL_Rect dst, SDL_Texture* tex);
   void render(Entity& e);
   void clearWindow();
   void destroy();

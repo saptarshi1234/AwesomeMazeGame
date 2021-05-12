@@ -5,4 +5,5 @@
 class Player : public Entity {
  public:
   Bullet fireBullet(SDL_Texture* tex);
+  SDL_Rect getCropArea();
 };
