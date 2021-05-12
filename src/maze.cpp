@@ -113,12 +113,12 @@ std::vector<std::vector<int>> Maze::render() {
       int h = pathLength;
       if (maze[i][j].down) h += wallLength;
       if (maze[i][j].right) w += wallLength;
-      int temp = rand() % 7;
-      int temp2 = rand() % 7;
+      int temp = rand() % 100;
+      int temp2 = rand() % 100;
 
-      if (i != mazeWidth - 1 && temp < 3) w = pathLength + wallLength;
+      if (i != mazeWidth - 1 && temp < 15) w = pathLength + wallLength;
 
-      if (j != mazeHeight - 1 && temp2 < 3) h = pathLength + wallLength;
+      if (j != mazeHeight - 1 && temp2 < 15) h = pathLength + wallLength;
 
       for (int x = startX; x < startX + w; x++) {
         for (int y = startY; y < startY + h; y++) {

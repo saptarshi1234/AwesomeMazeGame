@@ -62,9 +62,9 @@ std::string serialize(std::vector<std::vector<int>> v) {
 std::vector<std::vector<int>> deserialize(std::string s) {
   std::vector<std::vector<int>> v;
   int pos = 0;
-  for (int i = 0; i < Params::SCREEN_HEIGHT / 10; i++) {
+  for (int i = 0; i < Params::SCREEN_HEIGHT / Params::ACTUAL_CELL_SIZE; i++) {
     std::vector<int> row;
-    for (int j = 0; j < Params::SCREEN_WIDTH / 10; j++) {
+    for (int j = 0; j < Params::SCREEN_WIDTH / Params::ACTUAL_CELL_SIZE; j++) {
       row.push_back(s[pos++] - 48);
     }
     v.push_back(row);
@@ -84,26 +84,32 @@ void Game::initialize() {
 
     std::string s = serialize(maze.getPixelV());
     server.send(s);
+    cout << s << endl;
 
   } else {
     auto data = client.recv();
     maze.setPixelV(deserialize(data));
+    cout << data << endl;
   }
   maze.maze_tex = win.loadTexture("res/textures/ground.png");
 }
 
 void Game::loadGame() {
   int w = Params::ACTUAL_CELL_SIZE;
+  int p = Params::PATH_WIDTH;
+  int ww = Params::WALL_WIDTH;
   SDL_Texture *player_tex = win.loadTexture("res/textures/player0.png");
   if (isServer) {
-    player1.init({w, w, 2 * w, 2 * w}, player_tex);
-    player2.init({w, w, 2 * w, 2 * w}, player_tex);
+    player1.init({w, w, p * w, p * w}, player_tex);
+    player2.init({w, w, p * w, p * w}, player_tex);
     server.send(player1.to_string());
     player2.from_string(server.recv());
 
   } else {
-    player1.init({Params::SCREEN_WIDTH - 3 * w, w, 2 * w, 2 * w}, player_tex);
-    player2.init({Params::SCREEN_WIDTH - 3 * w, w, 2 * w, 2 * w}, player_tex);
+    player1.init({Params::SCREEN_WIDTH - (p + ww) * w, w, p * w, p * w},
+                 player_tex);
+    player2.init({Params::SCREEN_WIDTH - (p + ww) * w, w, p * w, p * w},
+                 player_tex);
 
     client.send(player1.to_string());
     player2.from_string(client.recv());
@@ -224,20 +230,22 @@ void Game::update() {
       Bot b;
       int x = w * (row * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
       int y = w * (col * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
-      b.init({x, y, 3 * w - 1, 3 * w - 1},
+      b.init({x, y, Params::PATH_WIDTH * w - 1, Params::PATH_WIDTH * w - 1},
              win.loadTexture("res/textures/player0.png"));
       bots.push_back(b);
     }
-    for (int i = 0; i < bots.size(); i++) {
-      if (bots[i].shouldUpdate()) bots[i].update(player1.getLocation(), &maze);
-      // if (bots[i].shouldFire()) {
-      //   SDL_Texture *tex = win.loadTexture("res/textures/player0.png");
-      //   Bullet b = bots[i].fireBullet(tex);
-      //   bullets.push_back(b);
-      //   unsynced_bullets.push_back(b);
-      // }
-      bots[i].move(&maze);
+  }
+  for (int i = 0; i < bots.size(); i++) {
+    if (isServer && bots[i].shouldUpdate()) {
+      bots[i].update(player1.getLocation(), &maze);
     }
+    if (bots[i].shouldFire()) {
+      SDL_Texture *tex = win.loadTexture("res/textures/player0.png");
+      Bullet b = bots[i].fireBullet(tex);
+      bullets.push_back(b);
+      unsynced_bullets.push_back(b);
+    }
+    bots[i].move(&maze);
   }
 
   player1.move(&maze);
@@ -282,6 +290,21 @@ void Game::sync() {
 
   c_sock->send(player1.to_string());
   player2.from_string(c_sock->recv());
+
+  // std::stringstream ss_send;
+  // for (Bot &b : bots) {
+  //   ss_send << b.to_string() << '\n';
+  // }
+  // c_sock->send(ss_send.str());
+
+  // std::stringstream ss_recv(c_sock->recv());
+  // char delim = '\n';
+  // std::string word;
+  // int index = 0;
+  // while (std::getline(ss_recv, word, delim)) {
+  //   SDL_Texture *tex = win.loadTexture("res/textures/player0.png");
+  //   bots[index].from_string(word);
+  // }
 }
 
 void Game::render() {

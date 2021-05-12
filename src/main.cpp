@@ -80,3 +80,15 @@ int main(int argc, char* argv[]) {
 
   return 0;
 }
+
+// TODO
+
+// Akshat
+// * bot AI -
+// * better movements -
+// * bot dies - point table
+
+// Sap
+// * make clean
+// * sprite sheets and animation
+//

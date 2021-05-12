@@ -48,7 +48,7 @@ Bot::Bot() {
   waitFire = 0;
   waitUpdate = 0;
   updateFreq = 50;
-  fireFreq = rand() % 50 + 50;
+  fireFreq = rand() % 20 + 20;
 }
 
 void Bot::update(SDL_Rect loc, Maze* maze) {
@@ -80,7 +80,7 @@ void Bot::update(SDL_Rect loc, Maze* maze) {
           break;
       }
       int D = abs(tempX - loc.x) + abs(tempY - loc.y);
-      if (D < curD) probs[i] += 4;
+      if (D < curD) probs[i] += 20;
       tot += probs[i];
     }
   }
