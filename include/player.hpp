@@ -3,7 +3,15 @@
 #include "bullet.hpp"
 #include "entity.hpp"
 class Player : public Entity {
+ protected:
+  SDL_Texture *F1_tex;
+  SDL_Texture *F2_tex;
+  SDL_Texture *gun;
+  int firing = 0;
+
  public:
-  Bullet fireBullet(SDL_Texture* tex);
-  SDL_Rect getCropArea();
+  void init(SDL_Rect loc);
+  Bullet fireBullet();
+  void move(Maze *maze);
+  // SDL_Rect getCropArea();
 };

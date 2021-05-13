@@ -16,7 +16,6 @@ using std::endl;
 
 Game::Game(WindowManager win, bool isServer, char *ip)
     : win(win), isServer(isServer) {
-  tex_man.initialize(win);
   if (isServer) {
     cout << "Server" << endl;
     server.initialize();
@@ -92,25 +91,22 @@ void Game::initialize() {
     maze.setPixelV(deserialize(data));
     cout << data << endl;
   }
-  maze.maze_tex = tex_man.getTex(Textures::GROUND);
+  maze.maze_tex = TextureManager::getTex(TextureID::GROUND);
 }
 
 void Game::loadGame() {
   int w = Params::ACTUAL_CELL_SIZE;
   int p = Params::PATH_WIDTH;
   int ww = Params::WALL_WIDTH;
-  SDL_Texture *player_tex = tex_man.getTex(Textures::PLAYER);
   if (isServer) {
-    player1.init({w, w, p * w, p * w}, player_tex);
-    player2.init({w, w, p * w, p * w}, player_tex);
+    player1.init({w, w, p * w, p * w});
+    player2.init({w, w, p * w, p * w});
     server.send(player1.to_string());
     player2.from_string(server.recv());
 
   } else {
-    player1.init({Params::SCREEN_WIDTH - (p + ww) * w, w, p * w, p * w},
-                 player_tex);
-    player2.init({Params::SCREEN_WIDTH - (p + ww) * w, w, p * w, p * w},
-                 player_tex);
+    player1.init({Params::SCREEN_WIDTH - (p + ww) * w, w, p * w, p * w});
+    player2.init({Params::SCREEN_WIDTH - (p + ww) * w, w, p * w, p * w});
 
     client.send(player1.to_string());
     player2.from_string(client.recv());
@@ -196,7 +192,7 @@ void Game::handleEvents() {
             dkey_stack.push_back(RIGHT);
           break;
         case SDLK_SPACE: {
-          Bullet b = player1.fireBullet(tex_man.getTex(Textures::BULLET));
+          Bullet b = player1.fireBullet();
           bullets.push_back(b);
           unsynced_bullets.push_back(b);
           break;
@@ -208,7 +204,7 @@ void Game::handleEvents() {
 
     if (event.type == SDL_MOUSEBUTTONDOWN) {
       if (event.button.button == SDL_BUTTON_LEFT) {
-        Bullet b = player1.fireBullet(tex_man.getTex(Textures::BULLET));
+        Bullet b = player1.fireBullet();
         bullets.push_back(b);
         unsynced_bullets.push_back(b);
       }
@@ -228,8 +224,7 @@ void Game::update() {
       Bot b;
       int x = w * (row * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
       int y = w * (col * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
-      b.init({x, y, Params::PATH_WIDTH * w - 1, Params::PATH_WIDTH * w - 1},
-             tex_man.getTex(Textures::PLAYER));
+      b.init({x, y, Params::PATH_WIDTH * w - 1, Params::PATH_WIDTH * w - 1});
       bots.push_back(b);
     }
   }
@@ -238,7 +233,7 @@ void Game::update() {
       bots[i].update(player1.getLocation(), &maze);
     }
     if (bots[i].shouldFire()) {
-      Bullet b = bots[i].fireBullet(tex_man.getTex(Textures::BULLET));
+      Bullet b = bots[i].fireBullet();
       bullets.push_back(b);
       unsynced_bullets.push_back(b);
     }
@@ -279,7 +274,7 @@ void Game::sync() {
   std::string word;
   while (std::getline(ss_recv, word, delim)) {
     Bullet b;
-    b.init({0, 0, 0, 0}, tex_man.getTex(Textures::BULLET));
+    b.init({0, 0, 0, 0});
     b.from_string(word);
     other_bullets.push_back(b);
   }

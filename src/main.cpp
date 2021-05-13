@@ -2,11 +2,8 @@
 
 #include <iostream>
 
-#include "application.hpp"
-#include "client.hpp"
 #include "game.hpp"
 #include "params.hpp"
-#include "server.hpp"
 #include "window.hpp"
 
 using std::cout;
@@ -46,6 +43,8 @@ int main(int argc, char* argv[]) {
 
   WindowManager window(window_name, Params::SCREEN_HEIGHT,
                        Params::SCREEN_WIDTH);
+  TextureManager::initialize(window);
+
   Game game(window, isServer, ip);
 
   srand((unsigned int)time(NULL));

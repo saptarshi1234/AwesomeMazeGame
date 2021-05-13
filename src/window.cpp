@@ -33,11 +33,34 @@ void WindowManager::render(SDL_Rect dst, SDL_Rect src, SDL_Texture* tex) {
   SDL_RenderCopy(renderer, tex, &src, &dst);
 }
 
-void WindowManager::render(Entity& entity) {
-  SDL_Rect src = entity.getCropArea();
-  SDL_Rect dst = entity.getLocation();
+SDL_Rect getSrc(SDL_Rect rect, Direction dir) {
+  int index = 0;
+  switch (dir) {
+    case TOP:
+      index = 0;
+      break;
+    case RIGHT:
+      index = 1;
+      break;
+    case BOTTOM:
+      index = 2;
+      break;
+    case LEFT:
+      index = 3;
+      break;
+  }
+  return {0, index * rect.h / 4, rect.w, rect.h / 4};
+}
 
-  render(dst, src, entity.getTexture());
+void WindowManager::render(Entity& entity) {
+  for (auto layer : entity.getLayers()) {
+    SDL_Rect src = getSrc(layer.getSize(), entity.getDirection());
+    SDL_Rect dst = entity.getLocation();
+    dst.x += layer.offset.first;
+    dst.y += layer.offset.second;
+
+    render(dst, src, layer.tex);
+  }
 }
 
 void WindowManager::display() { SDL_RenderPresent(renderer); }

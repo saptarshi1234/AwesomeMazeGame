@@ -11,12 +11,9 @@ Entity::~Entity() {
   // delete texture;
 }
 
-void Entity::init(SDL_Rect loc, SDL_Texture* tex) {
+void Entity::init(SDL_Rect loc) {
   location = loc;
-  texture = tex;
   velocity = 4;
-  offsetX = 0;
-  offsetY = 0;
   dir = RIGHT;
   is_moving = false;
 }
@@ -27,7 +24,7 @@ void Entity::setSize(int w, int h) {
 }
 
 SDL_Rect Entity::getLocation() { return location; }
-SDL_Texture* Entity::getTexture() { return texture; }
+std::vector<LayerDetails> Entity::getLayers() { return layers; }
 
 void Entity::setLocation(SDL_Rect rect) { location = rect; }
 Direction Entity::getDirection() { return dir; }
@@ -37,13 +34,13 @@ bool notWall(Maze* maze, int x, int y) {
   return m[y / Params::ACTUAL_CELL_SIZE][x / Params::ACTUAL_CELL_SIZE] == 0;
 }
 
-SDL_Rect Entity::getCropArea() {
-  SDL_Rect src;
-  src.x = 0;
-  src.y = 0;
-  SDL_QueryTexture(texture, NULL, NULL, &src.w, &src.h);
-  return src;
-}
+// SDL_Rect Entity::getCropArea() {
+//   // SDL_Rect src;
+//   // src.x = 0;
+//   // src.y = 0;
+//   // SDL_QueryTexture(texture, NULL, NULL, &src.w, &src.h);
+//   // return src;
+// }
 
 void Entity::move(Maze* maze) {
   if (is_moving) {

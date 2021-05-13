@@ -3,32 +3,44 @@
 #include <iostream>
 
 #include "bullet.hpp"
+#include "textures.hpp"
 
-Bullet Player::fireBullet(SDL_Texture* tex) {
+void Player::init(SDL_Rect loc) {
+  Entity::init(loc);
+  F1_tex = TextureManager::getTex(TextureID::TANK_F1);
+  F2_tex = TextureManager::getTex(TextureID::TANK_F2);
+  layers = {{F1_tex, {0, 0}}, {TextureManager::getTex(TextureID::GUN), {0, 0}}};
+}
+
+Bullet Player::fireBullet() {
   Bullet b;
-  b.init(location, tex);
+  b.init(location);
   b.setDirection(this->dir);
-  // std::cout << "hello" << std::endl;
+  firing = 1;
+  switch (dir) {
+    case TOP:
+      layers[1].offset = {0, 5};
+      break;
+    case RIGHT:
+      layers[1].offset = {-5, 0};
+      break;
+    case BOTTOM:
+      layers[1].offset = {0, -5};
+      break;
+    case LEFT:
+      layers[1].offset = {5, 0};
+      break;
+    default:
+      break;
+  }
   return b;
 }
 
-SDL_Rect Player::getCropArea() {
-  auto rect = Entity::getCropArea();
-  int index = 0;
-  switch (dir) {
-    case TOP:
-      index = 0;
-      break;
-    case LEFT:
-      index = 2;
-      break;
-    case RIGHT:
-      index = 1;
-      break;
-    case BOTTOM:
-      index = 3;
-      break;
+void Player::move(Maze* maze) {
+  Entity::move(maze);
+  if (firing > 0) firing++;
+  if (firing == 4) {
+    layers[1].offset = {0, 0};
+    firing = 0;
   }
-  int tank_index = (moves % 8) / 4;
-  return {tank_index * rect.w / 2, index * rect.h / 4, rect.w / 2, rect.h / 4};
 }
