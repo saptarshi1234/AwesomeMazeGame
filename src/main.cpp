@@ -91,4 +91,5 @@ int main(int argc, char* argv[]) {
 // Sap
 // * make clean
 // * sprite sheets and animation
-//
+// * startup screen with choices
+// * powerups

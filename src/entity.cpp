@@ -86,6 +86,7 @@ void Entity::move(Maze* maze) {
       if (is_moving) {
         location.x = tempX;
         location.y = tempY;
+        moves++;
       }
     }
   }

@@ -16,6 +16,7 @@ class Entity {
   int offsetX;
   int offsetY;
   int velocity;
+  int moves = 0;
 
   Direction dir;
   bool is_moving;

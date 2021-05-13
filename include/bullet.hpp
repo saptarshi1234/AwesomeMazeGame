@@ -3,4 +3,5 @@
 class Bullet : public Entity {
  public:
   void init(SDL_Rect loc, SDL_Texture* tex);
+  SDL_Rect getCropArea();
 };

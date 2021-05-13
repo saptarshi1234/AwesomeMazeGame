@@ -9,6 +9,7 @@
 #include "networking.hpp"
 #include "player.hpp"
 #include "server.hpp"
+#include "textures.hpp"
 #include "window.hpp"
 
 class Game {
@@ -21,6 +22,7 @@ class Game {
   Client client;
   CustomSocket* c_sock;
   int num_other_bullets;
+  TextureManager tex_man;
 
   std::vector<Direction> dkey_stack;
 

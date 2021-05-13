@@ -16,6 +16,7 @@ using std::endl;
 
 Game::Game(WindowManager win, bool isServer, char *ip)
     : win(win), isServer(isServer) {
+  tex_man.initialize(win);
   if (isServer) {
     cout << "Server" << endl;
     server.initialize();
@@ -91,14 +92,14 @@ void Game::initialize() {
     maze.setPixelV(deserialize(data));
     cout << data << endl;
   }
-  maze.maze_tex = win.loadTexture("res/textures/ground.png");
+  maze.maze_tex = tex_man.getTex(Textures::GROUND);
 }
 
 void Game::loadGame() {
   int w = Params::ACTUAL_CELL_SIZE;
   int p = Params::PATH_WIDTH;
   int ww = Params::WALL_WIDTH;
-  SDL_Texture *player_tex = win.loadTexture("res/textures/body_all.png");
+  SDL_Texture *player_tex = tex_man.getTex(Textures::PLAYER);
   if (isServer) {
     player1.init({w, w, p * w, p * w}, player_tex);
     player2.init({w, w, p * w, p * w}, player_tex);
@@ -114,7 +115,6 @@ void Game::loadGame() {
     client.send(player1.to_string());
     player2.from_string(client.recv());
   }
-  SDL_Texture *tex = win.loadTexture("res/textures/player0.png");
 
   running = true;
 }
@@ -196,8 +196,7 @@ void Game::handleEvents() {
             dkey_stack.push_back(RIGHT);
           break;
         case SDLK_SPACE: {
-          SDL_Texture *tex = win.loadTexture("res/textures/player0.png");
-          Bullet b = player1.fireBullet(tex);
+          Bullet b = player1.fireBullet(tex_man.getTex(Textures::BULLET));
           bullets.push_back(b);
           unsynced_bullets.push_back(b);
           break;
@@ -209,8 +208,7 @@ void Game::handleEvents() {
 
     if (event.type == SDL_MOUSEBUTTONDOWN) {
       if (event.button.button == SDL_BUTTON_LEFT) {
-        SDL_Texture *tex = win.loadTexture("res/textures/player0.png");
-        Bullet b = player1.fireBullet(tex);
+        Bullet b = player1.fireBullet(tex_man.getTex(Textures::BULLET));
         bullets.push_back(b);
         unsynced_bullets.push_back(b);
       }
@@ -231,7 +229,7 @@ void Game::update() {
       int x = w * (row * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
       int y = w * (col * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
       b.init({x, y, Params::PATH_WIDTH * w - 1, Params::PATH_WIDTH * w - 1},
-             win.loadTexture("res/textures/player0.png"));
+             tex_man.getTex(Textures::PLAYER));
       bots.push_back(b);
     }
   }
@@ -240,8 +238,7 @@ void Game::update() {
       bots[i].update(player1.getLocation(), &maze);
     }
     if (bots[i].shouldFire()) {
-      SDL_Texture *tex = win.loadTexture("res/textures/player0.png");
-      Bullet b = bots[i].fireBullet(tex);
+      Bullet b = bots[i].fireBullet(tex_man.getTex(Textures::BULLET));
       bullets.push_back(b);
       unsynced_bullets.push_back(b);
     }
@@ -281,9 +278,8 @@ void Game::sync() {
   char delim = '\n';
   std::string word;
   while (std::getline(ss_recv, word, delim)) {
-    SDL_Texture *tex = win.loadTexture("res/textures/player0.png");
     Bullet b;
-    b.init({0, 0, 0, 0}, tex);
+    b.init({0, 0, 0, 0}, tex_man.getTex(Textures::BULLET));
     b.from_string(word);
     other_bullets.push_back(b);
   }
@@ -302,7 +298,6 @@ void Game::sync() {
   // std::string word;
   // int index = 0;
   // while (std::getline(ss_recv, word, delim)) {
-  //   SDL_Texture *tex = win.loadTexture("res/textures/player0.png");
   //   bots[index].from_string(word);
   // }
 }
