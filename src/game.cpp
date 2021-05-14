@@ -238,6 +238,9 @@ void Game::update() {
       unsynced_bullets.push_back(b);
     }
     bots[i].move(&maze);
+    if (bots[i].moves >= 40 && bots[i].explosion_status == 0) {
+      bots[i].explosion_status = 1;
+    }
   }
 
   player1.move(&maze);

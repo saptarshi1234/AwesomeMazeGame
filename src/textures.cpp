@@ -8,6 +8,8 @@ void TextureManager::initialize(WindowManager win) {
       win.loadTexture("res/textures/tanks/others/guns.png");
   tex_map[TextureID::GROUND] =
       win.loadTexture("res/textures/background/ground.png");
+  tex_map[TextureID::EXPLOSION] =
+      win.loadTexture("res/textures/tanks/others/explosion.png");
 
   // TODO
   tex_map[TextureID::TANK_F1] =

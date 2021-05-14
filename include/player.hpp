@@ -7,9 +7,11 @@ class Player : public Entity {
   SDL_Texture *F1_tex;
   SDL_Texture *F2_tex;
   SDL_Texture *gun;
+  SDL_Texture *explosion;
   int firing = 0;
 
  public:
+  int explosion_status = 0;
   void init(SDL_Rect loc);
   Bullet fireBullet();
   void move(Maze *maze);

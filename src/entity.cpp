@@ -52,6 +52,11 @@ void Entity::move(Maze* maze) {
         fy = y;
         y = tempY;
         break;
+      case RIGHT:
+        tempX += velocity;
+        x = fx;
+        fx = x + velocity;
+        break;
       case BOTTOM:
         tempY += velocity;
         y = fy;
@@ -62,11 +67,7 @@ void Entity::move(Maze* maze) {
         fx = x;
         x = tempX;
         break;
-      case RIGHT:
-        tempX += velocity;
-        x = fx;
-        fx = x + velocity;
-        break;
+
       default:
         break;
     }

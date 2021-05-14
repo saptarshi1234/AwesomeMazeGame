@@ -9,26 +9,31 @@ void Player::init(SDL_Rect loc) {
   Entity::init(loc);
   F1_tex = TextureManager::getTex(TextureID::TANK_F1);
   F2_tex = TextureManager::getTex(TextureID::TANK_F2);
-  layers = {{F1_tex, {0, 0}}, {TextureManager::getTex(TextureID::GUN), {0, 0}}};
+  layers = {
+      {F1_tex, {0, 0}},
+      {TextureManager::getTex(TextureID::GUN), {0, 0}},
+      {TextureManager::getTex(TextureID::EXPLOSION), {0, 0}, {0, 8}, false}};
 }
 
 Bullet Player::fireBullet() {
   Bullet b;
   b.init(location);
   b.setDirection(this->dir);
+
   firing = 1;
+  int recoil = 5, shift = 5;
   switch (dir) {
     case TOP:
-      layers[1].offset = {0, 5};
+      layers[1].offset = {0, recoil};
       break;
     case RIGHT:
-      layers[1].offset = {-5, 0};
+      layers[1].offset = {-recoil, 0};
       break;
     case BOTTOM:
-      layers[1].offset = {0, -5};
+      layers[1].offset = {0, -recoil};
       break;
     case LEFT:
-      layers[1].offset = {5, 0};
+      layers[1].offset = {recoil, 0};
       break;
     default:
       break;
@@ -42,5 +47,26 @@ void Player::move(Maze* maze) {
   if (firing == 4) {
     layers[1].offset = {0, 0};
     firing = 0;
+  }
+  if (moves % 2 == 0) {
+    layers[0].tex = F1_tex;
+  } else {
+    layers[0].tex = F2_tex;
+  }
+
+  if (explosion_status > 0) {
+    layers[2].toShow = true;
+    if (explosion_status == 2) {
+      layers[0].toShow = false;
+      layers[1].toShow = false;
+    }
+    layers[2].crop_details.first = explosion_status - 1;
+    explosion_status++;
+
+    if (explosion_status == 8) {
+      explosion_status = -1;
+      // TODO replace
+      layers[2].toShow = false;
+    }
   }
 }

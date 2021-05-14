@@ -33,28 +33,36 @@ void WindowManager::render(SDL_Rect dst, SDL_Rect src, SDL_Texture* tex) {
   SDL_RenderCopy(renderer, tex, &src, &dst);
 }
 
-SDL_Rect getSrc(SDL_Rect rect, Direction dir) {
-  int index = 0;
-  switch (dir) {
-    case TOP:
-      index = 0;
-      break;
-    case RIGHT:
-      index = 1;
-      break;
-    case BOTTOM:
-      index = 2;
-      break;
-    case LEFT:
-      index = 3;
-      break;
+SDL_Rect getSrc(LayerDetails layer, Direction dir) {
+  SDL_Rect rect = layer.getSize();
+
+  if (layer.crop_details.second == -1) {
+    int index = 0;
+    switch (dir) {
+      case TOP:
+        index = 0;
+        break;
+      case RIGHT:
+        index = 1;
+        break;
+      case BOTTOM:
+        index = 2;
+        break;
+      case LEFT:
+        index = 3;
+        break;
+    }
+    return {0, index * rect.h / 4, rect.w, rect.h / 4};
   }
-  return {0, index * rect.h / 4, rect.w, rect.h / 4};
+  auto [index, total] = layer.crop_details;
+  return {0, index * rect.h / total, rect.w, rect.h / total};
 }
 
 void WindowManager::render(Entity& entity) {
   for (auto layer : entity.getLayers()) {
-    SDL_Rect src = getSrc(layer.getSize(), entity.getDirection());
+    if (!layer.toShow) continue;
+
+    SDL_Rect src = getSrc(layer, entity.getDirection());
     SDL_Rect dst = entity.getLocation();
     dst.x += layer.offset.first;
     dst.y += layer.offset.second;

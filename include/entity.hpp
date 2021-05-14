@@ -12,6 +12,8 @@ enum Direction { TOP, LEFT, BOTTOM, RIGHT, STOP };
 struct LayerDetails {
   SDL_Texture* tex;
   std::pair<int, int> offset;
+  std::pair<int, int> crop_details = {-1, -1};
+  bool toShow = true;
 
   SDL_Rect getSize() {
     SDL_Rect src;
@@ -25,10 +27,8 @@ struct LayerDetails {
 class Entity {
  protected:
   std::vector<LayerDetails> layers;
-  // SDL_Texture* texture;
   SDL_Rect location;
   int velocity;
-  int moves = 0;
 
   Direction dir;
   bool is_moving;
@@ -36,11 +36,11 @@ class Entity {
  public:
   Entity();
   ~Entity();
+  int moves = 0;
 
   void init(SDL_Rect loc);
   void setSize(int, int);
   SDL_Rect getLocation();
-  // virtual SDL_Rect getCropArea();
   std::vector<LayerDetails> getLayers();
   Direction getDirection();
 
