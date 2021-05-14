@@ -45,6 +45,59 @@ int main(int argc, char* argv[]) {
                        Params::SCREEN_WIDTH);
   TextureManager::initialize(window);
 
+  Entity splash_screen;
+  splash_screen.init({0, 0, Params::SCREEN_WIDTH, Params::SCREEN_HEIGHT});
+  // LayerDetails server =
+  // splash_screen.setLayers(
+  //     {{},
+  //      {TextureManager::getTex(TextureID::SERVER), {0, 0}, {0, 1}}});
+
+  LayerDetails logo = {TextureManager::getTex(TextureID::LOGO)};
+  LayerDetails server = {TextureManager::getTex(TextureID::SERVER)};
+  LayerDetails client = {TextureManager::getTex(TextureID::CLIENT)};
+
+  SDL_Rect logo_loc = {0, 0, Params::SCREEN_WIDTH, Params::SCREEN_HEIGHT};
+  SDL_Rect server_loc = server.getSize();
+  SDL_Rect client_loc = client.getSize();
+
+  server_loc.x = (logo_loc.w - server_loc.w) / 2;
+  client_loc.x = (logo_loc.w - client_loc.w) / 2;
+
+  server_loc.y = 5 * logo_loc.h / 8;
+  client_loc.y = server_loc.y + 1.2 * server_loc.h;
+
+  bool received_key = false;
+
+  while (!received_key) {
+    window.render(logo_loc, logo.getSize(), logo.tex);
+    window.render(server_loc, server.getSize(), server.tex);
+    window.render(client_loc, client.getSize(), client.tex);
+
+    // window.render({0, 0, Params::SCREEN_WIDTH, Params::SCREEN_HEIGHT}, )
+    window.display();
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+      if (event.type == SDL_QUIT) {
+        SDL_Quit();
+        break;
+      }
+
+      if (event.type == SDL_KEYDOWN) {
+        switch (event.key.keysym.sym) {
+          case SDLK_s:
+            isServer = true;
+            received_key = true;
+            break;
+          case SDLK_c:
+            isServer = false;
+            received_key = true;
+            break;
+        }
+      }
+    }
+    window.clearWindow();
+  }
+  cout << isServer << endl;
   Game game(window, isServer, ip);
 
   srand((unsigned int)time(NULL));
@@ -54,6 +107,7 @@ int main(int argc, char* argv[]) {
   int index = 0, update_freq = 50;
   Clock sleep_clk, stats_clk;
 
+  window.clearWindow();
   while (game.isRunning()) {
     sleep_clk.tick();
     stats_clk.tick();

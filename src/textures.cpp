@@ -16,6 +16,13 @@ void TextureManager::initialize(WindowManager win) {
       win.loadTexture("res/textures/tanks/body/HULL_F1.png");
   tex_map[TextureID::TANK_F2] =
       win.loadTexture("res/textures/tanks/body/HULL_F2.png");
+
+  tex_map[TextureID::CLIENT] =
+      win.loadTexture("res/textures/background/client.png");
+  tex_map[TextureID::SERVER] =
+      win.loadTexture("res/textures/background/server.png");
+  tex_map[TextureID::LOGO] =
+      win.loadTexture("res/textures/background/logo.png");
 }
 
 SDL_Texture* TextureManager::getTex(TextureID tex) { return tex_map[tex]; }

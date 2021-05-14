@@ -23,6 +23,10 @@ void Entity::setSize(int w, int h) {
   location.w = w;
 }
 
+void Entity::setLayers(std::vector<LayerDetails> layers) {
+  this->layers = layers;
+}
+
 SDL_Rect Entity::getLocation() { return location; }
 std::vector<LayerDetails> Entity::getLayers() { return layers; }
 

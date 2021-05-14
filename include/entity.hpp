@@ -11,7 +11,7 @@ enum Direction { TOP, LEFT, BOTTOM, RIGHT, STOP };
 
 struct LayerDetails {
   SDL_Texture* tex;
-  std::pair<int, int> offset;
+  std::pair<int, int> offset = {0, 0};
   std::pair<int, int> crop_details = {-1, -1};
   bool toShow = true;
 
@@ -42,6 +42,7 @@ class Entity {
   void setSize(int, int);
   SDL_Rect getLocation();
   std::vector<LayerDetails> getLayers();
+  void setLayers(std::vector<LayerDetails> layers);
   Direction getDirection();
 
   void move(Maze* maze);
