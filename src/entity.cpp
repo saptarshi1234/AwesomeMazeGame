@@ -16,6 +16,7 @@ void Entity::init(SDL_Rect loc) {
   velocity = 8;
   dir = RIGHT;
   is_moving = false;
+  revert_dir = STOP;
 }
 
 void Entity::setSize(int w, int h) {
@@ -53,47 +54,87 @@ void Entity::move(Maze* maze) {
   if (is_moving) {
     int tempX = location.x, tempY = location.y, x = location.x,
         fx = x + location.w, y = location.y, fy = y + location.h;
+    bool x_free = false, y_free = false;
     switch (dir) {
       case TOP:
         tempY -= velocity;
         fy = y;
         y = tempY;
+        revert_dir = BOTTOM;
+        x_free = true;
         break;
       case RIGHT:
         tempX += velocity;
         x = fx;
         fx = x + velocity;
+        revert_dir = LEFT;
+        y_free = true;
         break;
       case BOTTOM:
         tempY += velocity;
         y = fy;
         fy = y + velocity;
+        revert_dir = TOP;
+        x_free = true;
         break;
       case LEFT:
         tempX -= velocity;
         fx = x;
         x = tempX;
+        revert_dir = RIGHT;
+        y_free = true;
         break;
 
       default:
         break;
     }
+    int min_ = -1, max_ = -1;
     if (tempX != location.x || tempY != location.y) {
       for (int i = x; i < fx; i++) {
         for (int j = y; j < fy; j++) {
           if (i < 0 || i >= Params::SCREEN_WIDTH || j < 0 ||
               j >= Params::SCREEN_HEIGHT || !notWall(maze, i, j)) {
-            is_moving = false;
-            break;
+            if ((x_free && i >= x + location.w / 5 &&
+                 i < fx - location.w / 5) ||
+                (y_free && j >= y + location.h / 5 &&
+                 j < fy - location.h / 5)) {
+              is_moving = false;
+              revert_dir = STOP;
+              break;
+            }
+          } else {
+            if (x_free &&
+                ((dir == TOP && j == y) || (dir == BOTTOM && j == fy - 1))) {
+              if (min_ == -1) min_ = i;
+              max_ = i;
+            }
+            if (y_free &&
+                ((dir == LEFT && i == x) || (dir == RIGHT && i == fx - 1))) {
+              if (min_ == -1) min_ = j;
+              max_ = j;
+            }
           }
         }
       }
       if (is_moving) {
+        if (x_free) {
+          if (tempX != min_)
+            tempX = min_;
+          else if (tempX + location.w - 1 != max_)
+            tempX = max_ + 1 - location.w;
+        } else {
+          if (tempY != min_)
+            tempY = min_;
+          else if (tempY + location.h - 1 != max_)
+            tempY = max_ + 1 - location.h;
+        }
         location.x = tempX;
         location.y = tempY;
         moves++;
       }
     }
+  } else {
+    revert_dir = STOP;
   }
 }
 
@@ -106,6 +147,8 @@ bool Entity::canMove(Maze* maze) {
         tempY -= velocity;
         fy = y;
         y = tempY;
+        fx -= location.w / 2;
+        x += location.w / 2;
         break;
       case BOTTOM:
         tempY += velocity;
@@ -156,6 +199,9 @@ std::string Entity::to_string() {
      << location.w << space << is_moving << space << dir;
   return ss.str();
 }
+
+Direction Entity::getRevertDir() { return revert_dir; }
+void Entity::setRevertDir(Direction d) { revert_dir = d; }
 
 void Entity::from_string(std::string s) {
   int int_dir;

@@ -29,7 +29,7 @@ class Entity {
   std::vector<LayerDetails> layers;
   SDL_Rect location;
   int velocity;
-
+  Direction revert_dir;
   Direction dir;
   bool is_moving;
 
@@ -53,6 +53,8 @@ class Entity {
   bool isMoving();
   void setDirection(Direction d);
   void setLocation(SDL_Rect rect);
+  void setRevertDir(Direction d);
+  Direction getRevertDir();
   std::string to_string();
   void from_string(std::string s);
 };
