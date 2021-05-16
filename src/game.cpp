@@ -250,6 +250,16 @@ void Game::update() {
       bots.push_back(b);
     }
   }
+
+  for (auto it = bots.begin(); it != bots.end(); it++) {
+    if (it->getHP() <= 0 && it->explosion_status == -1) {
+      it = bots.erase(it) - 1;
+    }
+  }
+  if (player1.getHP() <= 0) {
+    ;
+  }
+
   for (int i = 0; i < bots.size(); i++) {
     if (isServer && bots[i].shouldUpdate()) {
       bots[i].update(player1.getLocation(), &maze);

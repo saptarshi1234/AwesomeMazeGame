@@ -88,6 +88,8 @@ void Player::move(Maze* maze) {
     if (explosion_status == 2) {
       layers[0].toShow = false;
       layers[1].toShow = false;
+    } else if (explosion_status == 1) {
+      is_moving = false;
     }
     layers[2].crop_details.first = explosion_status - 1;
     explosion_status++;
