@@ -58,12 +58,20 @@ SDL_Rect getSrc(LayerDetails layer, Direction dir) {
   return {0, index * rect.h / total, rect.w, rect.h / total};
 }
 
+SDL_Rect getDst(LayerDetails layer, SDL_Rect dst) {
+  if (layer.dstSize.first != -1) {
+    dst.w = layer.dstSize.first;
+    dst.h = layer.dstSize.second;
+  }
+  return dst;
+}
+
 void WindowManager::render(Entity& entity) {
   for (auto layer : entity.getLayers()) {
     if (!layer.toShow) continue;
 
     SDL_Rect src = getSrc(layer, entity.getDirection());
-    SDL_Rect dst = entity.getPhysicalLocation();
+    SDL_Rect dst = getDst(layer, entity.getPhysicalLocation());
     dst.x += layer.offset.first;
     dst.y += layer.offset.second;
 

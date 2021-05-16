@@ -4,7 +4,19 @@
 
 #include "window.hpp"
 
-enum TextureID { TANK_F1, TANK_F2, BULLET, GROUND, GUN, EXPLOSION, CLIENT, SERVER, LOGO };
+enum TextureID {
+  TANK_F1,
+  TANK_F2,
+  BULLET,
+  GROUND,
+  GUN,
+  EXPLOSION,
+  CLIENT,
+  SERVER,
+  LOGO,
+  HEALTH_BAR,
+  HEALTH_BODY
+};
 
 class TextureManager {
  public:

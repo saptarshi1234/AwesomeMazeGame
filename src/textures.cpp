@@ -23,6 +23,10 @@ void TextureManager::initialize(WindowManager win) {
       win.loadTexture("res/textures/background/server.png");
   tex_map[TextureID::LOGO] =
       win.loadTexture("res/textures/background/logo.png");
+  tex_map[TextureID::HEALTH_BAR] =
+      win.loadTexture("res/textures/tanks/others/health_bar.png");
+  tex_map[TextureID::HEALTH_BODY] =
+      win.loadTexture("res/textures/tanks/others/health_body.png");
 }
 
 SDL_Texture* TextureManager::getTex(TextureID tex) { return tex_map[tex]; }

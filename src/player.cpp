@@ -6,13 +6,28 @@
 #include "textures.hpp"
 
 void Player::init(SDL_Rect loc) {
+  int w = 2 * Params::ACTUAL_CELL_SIZE * 8 / 10;
+  int h = 2 * Params::ACTUAL_CELL_SIZE / 10;
+
+  int offX = Params::ACTUAL_CELL_SIZE / 2;
+
   Entity::init(loc);
   F1_tex = TextureManager::getTex(TextureID::TANK_F1);
   F2_tex = TextureManager::getTex(TextureID::TANK_F2);
   layers = {
       {F1_tex, {0, 0}},
       {TextureManager::getTex(TextureID::GUN), {0, 0}},
-      {TextureManager::getTex(TextureID::EXPLOSION), {0, 0}, {0, 8}, false}};
+      {TextureManager::getTex(TextureID::EXPLOSION), {0, 0}, {0, 8}, false},
+      {TextureManager::getTex(TextureID::HEALTH_BAR),
+       {-offX, -offX},
+       {0, 1},
+       true,
+       {w, h}},
+      {TextureManager::getTex(TextureID::HEALTH_BODY),
+       {-offX, -offX},
+       {0, 1},
+       true,
+       {w, h}}};
 }
 
 SDL_Rect Player::getPhysicalLocation() { return location; }
@@ -43,7 +58,11 @@ Bullet Player::fireBullet() {
   return b;
 }
 
-void Player::setHP(double h) { hp = h; }
+void Player::setHP(double h) {
+  hp = h;
+  layers[4].dstSize.first =
+      (int)(Params::ACTUAL_CELL_SIZE * 16 / 10 * hp / Params::MAX_HP);
+}
 void Player::setBulletPower(double x) { bullet_power = x; }
 void Player::raiseScore(int s) { score += s; }
 double Player::getHP() { return hp; }

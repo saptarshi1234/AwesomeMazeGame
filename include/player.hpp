@@ -12,7 +12,7 @@ class Player : public Entity {
   int firing = 0;
   int score = 0;
   double bullet_power = 1;
-  double hp = 1000;
+  double hp = Params::MAX_HP;
 
  public:
   int explosion_status = 0;

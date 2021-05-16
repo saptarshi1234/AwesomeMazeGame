@@ -7,6 +7,7 @@ const int PATH_WIDTH = 2;
 const int ACTUAL_CELL_SIZE = 20;
 const int NUM_CELLS_X = 15;
 const int NUM_CELLS_Y = 15;
+const int MAX_HP = 1000;
 const int SCREEN_WIDTH =
     (2 + NUM_CELLS_X * PATH_WIDTH + (NUM_CELLS_X - 1) * WALL_WIDTH) *
     ACTUAL_CELL_SIZE;
