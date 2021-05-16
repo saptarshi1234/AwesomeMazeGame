@@ -17,7 +17,7 @@ void Player::init(SDL_Rect loc) {
 
 Bullet Player::fireBullet() {
   Bullet b;
-  b.init(location);
+  b.init(location, !is_bot, this, bullet_power);
   b.setDirection(this->dir);
 
   firing = 1;
@@ -40,6 +40,14 @@ Bullet Player::fireBullet() {
   }
   return b;
 }
+
+void Player::setHP(double h) { hp = h; }
+void Player::setBulletPower(double x) { bullet_power = x; }
+void Player::raiseScore(int s) { score += s; }
+double Player::getHP() { return hp; }
+double Player::getBulletPower() { return bullet_power; }
+int Player::getScore() { return score; }
+bool Player::isBot() { return is_bot; }
 
 void Player::move(Maze* maze) {
   Entity::move(maze);

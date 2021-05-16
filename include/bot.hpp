@@ -10,6 +10,7 @@ class Bot : public Player {
 
  public:
   Bot();
+  void init(SDL_Rect loc);
   void update(SDL_Rect loc, Maze* maze);
   void setFireFreq(int f);
   void setUpdateFreq(int f);

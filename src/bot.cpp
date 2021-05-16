@@ -51,6 +51,12 @@ Bot::Bot() {
   fireFreq = rand() % 20 + 20;
 }
 
+void Bot::init(SDL_Rect loc) {
+  Player::init(loc);
+  is_bot = true;
+  hp = 100;
+}
+
 void Bot::update(SDL_Rect loc, Maze* maze) {
   int probs[] = {2, 2, 2, 2};
   Direction dir = Entity::getDirection();

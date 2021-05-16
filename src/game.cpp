@@ -105,8 +105,8 @@ void Game::loadGame() {
     player2.from_string(server.recv());
 
   } else {
-    player1.init({Params::SCREEN_WIDTH - (p + ww) * w, w, p * w, p * w});
-    player2.init({Params::SCREEN_WIDTH - (p + ww) * w, w, p * w, p * w});
+    player1.init({Params::SCREEN_WIDTH - (p + 1) * w, w, p * w, p * w});
+    player2.init({Params::SCREEN_WIDTH - (p + 1) * w, w, p * w, p * w});
 
     client.send(player1.to_string());
     player2.from_string(client.recv());
@@ -138,6 +138,9 @@ void Game::handleEvents() {
           break;
         case SDLK_RIGHT:
           it = std::find(dkey_stack.begin(), dkey_stack.end(), RIGHT);
+          break;
+        case SDLK_SPACE:
+          space_down = false;
           break;
         default:
           break;
@@ -192,9 +195,12 @@ void Game::handleEvents() {
             dkey_stack.push_back(RIGHT);
           break;
         case SDLK_SPACE: {
-          Bullet b = player1.fireBullet();
-          bullets.push_back(b);
-          unsynced_bullets.push_back(b);
+          if (!space_down) {
+            Bullet b = player1.fireBullet();
+            bullets.push_back(b);
+            unsynced_bullets.push_back(b);
+            space_down = true;
+          }
           break;
         }
         default:
@@ -216,6 +222,22 @@ void Game::update() {
   unsynced_bullets.clear();
 
   if (isServer) {
+    for (auto bullet_it = bullets.begin(); bullet_it != bullets.end();
+         bullet_it++) {
+      if (bullet_it->destroyBullet()) {
+        bullet_it = bullets.erase(bullet_it);
+        bullet_it--;
+      }
+    }
+
+    for (auto bullet_it = other_bullets.begin();
+         bullet_it != other_bullets.end(); bullet_it++) {
+      if (bullet_it->destroyBullet()) {
+        bullet_it = other_bullets.erase(bullet_it);
+        bullet_it--;
+      }
+    }
+
     int w = Params::ACTUAL_CELL_SIZE;
     int k = rand() % Params::MAX_BOTS;
     if (k >= bots.size()) {
@@ -232,15 +254,15 @@ void Game::update() {
     if (isServer && bots[i].shouldUpdate()) {
       bots[i].update(player1.getLocation(), &maze);
     }
-    if (bots[i].shouldFire()) {
+    if (i < 10 && bots[i].shouldFire()) {
       Bullet b = bots[i].fireBullet();
       bullets.push_back(b);
       unsynced_bullets.push_back(b);
     }
     bots[i].move(&maze);
-    if (bots[i].moves >= 40 && bots[i].explosion_status == 0) {
-      bots[i].explosion_status = 1;
-    }
+    // if (bots[i].moves >= 40 && bots[i].explosion_status == 0) {
+    //   bots[i].explosion_status = 1;
+    // }
   }
 
   player1.move(&maze);
@@ -248,19 +270,40 @@ void Game::update() {
 
   for (auto bullet_it = bullets.begin(); bullet_it != bullets.end();
        bullet_it++) {
-    bullet_it->move(&maze);
-    if (!bullet_it->isMoving()) {
-      bullet_it = bullets.erase(bullet_it);
-      bullet_it--;
+    bool hit = false;
+    for (int i = 0; i < bots.size() + 2; i++) {
+      if (i < bots.size())
+        hit = bullet_it->hitTarget(bots[i]);
+      else if (i == bots.size())
+        hit = bullet_it->hitTarget(player1);
+      else
+        hit = bullet_it->hitTarget(player2);
+      if (hit) break;
+    }
+    if (!hit) {
+      bullet_it->move(&maze);
+      if (!bullet_it->isMoving()) {
+        bullet_it = bullets.erase(bullet_it);
+        bullet_it--;
+      }
     }
   }
 
   for (auto bullet_it = other_bullets.begin(); bullet_it != other_bullets.end();
        bullet_it++) {
-    bullet_it->move(&maze);
-    if (!bullet_it->isMoving()) {
-      bullet_it = other_bullets.erase(bullet_it);
-      bullet_it--;
+    bool hit = false;
+    for (int i = 0; i < bots.size(); i++) {
+      if (bullet_it->hitTarget(bots[i])) {
+        hit = true;
+        break;
+      }
+    }
+    if (!hit) {
+      bullet_it->move(&maze);
+      if (!bullet_it->isMoving()) {
+        bullet_it = other_bullets.erase(bullet_it);
+        bullet_it--;
+      }
     }
   }
 }
@@ -275,9 +318,11 @@ void Game::sync() {
   std::stringstream ss_recv(c_sock->recv());
   char delim = '\n';
   std::string word;
+  Bot dummy;
+  dummy.init({0, 0, 0, 0});
   while (std::getline(ss_recv, word, delim)) {
     Bullet b;
-    b.init({0, 0, 0, 0});
+    b.init({0, 0, 0, 0}, false, &dummy, 1);
     b.from_string(word);
     other_bullets.push_back(b);
   }

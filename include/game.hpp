@@ -22,6 +22,7 @@ class Game {
   int num_other_bullets;
 
   std::vector<Direction> dkey_stack;
+  bool space_down;
 
  public:
   Game(WindowManager win, bool isServer, char* ip);

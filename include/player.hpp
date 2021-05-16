@@ -8,12 +8,23 @@ class Player : public Entity {
   SDL_Texture *F2_tex;
   SDL_Texture *gun;
   SDL_Texture *explosion;
+  bool is_bot = false;
   int firing = 0;
+  int score = 0;
+  double bullet_power = 1;
+  double hp = 1000;
 
  public:
   int explosion_status = 0;
   void init(SDL_Rect loc);
   Bullet fireBullet();
+  void setHP(double h);
+  void setBulletPower(double x);
+  void raiseScore(int s);
+  double getHP();
+  double getBulletPower();
+  int getScore();
+  bool isBot();
   void move(Maze *maze);
-  // SDL_Rect getCropArea();
+  SDL_Rect getCropArea();
 };
