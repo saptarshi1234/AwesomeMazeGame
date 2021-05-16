@@ -18,6 +18,7 @@ class Player : public Entity {
   int explosion_status = 0;
   void init(SDL_Rect loc);
   Bullet fireBullet();
+  SDL_Rect getPhysicalLocation();
   void setHP(double h);
   void setBulletPower(double x);
   void raiseScore(int s);

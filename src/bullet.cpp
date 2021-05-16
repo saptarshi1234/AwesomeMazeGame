@@ -4,7 +4,31 @@
 #include "textures.hpp"
 
 void Bullet::init(SDL_Rect loc, bool fired_by, Player *player, double p) {
-  Entity::init(loc);
+  physicalLocation = loc;
+
+  // switch (player->getDirection()) {
+  //   case TOP:
+  //     location.y -= shift;
+  //     break;
+  //   case RIGHT:
+  //     location.x += shift;
+  //     break;
+  //   case BOTTOM:
+  //     location.y += shift;
+  //     break;
+  //   case LEFT:
+  //     location.x -= shift;
+  //     break;
+  //   default:
+  //     break;
+  // }
+
+  int xx = loc.x + loc.w / 2 - loc.w / 10;
+  int yy = loc.y + loc.h / 2 - loc.h / 10;
+  SDL_Rect loc2 = {xx, yy, loc.w / 5, loc.h / 5};
+
+  Entity::init(loc2);
+
   firedByPlayer = fired_by;
   shooter = player;
   power = p * Params::BULLET_POWER_UNIT;
@@ -32,6 +56,12 @@ void Bullet::setDirection(Direction dir) {
     default:
       break;
   }
+}
+
+SDL_Rect Bullet::getPhysicalLocation() {
+  return {location.x - physicalLocation.w / 2 + physicalLocation.w / 10,
+          location.y - physicalLocation.h / 2 + physicalLocation.h / 10,
+          physicalLocation.w, physicalLocation.h};
 }
 
 bool Bullet::destroyBullet() { return destroy; }

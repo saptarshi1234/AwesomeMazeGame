@@ -13,7 +13,7 @@ Entity::~Entity() {
 
 void Entity::init(SDL_Rect loc) {
   location = loc;
-  velocity = 4;
+  velocity = 8;
   dir = RIGHT;
   is_moving = false;
 }
@@ -28,6 +28,9 @@ void Entity::setLayers(std::vector<LayerDetails> layers) {
 }
 
 SDL_Rect Entity::getLocation() { return location; }
+
+SDL_Rect Entity::getPhysicalLocation() { return {}; }
+
 std::vector<LayerDetails> Entity::getLayers() { return layers; }
 
 void Entity::setLocation(SDL_Rect rect) { location = rect; }

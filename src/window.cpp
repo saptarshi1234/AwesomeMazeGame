@@ -63,7 +63,7 @@ void WindowManager::render(Entity& entity) {
     if (!layer.toShow) continue;
 
     SDL_Rect src = getSrc(layer, entity.getDirection());
-    SDL_Rect dst = entity.getLocation();
+    SDL_Rect dst = entity.getPhysicalLocation();
     dst.x += layer.offset.first;
     dst.y += layer.offset.second;
 

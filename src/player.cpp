@@ -15,6 +15,8 @@ void Player::init(SDL_Rect loc) {
       {TextureManager::getTex(TextureID::EXPLOSION), {0, 0}, {0, 8}, false}};
 }
 
+SDL_Rect Player::getPhysicalLocation() { return location; }
+
 Bullet Player::fireBullet() {
   Bullet b;
   b.init(location, !is_bot, this, bullet_power);

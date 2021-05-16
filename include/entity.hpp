@@ -41,6 +41,8 @@ class Entity {
   void init(SDL_Rect loc);
   void setSize(int, int);
   SDL_Rect getLocation();
+  virtual SDL_Rect getPhysicalLocation();
+
   std::vector<LayerDetails> getLayers();
   void setLayers(std::vector<LayerDetails> layers);
   Direction getDirection();
