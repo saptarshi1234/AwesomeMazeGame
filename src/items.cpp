@@ -1,5 +1,7 @@
 #include "items.hpp"
 
+#include "params.hpp"
+#include "player.hpp"
 #include "textures.hpp"
 
 Item::Item() {}
@@ -21,12 +23,15 @@ void Item::init(SDL_Rect loc, ItemType type) {
                             {0, 8},
                             true,
                             {rect.w, rect.h * 2}};
+  layer_choices[SHIELD] = {
+      TextureManager::getTex(TextureID::SHIELD), {0, 0}, {0, 1}};
 
   layer_choices[POWERUP].vertical_crop = false;
 
   layers = {layer_choices[type]};
 }
 
+Item::ItemType Item::getType() { return type; }
 SDL_Rect Item::getPhysicalLocation() { return location; }
 
 bool Item::checkCollected(Player &p) {

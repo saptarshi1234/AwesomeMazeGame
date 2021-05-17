@@ -7,7 +7,9 @@
 enum TextureID {
   TANK_F1,
   TANK_F2,
+  TANK_INV,
   GUN,
+  GUN_INV,
   BULLET,
 
   GROUND,
@@ -22,7 +24,8 @@ enum TextureID {
 
   MULTIPLIER_2X,
   INVISIBLE,
-  POWERUP
+  POWERUP,
+  SHIELD
 };
 
 class TextureManager {

@@ -128,15 +128,19 @@ void Game::handleEvents() {
       std::vector<Direction>::iterator it;
       switch (event.key.keysym.sym) {
         case SDLK_UP:
+        case SDLK_w:
           it = std::find(dkey_stack.begin(), dkey_stack.end(), TOP);
           break;
         case SDLK_DOWN:
+        case SDLK_s:
           it = std::find(dkey_stack.begin(), dkey_stack.end(), BOTTOM);
           break;
         case SDLK_LEFT:
+        case SDLK_a:
           it = std::find(dkey_stack.begin(), dkey_stack.end(), LEFT);
           break;
         case SDLK_RIGHT:
+        case SDLK_d:
           it = std::find(dkey_stack.begin(), dkey_stack.end(), RIGHT);
           break;
         case SDLK_SPACE:
@@ -162,6 +166,7 @@ void Game::handleEvents() {
 
     if (event.type == SDL_KEYDOWN) {
       switch (event.key.keysym.sym) {
+        case SDLK_w:
         case SDLK_UP:
           player1.setDirection(TOP);
           if (dkey_stack.size() != 0) {
@@ -170,6 +175,7 @@ void Game::handleEvents() {
           } else
             dkey_stack.push_back(TOP);
           break;
+        case SDLK_s:
         case SDLK_DOWN:
           player1.setDirection(BOTTOM);
           if (dkey_stack.size() != 0) {
@@ -178,6 +184,7 @@ void Game::handleEvents() {
           } else
             dkey_stack.push_back(BOTTOM);
           break;
+        case SDLK_a:
         case SDLK_LEFT:
           player1.setDirection(LEFT);
           if (dkey_stack.size() != 0) {
@@ -186,6 +193,7 @@ void Game::handleEvents() {
           } else
             dkey_stack.push_back(LEFT);
           break;
+        case SDLK_d:
         case SDLK_RIGHT:
           player1.setDirection(RIGHT);
           if (dkey_stack.size() != 0) {
@@ -252,8 +260,8 @@ void Game::update() {
     }
 
     // spawn collectibles
-    auto type = static_cast<Item::ItemType>(rand() % 3);
-    bool generate = rand() % 500 == 0;
+    auto type = static_cast<Item::ItemType>(rand() % Item::numTypes);
+    bool generate = rand() % 20 == 0;
     int width = Params::PATH_WIDTH * w;
     if (generate) {
       int row = rand() % Params::NUM_CELLS_X;
@@ -290,19 +298,22 @@ void Game::update() {
   }
 
   player1.move(&maze);
+  player1.updateItems();
+
   player2.move(&maze);
+  player2.updateItems();
 
   for (auto it = items.begin(); it != items.end(); it++) {
     bool b1 = it->checkCollected(player1);
     if (b1) {
-      player1.takeItem(*it);
+      player1.collectItem(*it);
       it = items.erase(it) - 1;
       continue;
     }
 
     bool b2 = it->checkCollected(player2);
     if (b2) {
-      player1.takeItem(*it);
+      player1.collectItem(*it);
       it = items.erase(it) - 1;
       continue;
     }

@@ -3,9 +3,12 @@
 #include <iostream>
 
 #include "bullet.hpp"
+#include "items.hpp"
 #include "textures.hpp"
 
 void Player::init(SDL_Rect loc) {
+  for (int i = 0; i < Item::numTypes; i++) collected.push_back(-1);
+
   int w = 2 * Params::ACTUAL_CELL_SIZE * 8 / 10;
   int h = 2 * Params::ACTUAL_CELL_SIZE / 10;
 
@@ -14,6 +17,7 @@ void Player::init(SDL_Rect loc) {
   Entity::init(loc);
   F1_tex = TextureManager::getTex(TextureID::TANK_F1);
   F2_tex = TextureManager::getTex(TextureID::TANK_F2);
+  gun = TextureManager::getTex(TextureID::GUN);
   layers = {
       {F1_tex, {0, 0}},
       {TextureManager::getTex(TextureID::GUN), {0, 0}},
@@ -64,7 +68,7 @@ void Player::setHP(double h) {
       (int)(Params::ACTUAL_CELL_SIZE * 16 / 10 * hp / Params::MAX_HP);
 }
 void Player::setBulletPower(double x) { bullet_power = x; }
-void Player::raiseScore(int s) { score += s; }
+void Player::raiseScore(int s) { score += s * score_multiplier; }
 double Player::getHP() { return hp; }
 double Player::getBulletPower() { return bullet_power; }
 int Player::getScore() { return score; }
@@ -77,11 +81,11 @@ void Player::move(Maze* maze) {
     layers[1].offset = {0, 0};
     firing = 0;
   }
-  if (moves % 2 == 0) {
-    layers[0].tex = F1_tex;
-  } else {
-    layers[0].tex = F2_tex;
-  }
+  // if (moves % 2 == 0) {
+  //   layers[0].tex = F1_tex;
+  // } else {
+  //   layers[0].tex = F2_tex;
+  // }
 
   if (explosion_status > 0) {
     layers[2].toShow = true;
@@ -102,7 +106,44 @@ void Player::move(Maze* maze) {
   }
 }
 
-void Player::takeItem(Item& item) {
-  ;
-  ;
+void Player::collectItem(Item& item) {
+  collected[item.getType()] = Params::POWERUP_TIME;
+  switch (item.getType()) {
+    case Item::ItemType::INVISIBLE:
+      layers[0].tex = TextureManager::getTex(TextureID::TANK_INV);
+      layers[1].tex = TextureManager::getTex(TextureID::GUN_INV);
+      break;
+    case Item::ItemType::MULTIPLIER:
+      score_multiplier = 2;
+      break;
+    case Item::ItemType::POWERUP:
+      this->bullet_power *= 2;
+      break;
+    case Item::ItemType::SHIELD:
+      break;
+  }
+}
+
+void Player::updateItems() {
+  for (int key = 0; key <= collected.size(); key++) {
+    if (collected[key] == -1) continue;
+    collected[key]--;
+    if (collected[key] == 0) {
+      switch (key) {
+        case Item::ItemType::INVISIBLE:
+          layers[0].tex = F1_tex;
+          layers[1].tex = gun;
+          break;
+        case Item::ItemType::MULTIPLIER:
+          score_multiplier = 1;
+          break;
+        case Item::ItemType::POWERUP:
+          this->bullet_power /= 2;
+          break;
+        case Item::ItemType::SHIELD:
+          break;
+      }
+      collected[key] = -1;
+    }
+  }
 }

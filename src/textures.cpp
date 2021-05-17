@@ -16,6 +16,10 @@ void TextureManager::initialize(WindowManager win) {
       win.loadTexture("res/textures/tanks/body/HULL_F1.png");
   tex_map[TextureID::TANK_F2] =
       win.loadTexture("res/textures/tanks/body/HULL_F2.png");
+  tex_map[TextureID::TANK_INV] =
+      win.loadTexture("res/textures/tanks/body/HULL_blurred.png");
+  tex_map[TextureID::GUN_INV] =
+      win.loadTexture("res/textures/tanks/others/guns_blurred.png");
 
   tex_map[TextureID::CLIENT] =
       win.loadTexture("res/textures/background/client.png");
@@ -34,6 +38,8 @@ void TextureManager::initialize(WindowManager win) {
       win.loadTexture("res/textures/tanks/others/inv.png");
   tex_map[TextureID::POWERUP] =
       win.loadTexture("res/textures/tanks/others/fire.png");
+  tex_map[TextureID::SHIELD] =
+      win.loadTexture("res/textures/tanks/others/shield.png");
 }
 
 SDL_Texture* TextureManager::getTex(TextureID tex) { return tex_map[tex]; }
