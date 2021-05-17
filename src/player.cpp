@@ -101,3 +101,8 @@ void Player::move(Maze* maze) {
     }
   }
 }
+
+void Player::takeItem(Item& item) {
+  ;
+  ;
+}

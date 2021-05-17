@@ -2,6 +2,8 @@
 
 #include "bullet.hpp"
 #include "entity.hpp"
+
+class Item;
 class Player : public Entity {
  protected:
   SDL_Texture *F1_tex;
@@ -26,6 +28,7 @@ class Player : public Entity {
   double getBulletPower();
   int getScore();
   bool isBot();
+  void takeItem(Item &item);
   void move(Maze *maze);
   SDL_Rect getCropArea();
 };

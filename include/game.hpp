@@ -4,6 +4,7 @@
 
 #include "bot.hpp"
 #include "entity.hpp"
+#include "items.hpp"
 #include "maze.hpp"
 #include "networking.hpp"
 #include "player.hpp"
@@ -41,5 +42,6 @@ class Game {
   std::vector<Bullet> bullets;
   std::vector<Bullet> unsynced_bullets;
   std::vector<Bullet> other_bullets;
+  std::vector<Item> items;
   std::vector<Bot> bots;
 };

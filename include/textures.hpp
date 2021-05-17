@@ -7,15 +7,22 @@
 enum TextureID {
   TANK_F1,
   TANK_F2,
-  BULLET,
-  GROUND,
   GUN,
+  BULLET,
+
+  GROUND,
   EXPLOSION,
+
   CLIENT,
   SERVER,
   LOGO,
+
   HEALTH_BAR,
-  HEALTH_BODY
+  HEALTH_BODY,
+
+  MULTIPLIER_2X,
+  INVISIBLE,
+  POWERUP
 };
 
 class TextureManager {

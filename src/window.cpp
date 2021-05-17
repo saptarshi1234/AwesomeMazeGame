@@ -55,7 +55,11 @@ SDL_Rect getSrc(LayerDetails layer, Direction dir) {
     return {0, index * rect.h / 4, rect.w, rect.h / 4};
   }
   auto [index, total] = layer.crop_details;
-  return {0, index * rect.h / total, rect.w, rect.h / total};
+
+  if (layer.vertical_crop) {
+    return {0, index * rect.h / total, rect.w, rect.h / total};
+  }
+  return {index * rect.w / total, 0, rect.w / total, rect.h};
 }
 
 SDL_Rect getDst(LayerDetails layer, SDL_Rect dst) {

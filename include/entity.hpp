@@ -15,6 +15,7 @@ struct LayerDetails {
   std::pair<int, int> crop_details = {-1, -1};
   bool toShow = true;
   std::pair<int, int> dstSize = {-1, -1};
+  bool vertical_crop = true;
 
   SDL_Rect getSize() {
     SDL_Rect src;

@@ -238,6 +238,7 @@ void Game::update() {
       }
     }
 
+    // spawn bots at random
     int w = Params::ACTUAL_CELL_SIZE;
     int k = rand() % Params::MAX_BOTS;
     if (k >= bots.size()) {
@@ -248,6 +249,22 @@ void Game::update() {
       int y = w * (col * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
       b.init({x, y, Params::PATH_WIDTH * w - 1, Params::PATH_WIDTH * w - 1});
       bots.push_back(b);
+    }
+
+    // spawn collectibles
+    auto type = static_cast<Item::ItemType>(rand() % 3);
+    bool generate = rand() % 500 == 0;
+    int width = Params::PATH_WIDTH * w;
+    if (generate) {
+      int row = rand() % Params::NUM_CELLS_X;
+      int col = rand() % Params::NUM_CELLS_Y;
+      int x = w * (row * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
+      int y = w * (col * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
+
+      Item item;
+      item.init({x + width / 4, y + width / 4, width / 2, width / 2}, type);
+
+      items.push_back(item);
     }
   }
 
@@ -270,13 +287,26 @@ void Game::update() {
       unsynced_bullets.push_back(b);
     }
     bots[i].move(&maze);
-    // if (bots[i].moves >= 40 && bots[i].explosion_status == 0) {
-    //   bots[i].explosion_status = 1;
-    // }
   }
 
   player1.move(&maze);
   player2.move(&maze);
+
+  for (auto it = items.begin(); it != items.end(); it++) {
+    bool b1 = it->checkCollected(player1);
+    if (b1) {
+      player1.takeItem(*it);
+      it = items.erase(it) - 1;
+      continue;
+    }
+
+    bool b2 = it->checkCollected(player2);
+    if (b2) {
+      player1.takeItem(*it);
+      it = items.erase(it) - 1;
+      continue;
+    }
+  }
 
   for (auto bullet_it = bullets.begin(); bullet_it != bullets.end();
        bullet_it++) {
@@ -376,6 +406,9 @@ void Game::render() {
   }
   for (auto &b : other_bullets) {
     win.render(b);
+  }
+  for (auto &item : items) {
+    win.render(item);
   }
 }
 void Game::wait(int delay) { SDL_Delay(delay); }
