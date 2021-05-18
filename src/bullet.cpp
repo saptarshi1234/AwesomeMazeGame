@@ -114,14 +114,24 @@ bool Bullet::hitTarget(Player &p) {
     return false;
   }
   destroy = true;
+  if (p.explosion_status != 0) {
+    return true;
+  }
   if (p.getHP() <= power) {
+    if (!p.isBot()) {
+      p.raiseScore(-1000);
+      if (firedByPlayer) shooter->raiseScore(2 * (p.getHP() + 50));
+    } else if (firedByPlayer)
+      shooter->raiseScore(p.getHP() + 50);
     p.explosion_status = 1;
     p.setHP(0);
-    if (firedByPlayer) shooter->raiseScore(100);
 
   } else {
     p.setHP(p.getHP() - power);
-    if (firedByPlayer) shooter->raiseScore(50);
+    if (!p.isBot()) {
+      if (firedByPlayer) shooter->raiseScore(2 * power);
+    } else if (firedByPlayer)
+      shooter->raiseScore(power);
   }
   if (!(x >= p_loc.x && x < p_loc.x + p_loc.w && y >= p_loc.y &&
         y < p_loc.y + p_loc.h)) {

@@ -291,10 +291,10 @@ void Game::update() {
   }
 
   for (int i = 0; i < bots.size(); i++) {
-    if (isServer) {
+    if (isServer && bots[i].explosion_status == 0) {
       bots[i].update(player1.getLocation(), player2.getLocation(), &maze);
     }
-    if (i < 10 && bots[i].shouldFire()) {
+    if (bots[i].shouldFire() && bots[i].explosion_status == 0) {
       Bullet b = bots[i].fireBullet();
       bullets.push_back(b);
       unsynced_bullets.push_back(b);
