@@ -1,11 +1,13 @@
 #include "player.hpp"
 
+#include <cfloat>
 #include <iostream>
+#include <vector>
 
 #include "bullet.hpp"
 #include "items.hpp"
 #include "textures.hpp"
-
+using namespace std;
 void Player::init(SDL_Rect loc) {
   for (int i = 0; i < Item::numTypes; i++) collected.push_back(-1);
 
@@ -75,6 +77,7 @@ int Player::getScore() { return score; }
 bool Player::isBot() { return is_bot; }
 
 void Player::move(Maze* maze) {
+  collided = false;
   Entity::move(maze);
   if (firing > 0) firing++;
   if (firing == 4) {
@@ -188,4 +191,140 @@ std::string Player::to_update() {
   std::stringstream ss;
   ss << dir;
   return ss.str();
+}
+
+bool rayRectCollision(vector<double> point, vector<double> dir, SDL_FRect obj,
+                      double& t, double& nx, double& ny) {
+  double nearX, nearY, farX, farY;
+  if (dir[1] != 0) {
+    nearY = (obj.y - point[1]) / dir[1];
+    farY = (obj.y + obj.h - point[1]) / dir[1];
+  } else {
+    if (obj.y - point[1] > 0)
+      nearY = DBL_MAX;
+    else if (obj.y - point[1] < 0)
+      nearY = -DBL_MAX;
+    else
+      nearY = 0;
+    if (obj.y + obj.h - point[1] > 0)
+      farY = DBL_MAX;
+    else if (obj.y + obj.h - point[1] < 0)
+      farY = -DBL_MAX;
+    else
+      farY = 0;
+  }
+  if (dir[0] != 0) {
+    nearX = (obj.x - point[0]) / dir[0];
+    farX = (obj.x + obj.w - point[0]) / dir[0];
+  } else {
+    if (obj.x - point[0] > 0)
+      nearX = DBL_MAX;
+    else if (obj.x - point[0] < 0)
+      nearX = -DBL_MAX;
+    else
+      nearX = 0;
+    if (obj.x + obj.w - point[0] > 0)
+      farX = DBL_MAX;
+    else if (obj.x + obj.w - point[0] < 0)
+      farX = -DBL_MAX;
+    else
+      farX = 0;
+  }
+  if (nearX > farX) swap(nearX, farX);
+  if (nearY > farY) swap(nearY, farY);
+  if (nearX > farY || nearY > farX) {
+    return false;
+  }
+  nx = 0;
+  ny = 0;
+  if (nearX < nearY) {
+    t = nearY;
+    ny = -dir[1];
+  } else {
+    t = nearX;
+    nx = -dir[0];
+  }
+  if (t >= 0 && t <= 1) {
+    return true;
+  }
+  return false;
+}
+
+void Player::checkCollision(Player* p) {
+  SDL_Rect p_loc = p->getLocation();
+  SDL_Rect prev_loc = p->getPrevLocation();
+  if (SDL_RectEquals(&location, &prev_location) &&
+      SDL_RectEquals(&p_loc, &prev_loc)) {
+    return;
+  }
+  SDL_Rect loc;
+  if (collided)
+    loc = location;
+  else
+    loc = prev_location;
+  int x1 = loc.x, y1 = loc.y, x2 = prev_loc.x, y2 = prev_loc.y;
+  int v_x = 0, v_y = 0, v1_x = 0, v2_x = 0, v1_y = 0, v2_y = 0;
+  // if (x1 < x2 + p_loc.w && x1 + location.w > x2 && y1 < y2 + p_loc.h &&
+  //     y1 + location.h > y2) {
+  //   int t = 0;
+  // }
+  int v2 = p->getVelocity();
+  v_x = location.x - x1;
+  v_y = location.y - y1;
+  v1_x = v_x;
+  v1_y = v_y;
+  v_x += (x2 - p_loc.x);
+  v_y += (y2 - p_loc.y);
+  v2_x = p_loc.x - x2;
+  v2_y = p_loc.y - y2;
+
+  vector<double> c1 = {(double)(2 * x1 + location.w) / 2,
+                       (double)(2 * y1 + location.h) / 2};
+  vector<double> dir = {(double)v_x, (double)v_y};
+  SDL_FRect obj = {(double)(2 * x2 - location.w) / 2,
+                   (double)(2 * y2 - location.h) / 2,
+                   (double)location.w + p_loc.w, (double)location.h + p_loc.h};
+  double t, nx, ny;
+  vector<double> change1, change2;
+  bool b = rayRectCollision(c1, dir, obj, t, nx, ny);
+  if (!b) return;
+  bool stopP1 = false, stopP2 = false;
+  if (v1_x * v2_x > 0 || v1_y * v2_y > 0) {
+    change1 = {(double)v1_x * t + (double)(v1_x + v2_x) * (1 - t) / 2,
+               (double)v1_y * t + (double)(v1_y + v2_y) * (1 - t) / 2};
+    change2 = {(double)v2_x * t + (double)(v1_x + v2_x) * (1 - t) / 2,
+               (double)v2_y * t + (double)(v1_y + v2_y) * (1 - t) / 2};
+    x1 += (int)change1[0];
+    y1 += (int)change1[1];
+    x2 += (int)change2[0];
+    y2 += (int)change2[1];
+    location.x = x1;
+    location.y = y1;
+    p->setLocation({x2, y2, p_loc.w, p_loc.h});
+    stopP1 = true;
+    stopP2 = true;
+  } else {
+    change1 = {(double)v1_x * t, (double)v1_y * t};
+    change2 = {(double)v2_x * t, (double)v2_y * t};
+    if (v1_x * nx < 0) {
+      location.x = x1 + ((int)change1[0]);
+      stopP1 = true;
+    }
+    if (v1_y * ny < 0) {
+      location.y = y1 + ((int)change1[1]);
+      stopP1 = true;
+    }
+    if (v2_x * nx > 0) {
+      p_loc.x = x2 + ((int)change2[0]);
+      stopP2 = true;
+    }
+    if (v2_y * ny > 0) {
+      p_loc.y = y2 + ((int)change2[1]);
+      stopP2 = true;
+    }
+
+    p->setLocation(p_loc);
+  }
+  if (stopP2) p->setPrevLocation(p->getLocation());
+  if (stopP1) collided = true;
 }

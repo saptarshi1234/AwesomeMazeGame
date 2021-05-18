@@ -114,7 +114,7 @@ void Bot::setUpdateFreq(int f) { updateFreq = f; }
 
 bool Bot::shouldUpdate() {
   waitUpdate = (waitUpdate + 1) % updateFreq;
-  // return (waitUpdate == 0);
+  return (waitUpdate == 0);
 }
 
 std::string Bot::to_update(int index) {
