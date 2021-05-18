@@ -16,4 +16,7 @@ const int SCREEN_HEIGHT =
     (2 + NUM_CELLS_Y * PATH_WIDTH + (NUM_CELLS_Y - 1) * WALL_WIDTH) *
     ACTUAL_CELL_SIZE;
 const int MAX_BOTS = 10;
+const int WIDTH_OFFSET = ACTUAL_CELL_SIZE * 10;
+const int TOTAL_SCREEN_WIDTH = WIDTH_OFFSET + SCREEN_WIDTH;
+
 };  // namespace Params

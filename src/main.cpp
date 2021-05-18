@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 #include <iostream>
 
@@ -39,14 +40,15 @@ int main(int argc, char* argv[]) {
 
   if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0)
     std::cout << "could not iniitialize SDL";
+  TTF_Init();
   std::cout << "SDL loaded" << std::endl;
 
   WindowManager window(window_name, Params::SCREEN_HEIGHT,
-                       Params::SCREEN_WIDTH);
+                       Params::TOTAL_SCREEN_WIDTH);
   TextureManager::initialize(window);
 
   Entity splash_screen;
-  splash_screen.init({0, 0, Params::SCREEN_WIDTH, Params::SCREEN_HEIGHT});
+  splash_screen.init({0, 0, Params::TOTAL_SCREEN_WIDTH, Params::SCREEN_HEIGHT});
   // LayerDetails server =
   // splash_screen.setLayers(
   //     {{},
@@ -56,7 +58,7 @@ int main(int argc, char* argv[]) {
   LayerDetails server = {TextureManager::getTex(TextureID::SERVER)};
   LayerDetails client = {TextureManager::getTex(TextureID::CLIENT)};
 
-  SDL_Rect logo_loc = {0, 0, Params::SCREEN_WIDTH, Params::SCREEN_HEIGHT};
+  SDL_Rect logo_loc = {0, 0, Params::TOTAL_SCREEN_WIDTH, Params::SCREEN_HEIGHT};
   SDL_Rect server_loc = server.getSize();
   SDL_Rect client_loc = client.getSize();
 

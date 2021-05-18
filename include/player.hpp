@@ -17,7 +17,7 @@ class Player : public Entity {
   bool is_bot = false;
   int firing = 0;
   int score = 0;
-  int score_multiplier;
+  int score_multiplier = 1;
   double bullet_power = 1;
   double hp = Params::MAX_HP;
   std::vector<int> collected;
@@ -38,6 +38,7 @@ class Player : public Entity {
   bool isBot();
   void updateItems();
   void collectItem(Item &item);
+  std::vector<int> getCollectedItems();
   void move(Maze *maze);
   SDL_Rect getCropArea();
 };

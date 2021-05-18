@@ -153,7 +153,11 @@ void Game::handleEvents() {
         case SDLK_UP:
         case SDLK_DOWN:
         case SDLK_LEFT:
-        case SDLK_RIGHT: {
+        case SDLK_RIGHT:
+        case SDLK_w:
+        case SDLK_s:
+        case SDLK_a:
+        case SDLK_d: {
           if (it != dkey_stack.end()) dkey_stack.erase(it);
           if (dkey_stack.size() == 0)
             player1.stopMoving();
@@ -407,6 +411,8 @@ void Game::render() {
   }
   win.render(player1);
   win.render(player2);
+
+  win.renderPlayerDetails(player1);
 
   for (auto &bot : bots) {
     win.render(bot);
