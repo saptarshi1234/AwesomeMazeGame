@@ -16,7 +16,7 @@ void Entity::init(SDL_Rect loc) {
   velocity = 8;
   dir = RIGHT;
   is_moving = false;
-  revert_dir = STOP;
+  prev_location = loc;
 }
 
 void Entity::setSize(int w, int h) {
@@ -51,6 +51,7 @@ bool notWall(Maze* maze, int x, int y) {
 // }
 
 void Entity::move(Maze* maze) {
+  prev_location = location;
   if (is_moving) {
     int tempX = location.x, tempY = location.y, x = location.x,
         fx = x + location.w, y = location.y, fy = y + location.h;
@@ -60,28 +61,24 @@ void Entity::move(Maze* maze) {
         tempY -= velocity;
         fy = y;
         y = tempY;
-        revert_dir = BOTTOM;
         x_free = true;
         break;
       case RIGHT:
         tempX += velocity;
         x = fx;
         fx = x + velocity;
-        revert_dir = LEFT;
         y_free = true;
         break;
       case BOTTOM:
         tempY += velocity;
         y = fy;
         fy = y + velocity;
-        revert_dir = TOP;
         x_free = true;
         break;
       case LEFT:
         tempX -= velocity;
         fx = x;
         x = tempX;
-        revert_dir = RIGHT;
         y_free = true;
         break;
 
@@ -99,7 +96,6 @@ void Entity::move(Maze* maze) {
                 (y_free && j >= y + location.h / 5 &&
                  j < fy - location.h / 5)) {
               is_moving = false;
-              revert_dir = STOP;
               break;
             }
           } else {
@@ -133,8 +129,6 @@ void Entity::move(Maze* maze) {
         moves++;
       }
     }
-  } else {
-    revert_dir = STOP;
   }
 }
 
@@ -206,8 +200,8 @@ std::string Entity::to_string() {
   return ss.str();
 }
 
-Direction Entity::getRevertDir() { return revert_dir; }
-void Entity::setRevertDir(Direction d) { revert_dir = d; }
+SDL_Rect Entity::getPrevLocation() { return prev_location; }
+void Entity::setPrevLocation(SDL_Rect loc) { prev_location = loc; }
 
 int Entity::getVelocity() { return velocity; }
 void Entity::setVelocity(int v) { velocity = v; }

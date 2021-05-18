@@ -21,6 +21,7 @@ class Player : public Entity {
   double bullet_power = 1;
   double hp = Params::MAX_HP;
   std::vector<int> collected;
+  bool collided;
 
  public:
   // Player();

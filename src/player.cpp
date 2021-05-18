@@ -79,6 +79,7 @@ int Player::getScore() { return score; }
 bool Player::isBot() { return is_bot; }
 
 void Player::move(Maze* maze) {
+  collided = false;
   Entity::move(maze);
   if (firing > 0) firing++;
   if (firing == 4) {
@@ -212,64 +213,32 @@ bool rayRectCollision(vector<double> point, vector<double> dir, SDL_FRect obj,
 }
 
 void Player::checkCollision(Player* p) {
-  if (revert_dir == STOP && p->getRevertDir() == STOP) {
+  SDL_Rect p_loc = p->getLocation();
+  SDL_Rect prev_loc = p->getPrevLocation();
+  if (SDL_RectEquals(&location, &prev_location) &&
+      SDL_RectEquals(&p_loc, &prev_loc)) {
     return;
   }
-  SDL_Rect p_loc = p->getLocation();
-  int x1 = location.x, y1 = location.y, x2 = p_loc.x, y2 = p_loc.y;
+  SDL_Rect loc;
+  if (collided)
+    loc = location;
+  else
+    loc = prev_location;
+  int x1 = loc.x, y1 = loc.y, x2 = prev_loc.x, y2 = prev_loc.y;
   int v_x = 0, v_y = 0, v1_x = 0, v2_x = 0, v1_y = 0, v2_y = 0;
-  Direction r_dir1 = revert_dir, r_dir2 = p->getRevertDir();
   // if (x1 < x2 + p_loc.w && x1 + location.w > x2 && y1 < y2 + p_loc.h &&
   //     y1 + location.h > y2) {
   //   int t = 0;
   // }
   int v2 = p->getVelocity();
-  switch (r_dir1) {
-    case TOP:
-      y1 -= velocity;
-      v_y += velocity;
-      break;
-    case RIGHT:
-      x1 += velocity;
-      v_x -= velocity;
-      break;
-    case BOTTOM:
-      y1 += velocity;
-      v_y -= velocity;
-      break;
-    case LEFT:
-      x1 -= velocity;
-      v_x += velocity;
-      break;
-    default:
-      break;
-  }
+  v_x = location.x - x1;
+  v_y = location.y - y1;
   v1_x = v_x;
   v1_y = v_y;
-  switch (r_dir2) {
-    case TOP:
-      y2 -= v2;
-      v_y -= v2;
-      v2_y += v2;
-      break;
-    case RIGHT:
-      x2 += v2;
-      v_x += v2;
-      v2_x -= v2;
-      break;
-    case BOTTOM:
-      y2 += v2;
-      v_y += v2;
-      v2_y -= v2;
-      break;
-    case LEFT:
-      x2 -= v2;
-      v_x -= v2;
-      v2_x += v2;
-      break;
-    default:
-      break;
-  }
+  v_x += (x2 - p_loc.x);
+  v_y += (y2 - p_loc.y);
+  v2_x = p_loc.x - x2;
+  v2_y = p_loc.y - y2;
 
   vector<double> c1 = {(double)(2 * x1 + location.w) / 2,
                        (double)(2 * y1 + location.h) / 2};
@@ -318,6 +287,6 @@ void Player::checkCollision(Player* p) {
 
     p->setLocation(p_loc);
   }
-  if (stopP2) p->setRevertDir(STOP);
-  if (stopP1) revert_dir = STOP;
+  if (stopP2) p->setPrevLocation(p->getLocation());
+  if (stopP1) collided = true;
 }
