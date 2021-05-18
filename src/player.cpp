@@ -149,3 +149,43 @@ void Player::updateItems() {
 }
 
 std::vector<int> Player::getCollectedItems() { return collected; }
+
+void Player::create_from_string(std::string s) {
+  int int_dir;
+  std::stringstream ss(s);
+  ss >> location.x;
+  ss >> location.y;
+  ss >> location.h;
+  ss >> location.w;
+  ss >> is_moving;
+  ss >> bullet_fired;
+  ss >> int_dir;
+
+  setDirection(Direction(int_dir));
+}
+
+void Player::update_from_string(std::string s) {
+  std::stringstream ss(s);
+  int int_dir;
+  ss >> int_dir;
+  // ss >> is_moving;
+  ss >> int_dir;
+
+  // dir = Direction(int_dir);
+  setDirection(Direction(int_dir));
+}
+
+std::string Player::to_string() {
+  std::stringstream ss;
+  char space = ' ';
+  ss << location.x << space << location.y << space << location.h << space
+     << location.w << space << is_moving << space << bullet_fired << space
+     << dir;
+  return ss.str();
+}
+
+std::string Player::to_update() {
+  std::stringstream ss;
+  ss << dir;
+  return ss.str();
+}

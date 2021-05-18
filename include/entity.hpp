@@ -39,6 +39,7 @@ class Entity {
   Entity();
   ~Entity();
   int moves = 0;
+  bool bullet_fired = false;
 
   void init(SDL_Rect loc);
   void setSize(int, int);
@@ -58,9 +59,9 @@ class Entity {
   void setRevertDir(Direction d);
   Direction getRevertDir();
 
-  std::string to_string();
-  std::string to_update();
+  // std::string to_string();
+  // std::string to_update();
 
-  void update_from_string(std::string s);
-  void create_from_string(std::string s);
+  // void update_from_string(std::string s);
+  // void create_from_string(std::string s);
 };

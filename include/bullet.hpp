@@ -20,7 +20,7 @@ class Bullet : public Entity {
   bool destroyBullet();
   bool hitTarget(Player &p);
 
-  std::string to_string(Player *p1, Player *p2);
-  void create_from_string(std::string s, Player *p1, Player *p2);
+  // std::string to_string(Player *p1, Player *p2);
+  // void create_from_string(std::string s, Player *p1, Player *p2);
   // void move(Maze *m);
 };

@@ -60,6 +60,8 @@ void Bot::init(SDL_Rect loc) {
 void Bot::update(SDL_Rect loc, Maze* maze) {
   int probs[] = {2, 2, 2, 2};
   Direction dir = Entity::getDirection();
+  last_direction = dir;
+
   probs[convDir(dir)] += 8;
   int curD = abs(location.x - loc.x) + abs(location.y - loc.y);
   int tot = 0;
@@ -112,12 +114,16 @@ void Bot::setUpdateFreq(int f) { updateFreq = f; }
 
 bool Bot::shouldUpdate() {
   waitUpdate = (waitUpdate + 1) % updateFreq;
-  return (waitUpdate == 0);
+  // return (waitUpdate == 0);
 }
 
 std::string Bot::to_update(int index) {
   std::stringstream ss;
   char space = ' ';
-  ss << index << space << is_moving << space << dir;
+  // ss << index << space << is_moving << space << dir;
+  ss << index << space << dir;
+
   return ss.str();
 }
+
+bool Bot::directionChanged() { return last_direction != dir; }

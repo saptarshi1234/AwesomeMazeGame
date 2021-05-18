@@ -32,6 +32,7 @@ class Game {
   void loadGame();
   void sync();
   void update();
+  void updateBots();
   void handleEvents();
   void render();
   void wait(int);

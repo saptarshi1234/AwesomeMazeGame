@@ -42,7 +42,9 @@ class Player : public Entity {
   void move(Maze *maze);
   SDL_Rect getCropArea();
 
-  // std::string to_string();
-  // void update_from_string(std::string s);
-  // void create_from_string(std::string s);
+  std::string to_string();
+  std::string to_update();
+
+  void update_from_string(std::string s);
+  void create_from_string(std::string s);
 };

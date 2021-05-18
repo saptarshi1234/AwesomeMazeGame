@@ -118,8 +118,10 @@ int main(int argc, char* argv[]) {
     game.handleEvents();
     if (!game.isRunning()) break;
 
-    game.update();
+    game.updateBots();
     game.sync();
+    game.update();
+
     window.clearWindow();
 
     game.render();

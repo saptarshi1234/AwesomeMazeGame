@@ -113,32 +113,32 @@ bool Bullet::hitTarget(Player &p) {
   return true;
 }
 
-std::string Bullet::to_string(Player *p1, Player *p2) {
-  char space = ' ';
-  std::stringstream ss;
-  auto loc = physicalLocation;
+// std::string Bullet::to_string(Player *p1, Player *p2) {
+//   char space = ' ';
+//   std::stringstream ss;
+//   auto loc = physicalLocation;
 
-  ss << loc.x << space << loc.y << space << dir << space << firedByPlayer
-     << space << !(p1 == shooter) << space << power;
-  return ss.str();
-}
+//   ss << loc.x << space << loc.y << space << dir << space << firedByPlayer
+//      << space << !(p1 == shooter) << space << power;
+//   return ss.str();
+// }
 
-void Bullet::create_from_string(std::string s, Player *p1, Player *p2) {
-  int int_dir;
-  bool is_shooter;
+// void Bullet::create_from_string(std::string s, Player *p1, Player *p2) {
+//   int int_dir;
+//   bool is_shooter;
 
-  std::stringstream ss(s);
-  ss >> location.x;
-  ss >> location.y;
+//   std::stringstream ss(s);
+//   ss >> location.x;
+//   ss >> location.y;
 
-  init({location.x, location.y, p1->getLocation().w, p1->getLocation().h},
-       false, p1, 0);
+//   init({location.x, location.y, p1->getLocation().w, p1->getLocation().h},
+//        false, p1, 0);
 
-  ss >> int_dir;
-  ss >> firedByPlayer;
-  ss >> is_shooter;
-  ss >> power;
+//   ss >> int_dir;
+//   ss >> firedByPlayer;
+//   ss >> is_shooter;
+//   ss >> power;
 
-  shooter = is_shooter ? p1 : p2;
-  setDirection(Direction(int_dir));
-}
+//   shooter = is_shooter ? p1 : p2;
+//   setDirection(Direction(int_dir));
+// }

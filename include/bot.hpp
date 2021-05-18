@@ -7,6 +7,7 @@ class Bot : public Player {
   int waitUpdate;
   int fireFreq;
   int updateFreq;
+  Direction last_direction;
 
  public:
   Bot();
@@ -16,6 +17,7 @@ class Bot : public Player {
   void setUpdateFreq(int f);
   bool shouldFire();
   bool shouldUpdate();
+  bool directionChanged();
 
   // std::string to_string();
   std::string to_update(int index);

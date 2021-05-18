@@ -210,7 +210,15 @@ void Game::handleEvents() {
           if (!space_down) {
             Bullet b = player1.fireBullet();
             bullets.push_back(b);
-            unsynced_bullets.push_back(b);
+            for (int i = 0; i < bots.size(); i++) {
+              if (i < 10 && bots[i].shouldFire()) {
+                Bullet b = bots[i].fireBullet();
+                bullets.push_back(b);
+              }
+              bots[i].move(&maze);
+            }
+            player1.bullet_fired = true;
+            // unsynced_bullets.push_back(b);
             space_down = true;
           }
           break;
@@ -224,31 +232,14 @@ void Game::handleEvents() {
       if (event.button.button == SDL_BUTTON_LEFT) {
         Bullet b = player1.fireBullet();
         bullets.push_back(b);
-        unsynced_bullets.push_back(b);
+        player1.bullet_fired = true;
+        // unsynced_bullets.push_back(b);
       }
     }
   }
 }
 
-void Game::update() {
-  // unsynced_bullets.clear();
-
-  for (auto bullet_it = bullets.begin(); bullet_it != bullets.end();
-       bullet_it++) {
-    if (bullet_it->destroyBullet()) {
-      bullet_it = bullets.erase(bullet_it);
-      bullet_it--;
-    }
-  }
-
-  for (auto bullet_it = other_bullets.begin(); bullet_it != other_bullets.end();
-       bullet_it++) {
-    if (bullet_it->destroyBullet()) {
-      bullet_it = other_bullets.erase(bullet_it);
-      bullet_it--;
-    }
-  }
-
+void Game::updateBots() {
   if (isServer) {
     // spawn bots at random
     int w = Params::ACTUAL_CELL_SIZE;
@@ -279,6 +270,12 @@ void Game::update() {
 
       items.push_back(item);
     }
+
+    for (int i = 0; i < bots.size(); i++) {
+      if (bots[i].shouldUpdate()) {
+        bots[i].update(player1.getLocation(), &maze);
+      }
+    }
   }
 
   for (auto it = bots.begin(); it != bots.end(); it++) {
@@ -289,18 +286,104 @@ void Game::update() {
   if (player1.getHP() <= 0) {
     ;
   }
+}
 
-  for (int i = 0; i < bots.size(); i++) {
-    if (isServer && bots[i].shouldUpdate()) {
-      bots[i].update(player1.getLocation(), &maze);
+void Game::sync() {
+  // std::stringstream ss_send;
+  // for (Bullet &b : unsynced_bullets) {
+  //   ss_send << b.to_string(&player1, &player2) << '\n';
+  // }
+  // // cout << '\n' << ss_send.str() << endl;
+  // c_sock->send(ss_send.str());
+  // unsynced_bullets.clear();
+
+  // auto s = c_sock->recv();
+  // std::stringstream ss_recv(s);
+  // char delim = '\n';
+  // std::string word;
+  // while (std::getline(ss_recv, word, delim)) {
+  //   Bullet b;
+  //   b.create_from_string(word, &player1, &player2);
+  //   other_bullets.push_back(b);
+  // }
+
+  c_sock->send(player1.to_string());
+  player2.create_from_string(c_sock->recv());
+  if (player2.bullet_fired) {
+    Bullet b = player2.fireBullet();
+    bullets.push_back(b);
+  }
+  player1.bullet_fired = false;
+
+  if (isServer) {
+    std::stringstream ss_send;
+    for (Bot &b : unsynced_bots) {
+      ss_send << b.to_string() << '\n';
     }
+    unsynced_bots.clear();
+    c_sock->send(ss_send.str());
+
+    cout << "heere" << c_sock->recv() << endl;
+
+    std::stringstream ss_send2;
+    int index = 0;
+    for (Bot &b : bots) {
+      if (b.directionChanged() || true) {
+        ss_send2 << b.to_update(index) << '\n';
+      }
+      index++;
+    }
+    c_sock->send(ss_send2.str());
+  } else {
+    std::stringstream ss_recv(c_sock->recv());
+    char delim = '\n';
+    std::string word;
+
+    while (std::getline(ss_recv, word, delim)) {
+      Bot b;
+      b.init({0, 0, 0, 0});
+      b.create_from_string(word);
+      bots.push_back(b);
+    }
+
+    c_sock->send("recv");
+
+    std::stringstream ss_recv2(c_sock->recv());
+    int index = 0;
+    while (std::getline(ss_recv2, word, delim)) {
+      std::stringstream ss(word);
+      int index;
+      ss >> index;
+      bots[index].update_from_string(word);
+    }
+  }
+}
+
+void Game::update() {
+  for (int i = 0; i < bots.size(); i++) {
     if (i < 10 && bots[i].shouldFire()) {
       Bullet b = bots[i].fireBullet();
       bullets.push_back(b);
-      // unsynced_bullets.push_back(b);
     }
     bots[i].move(&maze);
   }
+
+  for (auto bullet_it = bullets.begin(); bullet_it != bullets.end();
+       bullet_it++) {
+    if (bullet_it->destroyBullet()) {
+      bullet_it = bullets.erase(bullet_it);
+      bullet_it--;
+    }
+  }
+
+  // for (auto bullet_it = other_bullets.begin(); bullet_it !=
+  // other_bullets.end();
+  //      bullet_it++) {
+  //   if (bullet_it->destroyBullet()) {
+  //     bullet_it = other_bullets.erase(bullet_it);
+  //     bullet_it--;
+  //   }
+  // }
 
   player1.move(&maze);
   player1.updateItems();
@@ -345,86 +428,27 @@ void Game::update() {
     }
   }
 
-  for (auto bullet_it = other_bullets.begin(); bullet_it != other_bullets.end();
-       bullet_it++) {
-    bool hit = false;
-    for (int i = 0; i < bots.size(); i++) {
-      if (bullet_it->hitTarget(bots[i])) {
-        hit = true;
-        break;
-      }
-    }
-    if (!hit) {
-      bullet_it->move(&maze);
-      if (!bullet_it->isMoving()) {
-        bullet_it = other_bullets.erase(bullet_it);
-        bullet_it--;
-      }
-    }
-  }
-}
-
-void Game::sync() {
-  std::stringstream ss_send;
-  for (Bullet &b : unsynced_bullets) {
-    ss_send << b.to_string(&player1, &player2) << '\n';
-  }
-  // cout << '\n' << ss_send.str() << endl;
-  c_sock->send(ss_send.str());
-  unsynced_bullets.clear();
-
-  auto s = c_sock->recv();
-  std::stringstream ss_recv(s);
-  char delim = '\n';
-  std::string word;
-  while (std::getline(ss_recv, word, delim)) {
-    Bullet b;
-    b.create_from_string(word, &player1, &player2);
-    other_bullets.push_back(b);
-  }
-
-  c_sock->send(player1.to_string());
-  player2.create_from_string(c_sock->recv());
-
-  if (isServer) {
-    std::stringstream ss_send;
-    for (Bot &b : unsynced_bots) {
-      ss_send << b.to_string() << '\n';
-    }
-    unsynced_bots.clear();
-    c_sock->send(ss_send.str());
-
-    cout << "heere" << c_sock->recv() << endl;
-
-    std::stringstream ss_send2;
-    int index = 0;
-    for (Bot &b : bots) {
-      ss_send2 << b.to_update(index++) << '\n';
-    }
-    c_sock->send(ss_send2.str());
-  } else {
-    std::stringstream ss_recv(c_sock->recv());
-    char delim = '\n';
-    std::string word;
-
-    while (std::getline(ss_recv, word, delim)) {
-      Bot b;
-      b.init({0, 0, 0, 0});
-      b.create_from_string(word);
-      bots.push_back(b);
-    }
-
-    c_sock->send("recv");
-
-    std::stringstream ss_recv2(c_sock->recv());
-    int index = 0;
-    while (std::getline(ss_recv2, word, delim)) {
-      std::stringstream ss(word);
-      int index;
-      ss >> index;
-      bots[index].update_from_string(word);
-    }
-  }
+  // for (auto bullet_it = other_bullets.begin(); bullet_it !=
+  // other_bullets.end();
+  //      bullet_it++) {
+  //   bool hit = false;
+  //   for (int i = 0; i < bots.size() + 2; i++) {
+  //     if (i < bots.size())
+  //       hit = bullet_it->hitTarget(bots[i]);
+  //     else if (i == bots.size())
+  //       hit = bullet_it->hitTarget(player1);
+  //     else
+  //       hit = bullet_it->hitTarget(player2);
+  //     if (hit) break;
+  //   }
+  //   if (!hit) {
+  //     bullet_it->move(&maze);
+  //     if (!bullet_it->isMoving()) {
+  //       bullet_it = other_bullets.erase(bullet_it);
+  //       bullet_it--;
+  //     }
+  //   }
+  // }
 }
 
 void Game::render() {
@@ -448,9 +472,9 @@ void Game::render() {
   for (auto &bullet : bullets) {
     win.render(bullet);
   }
-  for (auto &b : other_bullets) {
-    win.render(b);
-  }
+  // for (auto &b : other_bullets) {
+  //   win.render(b);
+  // }
   for (auto &item : items) {
     win.render(item);
   }
