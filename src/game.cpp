@@ -306,6 +306,20 @@ void Game::update() {
 
   player2.move(&maze);
   player2.updateItems();
+  if (isServer)
+    player1.checkCollision(&player2);
+  else
+    player2.checkCollision(&player1);
+
+  for (int i = 0; i < bots.size(); i++) {
+    if (isServer) {
+      player1.checkCollision(&bots[i]);
+      player2.checkCollision(&bots[i]);
+    } else {
+      player2.checkCollision(&bots[i]);
+      player1.checkCollision(&bots[i]);
+    }
+  }
 
   for (auto it = items.begin(); it != items.end(); it++) {
     bool b1 = it->checkCollected(player1);

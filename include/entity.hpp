@@ -59,4 +59,6 @@ class Entity {
   Direction getRevertDir();
   std::string to_string();
   void from_string(std::string s);
+  int getVelocity();
+  void setVelocity(int v);
 };

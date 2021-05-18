@@ -154,16 +154,22 @@ bool Entity::canMove(Maze* maze) {
         tempY += velocity;
         y = fy;
         fy = y + velocity;
+        fx -= location.w / 2;
+        x += location.w / 2;
         break;
       case LEFT:
         tempX -= velocity;
         fx = x;
         x = tempX;
+        fy -= location.h / 2;
+        y += location.h / 2;
         break;
       case RIGHT:
         tempX += velocity;
         x = fx;
         fx = x + velocity;
+        fy -= location.h / 2;
+        y += location.h / 2;
         break;
       default:
         break;
@@ -203,6 +209,8 @@ std::string Entity::to_string() {
 Direction Entity::getRevertDir() { return revert_dir; }
 void Entity::setRevertDir(Direction d) { revert_dir = d; }
 
+int Entity::getVelocity() { return velocity; }
+void Entity::setVelocity(int v) { velocity = v; }
 void Entity::from_string(std::string s) {
   int int_dir;
   std::stringstream ss(s);
