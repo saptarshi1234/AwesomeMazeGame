@@ -110,8 +110,8 @@ void Bot::update(SDL_Rect loc1, SDL_Rect loc2, Maze* maze) {
   int prob[] = {0, 0, 0, 0};
   int count = 0;
   Direction curr_dir = Entity::getDirection();
-  Direction p_dir =
-      convInt(maze->dirFromTo(location.x, location.y, loc.x, loc.y));
+  Direction p_dir = convInt(
+      maze->dirFromTo(location.x, location.y, loc.x, loc.y, convDir(curr_dir)));
   Direction p_dirF = p_dir;
   Entity::setDirection(p_dir);
   bool found = canMove(maze);
@@ -120,18 +120,19 @@ void Bot::update(SDL_Rect loc1, SDL_Rect loc2, Maze* maze) {
     movable[convDir(p_dir)] = 1;
     prob[convDir(p_dir)] = 90;
   }
-
-  Entity::setDirection(curr_dir);
-  if (canMove(maze)) {
-    count++;
-    movable[convDir(curr_dir)] = 1;
-    prob[convDir(curr_dir)] = 2;
-    if (!found &&
-        maze->dist(location.x + dX(curr_dir, velocity),
-                   location.y + dY(curr_dir, velocity), loc.x, loc.y) <= dist) {
-      found = true;
-      p_dirF = curr_dir;
-      prob[convDir(p_dirF)] = 90;
+  if (curr_dir != p_dir) {
+    Entity::setDirection(curr_dir);
+    if (canMove(maze)) {
+      count++;
+      movable[convDir(curr_dir)] = 1;
+      prob[convDir(curr_dir)] = 2;
+      if (!found && maze->dist(location.x + dX(curr_dir, velocity),
+                               location.y + dY(curr_dir, velocity), loc.x,
+                               loc.y) <= dist) {
+        found = true;
+        p_dirF = curr_dir;
+        prob[convDir(p_dirF)] = 90;
+      }
     }
   }
 
@@ -162,7 +163,7 @@ void Bot::update(SDL_Rect loc1, SDL_Rect loc2, Maze* maze) {
                    loc.x, loc.y) <= dist) {
       found = true;
       p_dirF = d;
-      if (count >= 3 || prob[convDir(curr_dir)] == 0) {
+      if (prob[convDir(curr_dir)] == 0) {
         if (dist < 20) prob[opp] = 90;
       }
     }
@@ -177,16 +178,19 @@ void Bot::update(SDL_Rect loc1, SDL_Rect loc2, Maze* maze) {
     return;
   }
 
-  if (dist > 20) {
-    if (prob[convDir(curr_dir)] > 0 && curr_dir != p_dirF) {
+  if (dist >= 20) {
+    if (prob[convDir(curr_dir)] > 0 && curr_dir != p_dirF &&
+        convDir(p_dirF) != opp) {
       prob[p_dirF] = 20;
     }
     for (int i = 0; i < 4; i++) {
       if (prob[i] > 0 && prob[i] < 90) {
         if (convDir(curr_dir) == i) {
           prob[convDir(curr_dir)] = 90;
-        } else if (i == opp && count >= 3 || prob[convDir(curr_dir)] == 0) {
-          prob[i] = 20;
+        } else if (i == opp) {
+          if (prob[convDir(curr_dir)] == 0) {
+            prob[i] = 20;
+          }
         } else
           prob[i] = 20;
       }

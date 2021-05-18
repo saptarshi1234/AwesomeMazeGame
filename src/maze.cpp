@@ -152,12 +152,14 @@ std::vector<std::vector<int>> Maze::render() {
       if (pixelV[wallX - 1][wallY] + pixelV[wallX][wallY - 1] +
               pixelV[wallX + wallLength][wallY] +
               pixelV[wallX][wallY + wallLength] ==
-          0)
+          0) {
+        nodes[wallX / pathLength][wallY / pathLength] = 0;
         for (int x = wallX; x < wallX + wallLength; x++) {
           for (int y = wallY; y < wallY + wallLength; y++) {
             pixelV[x][y] = 0;
           }
         }
+      }
     }
   }
   for (int i = 0; i < nodeW; i++) {
@@ -275,10 +277,10 @@ int Maze::dist(int x1, int y1, int x2, int y2) {
   int yV1 = x1 / Params::ACTUAL_CELL_SIZE - 1;
   int xV2 = y2 / Params::ACTUAL_CELL_SIZE - 1;
   int yV2 = x2 / Params::ACTUAL_CELL_SIZE - 1;
-  xV1 /= 2;
-  xV2 /= 2;
-  yV1 /= 2;
-  yV2 /= 2;
+  xV1 /= pathLength;
+  xV2 /= pathLength;
+  yV1 /= pathLength;
+  yV2 /= pathLength;
   if (xV1 < 0 || xV1 >= nodes.size() || xV2 < 0 || xV2 >= nodes.size() ||
       yV1 < 0 || yV1 >= nodes[0].size() || yV2 < 0 || yV2 >= nodes[0].size()) {
     return -1;
@@ -287,15 +289,15 @@ int Maze::dist(int x1, int y1, int x2, int y2) {
 }
 
 // assumes input to be valid
-int Maze::dirFromTo(int x1, int y1, int x2, int y2) {
+int Maze::dirFromTo(int x1, int y1, int x2, int y2, int preferableDir = -1) {
   int xV1 = y1 / Params::ACTUAL_CELL_SIZE - 1;
   int yV1 = x1 / Params::ACTUAL_CELL_SIZE - 1;
   int xV2 = y2 / Params::ACTUAL_CELL_SIZE - 1;
   int yV2 = x2 / Params::ACTUAL_CELL_SIZE - 1;
-  xV1 /= 2;
-  xV2 /= 2;
-  yV1 /= 2;
-  yV2 /= 2;
+  xV1 /= pathLength;
+  xV2 /= pathLength;
+  yV1 /= pathLength;
+  yV2 /= pathLength;
   if (xV1 < 0 || xV1 >= nodes.size() || xV2 < 0 || xV2 >= nodes.size() ||
       yV1 < 0 || yV1 >= nodes[0].size() || yV2 < 0 || yV2 >= nodes[0].size()) {
     return -1;
@@ -303,17 +305,25 @@ int Maze::dirFromTo(int x1, int y1, int x2, int y2) {
   int d = distances[xV1][yV1][xV2][yV2];
   vector<int> v;
   if (xV1 > 0 && distances[xV1 - 1][yV1][xV2][yV2] != -1 &&
-      distances[xV1 - 1][yV1][xV2][yV2] < d)
+      distances[xV1 - 1][yV1][xV2][yV2] < d) {
     v.push_back(0);
+    if (preferableDir == 0) return 0;
+  }
   if (xV1 < nodes.size() - 1 && distances[xV1 + 1][yV1][xV2][yV2] != -1 &&
-      distances[xV1 + 1][yV1][xV2][yV2] < d)
+      distances[xV1 + 1][yV1][xV2][yV2] < d) {
     v.push_back(2);
+    if (preferableDir == 2) return 2;
+  }
   if (yV1 > 0 && distances[xV1][yV1 - 1][xV2][yV2] != -1 &&
-      distances[xV1][yV1 - 1][xV2][yV2] < d)
+      distances[xV1][yV1 - 1][xV2][yV2] < d) {
     v.push_back(1);
+    if (preferableDir == 1) return 1;
+  }
   if (yV1 < nodes[0].size() - 1 && distances[xV1][yV1 + 1][xV2][yV2] != -1 &&
-      distances[xV1][yV1 + 1][xV2][yV2] < d)
+      distances[xV1][yV1 + 1][xV2][yV2] < d) {
     v.push_back(3);
+    if (preferableDir == 3) return 3;
+  }
 
   if (v.size() == 0) return -1;
   int in = rand() % v.size();
