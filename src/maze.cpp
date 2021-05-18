@@ -1,7 +1,10 @@
 #include "maze.hpp"
 
+#include <algorithm>
 #include <deque>
+#include <functional>
 #include <iostream>
+#include <queue>
 #include <random>
 #include <vector>
 
@@ -11,7 +14,14 @@
 #define LEFT 2
 #define DOWN 3
 #define RIGHT 4
+using namespace std;
 
+struct queueNode {
+  int dist = INT32_MAX;
+  int x, y;
+};
+
+bool compNode(queueNode n1, queueNode n2) { return n1.dist > n2.dist; }
 Maze::Maze() {}
 
 Maze::~Maze() {}
@@ -97,12 +107,16 @@ void Maze::generate() {
 std::vector<std::vector<int>> Maze::render() {
   int arrW = (mazeWidth) * (pathLength + wallLength) - wallLength;
   int arrH = (mazeHeight) * (pathLength + wallLength) - wallLength;
+  int nodeW = mazeWidth * 2 - 1;
+  int nodeH = mazeHeight * 2 - 1;
   pixelV.resize(arrW, std::vector<int>(arrH));
 
   for (int i = 0; i < arrW; i++) {
     for (int j = 0; j < arrH; j++) {
       pixelV[i][j] = 1;
     }
+    std::vector<int> temp(nodeH, 1);
+    if (i < nodeW) nodes.push_back(temp);
   }
 
   for (int i = 0; i < mazeWidth; i++) {
@@ -115,7 +129,6 @@ std::vector<std::vector<int>> Maze::render() {
       if (maze[i][j].right) w += wallLength;
       int temp = rand() % 100;
       int temp2 = rand() % 100;
-
       if (i != mazeWidth - 1 && temp < 15) w = pathLength + wallLength;
 
       if (j != mazeHeight - 1 && temp2 < 15) h = pathLength + wallLength;
@@ -126,6 +139,10 @@ std::vector<std::vector<int>> Maze::render() {
             pixelV[x][y] = 0;
         }
       }
+
+      nodes[2 * i][2 * j] = 0;
+      if (w > pathLength) nodes[2 * i + 1][2 * j] = 0;
+      if (h > pathLength) nodes[2 * i][2 * j + 1] = 0;
     }
   }
   for (int i = 0; i < mazeWidth - 1; i++) {
@@ -143,6 +160,15 @@ std::vector<std::vector<int>> Maze::render() {
         }
     }
   }
+  for (int i = 0; i < nodeW; i++) {
+    for (int j = 0; j < nodeH; j++) {
+      if (nodes[i][j] == 1)
+        cout << "* ";
+      else
+        cout << "  ";
+    }
+    cout << endl;
+  }
   return pixelV;
 }
 
@@ -159,48 +185,137 @@ std::vector<std::vector<int>> Maze::getPixelV() { return pixelV; }
 
 void Maze::setPixelV(std::vector<std::vector<int>> v) { pixelV = v; }
 
+void Maze::calcDistances() {
+  distances.resize(nodes.size());
+  int nodeW = nodes.size();
+  int nodeH = nodes[0].size();
+  for (int i = 0; i < nodeW; i++) {
+    for (int j = 0; j < nodeH; j++) {
+      vector<vector<int>> tempD(nodeW, vector<int>(nodeH, -1));
+      vector<vector<queueNode>> tempNodes(nodeW, vector<queueNode>(nodeH));
+      if (nodes[i][j] == 1) {
+        distances[i].push_back(tempD);
+        continue;
+      }
+      priority_queue<queueNode, vector<queueNode>,
+                     std::function<bool(queueNode, queueNode)>>
+          pq(compNode);
+      for (int k = 0; k < nodeW; k++) {
+        for (int p = 0; p < nodeH; p++) {
+          if (nodes[k][p] == 1) {
+            continue;
+          }
+          if (k == i && p == j) {
+            tempNodes[k][p] = {0, k, p};
+            continue;
+          }
+          tempNodes[k][p] = {INT32_MAX, k, p};
+        }
+      }
+      pq.push(tempNodes[i][j]);
+      int currX = i, currY = j;
+      while (!pq.empty()) {
+        queueNode n = pq.top();
+        pq.pop();
+        currX = n.x;
+        currY = n.y;
+        if (currX - 1 >= 0 && nodes[currX - 1][currY] == 0) {
+          if (tempNodes[currX][currY].dist + 1 <
+              tempNodes[currX - 1][currY].dist) {
+            tempNodes[currX - 1][currY].dist = tempNodes[currX][currY].dist + 1;
+            pq.push(tempNodes[currX - 1][currY]);
+          }
+        }
+
+        if (currY - 1 >= 0 && nodes[currX][currY - 1] == 0) {
+          if (tempNodes[currX][currY].dist + 1 <
+              tempNodes[currX][currY - 1].dist) {
+            tempNodes[currX][currY - 1].dist = tempNodes[currX][currY].dist + 1;
+            pq.push(tempNodes[currX][currY - 1]);
+          }
+        }
+
+        if (currX + 1 < nodeW && nodes[currX + 1][currY] == 0) {
+          if (tempNodes[currX][currY].dist + 1 <
+              tempNodes[currX + 1][currY].dist) {
+            tempNodes[currX + 1][currY].dist = tempNodes[currX][currY].dist + 1;
+            pq.push(tempNodes[currX + 1][currY]);
+          }
+        }
+
+        if (currY + 1 < nodeH && nodes[currX][currY + 1] == 0) {
+          if (tempNodes[currX][currY].dist + 1 <
+              tempNodes[currX][currY + 1].dist) {
+            tempNodes[currX][currY + 1].dist = tempNodes[currX][currY].dist + 1;
+            pq.push(tempNodes[currX][currY + 1]);
+          }
+        }
+      }
+      for (int k = 0; k < nodeW; k++) {
+        for (int p = 0; p < nodeH; p++) {
+          if (nodes[k][p] == 1) {
+            continue;
+          }
+          tempD[k][p] = tempNodes[k][p].dist;
+        }
+      }
+      distances[i].push_back(tempD);
+    }
+  }
+
+  for (int i = 0; i < nodeW; i++) {
+    for (int j = 0; j < nodeH; j++) {
+      cout << distances[2][0][i][j] << " ";
+    }
+    cout << endl;
+  }
+}
 int Maze::dist(int x1, int y1, int x2, int y2) {
-  std::vector<std::vector<int>> v;
-  int rows = pixelV.size(), cols = pixelV[0].size();
-  v.resize(rows, std::vector<int>(cols));
-  for (int i = 0; i < rows; i++) {
-    for (int j = 0; j < cols; j++) {
-      v[i][j] = -1;
-    }
+  int xV1 = y1 / Params::ACTUAL_CELL_SIZE - 1;
+  int yV1 = x1 / Params::ACTUAL_CELL_SIZE - 1;
+  int xV2 = y2 / Params::ACTUAL_CELL_SIZE - 1;
+  int yV2 = x2 / Params::ACTUAL_CELL_SIZE - 1;
+  xV1 /= 2;
+  xV2 /= 2;
+  yV1 /= 2;
+  yV2 /= 2;
+  if (xV1 < 0 || xV1 >= nodes.size() || xV2 < 0 || xV2 >= nodes.size() ||
+      yV1 < 0 || yV1 >= nodes[0].size() || yV2 < 0 || yV2 >= nodes[0].size()) {
+    return -1;
   }
-  v[x1][y1] = 0;
-  std::deque<std::vector<int>> q;
-  q.push_back({x1, y1});
-  int counter = 0;
-  while (!q.empty()) {
-    if (counter % 50 == 0) {
-      int u = 0;
-    }
-    counter++;
-    for (auto it = q.begin(); it != q.end(); it++) {
-      std::cout << it->at(0) << " " << it->at(1) << " * ";
-    }
-    std::cout << std::endl;
-    std::vector<int> co = q.front();
-    q.pop_front();
-    int x = co[0], y = co[1];
-    if (x > 0 && v[x - 1][y] == -1 && pixelV[x - 1][y] == 0) {
-      v[x - 1][y] == v[x][y] + 1;
-      q.push_back({x - 1, y});
-    }
-    if (x < rows - 1 && v[x + 1][y] == -1 && pixelV[x + 1][y] == 0) {
-      v[x + 1][y] == v[x][y] + 1;
-      q.push_back({x + 1, y});
-    }
-    if (y > 0 && v[x][y - 1] == -1 && pixelV[x][y - 1] == 0) {
-      v[x][y - 1] == v[x][y] + 1;
-      q.push_back({x, y - 1});
-    }
-    if (y < cols - 1 && v[x][y + 1] == -1 && pixelV[x][y + 1] == 0) {
-      v[x][y + 1] == v[x][y] + 1;
-      q.push_back({x, y + 1});
-    }
-    if (v[x2][y2] != -1) break;
+  return distances[xV1][yV1][xV2][yV2];
+}
+
+// assumes input to be valid
+int Maze::dirFromTo(int x1, int y1, int x2, int y2) {
+  int xV1 = y1 / Params::ACTUAL_CELL_SIZE - 1;
+  int yV1 = x1 / Params::ACTUAL_CELL_SIZE - 1;
+  int xV2 = y2 / Params::ACTUAL_CELL_SIZE - 1;
+  int yV2 = x2 / Params::ACTUAL_CELL_SIZE - 1;
+  xV1 /= 2;
+  xV2 /= 2;
+  yV1 /= 2;
+  yV2 /= 2;
+  if (xV1 < 0 || xV1 >= nodes.size() || xV2 < 0 || xV2 >= nodes.size() ||
+      yV1 < 0 || yV1 >= nodes[0].size() || yV2 < 0 || yV2 >= nodes[0].size()) {
+    return -1;
   }
-  return v[x2][y2];
+  int d = distances[xV1][yV1][xV2][yV2];
+  vector<int> v;
+  if (xV1 > 0 && distances[xV1 - 1][yV1][xV2][yV2] != -1 &&
+      distances[xV1 - 1][yV1][xV2][yV2] < d)
+    v.push_back(0);
+  if (xV1 < nodes.size() - 1 && distances[xV1 + 1][yV1][xV2][yV2] != -1 &&
+      distances[xV1 + 1][yV1][xV2][yV2] < d)
+    v.push_back(2);
+  if (yV1 > 0 && distances[xV1][yV1 - 1][xV2][yV2] != -1 &&
+      distances[xV1][yV1 - 1][xV2][yV2] < d)
+    v.push_back(1);
+  if (yV1 < nodes[0].size() - 1 && distances[xV1][yV1 + 1][xV2][yV2] != -1 &&
+      distances[xV1][yV1 + 1][xV2][yV2] < d)
+    v.push_back(3);
+
+  if (v.size() == 0) return -1;
+  int in = rand() % v.size();
+  return v[in];
 }

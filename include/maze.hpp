@@ -24,6 +24,8 @@ class Maze {
   int pathLength;
   int wallLength;
   std::vector<std::vector<int>> pixelV;
+  std::vector<std::vector<int>> nodes;
+  std::vector<std::vector<std::vector<std::vector<int>>>> distances;
 
  public:
   Maze();
@@ -39,5 +41,7 @@ class Maze {
   int dist(int x1, int y1, int x2, int y2);
   std::vector<std::vector<int>> render();
   std::vector<std::vector<int>> getPixelV();
+  void calcDistances();
   void setPixelV(std::vector<std::vector<int>> v);
+  int dirFromTo(int x1, int x2, int y1, int y2);
 };
