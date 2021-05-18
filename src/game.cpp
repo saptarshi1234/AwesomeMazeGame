@@ -102,14 +102,14 @@ void Game::loadGame() {
     player1.init({w, w, p * w, p * w});
     player2.init({w, w, p * w, p * w});
     server.send(player1.to_string());
-    player2.from_string(server.recv());
+    player2.create_from_string(server.recv());
 
   } else {
     player1.init({Params::SCREEN_WIDTH - (p + 1) * w, w, p * w, p * w});
     player2.init({Params::SCREEN_WIDTH - (p + 1) * w, w, p * w, p * w});
 
     client.send(player1.to_string());
-    player2.from_string(client.recv());
+    player2.create_from_string(client.recv());
   }
 
   running = true;
@@ -231,25 +231,25 @@ void Game::handleEvents() {
 }
 
 void Game::update() {
-  unsynced_bullets.clear();
+  // unsynced_bullets.clear();
+
+  for (auto bullet_it = bullets.begin(); bullet_it != bullets.end();
+       bullet_it++) {
+    if (bullet_it->destroyBullet()) {
+      bullet_it = bullets.erase(bullet_it);
+      bullet_it--;
+    }
+  }
+
+  for (auto bullet_it = other_bullets.begin(); bullet_it != other_bullets.end();
+       bullet_it++) {
+    if (bullet_it->destroyBullet()) {
+      bullet_it = other_bullets.erase(bullet_it);
+      bullet_it--;
+    }
+  }
 
   if (isServer) {
-    for (auto bullet_it = bullets.begin(); bullet_it != bullets.end();
-         bullet_it++) {
-      if (bullet_it->destroyBullet()) {
-        bullet_it = bullets.erase(bullet_it);
-        bullet_it--;
-      }
-    }
-
-    for (auto bullet_it = other_bullets.begin();
-         bullet_it != other_bullets.end(); bullet_it++) {
-      if (bullet_it->destroyBullet()) {
-        bullet_it = other_bullets.erase(bullet_it);
-        bullet_it--;
-      }
-    }
-
     // spawn bots at random
     int w = Params::ACTUAL_CELL_SIZE;
     int k = rand() % Params::MAX_BOTS;
@@ -261,6 +261,7 @@ void Game::update() {
       int y = w * (col * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
       b.init({x, y, Params::PATH_WIDTH * w - 1, Params::PATH_WIDTH * w - 1});
       bots.push_back(b);
+      unsynced_bots.push_back(b);
     }
 
     // spawn collectibles
@@ -296,7 +297,7 @@ void Game::update() {
     if (i < 10 && bots[i].shouldFire()) {
       Bullet b = bots[i].fireBullet();
       bullets.push_back(b);
-      unsynced_bullets.push_back(b);
+      // unsynced_bullets.push_back(b);
     }
     bots[i].move(&maze);
   }
@@ -366,38 +367,64 @@ void Game::update() {
 void Game::sync() {
   std::stringstream ss_send;
   for (Bullet &b : unsynced_bullets) {
-    ss_send << b.to_string() << '\n';
+    ss_send << b.to_string(&player1, &player2) << '\n';
   }
+  // cout << '\n' << ss_send.str() << endl;
   c_sock->send(ss_send.str());
+  unsynced_bullets.clear();
 
-  std::stringstream ss_recv(c_sock->recv());
+  auto s = c_sock->recv();
+  std::stringstream ss_recv(s);
   char delim = '\n';
   std::string word;
-  Bot dummy;
-  dummy.init({0, 0, 0, 0});
   while (std::getline(ss_recv, word, delim)) {
     Bullet b;
-    b.init({0, 0, 0, 0}, false, &dummy, 1);
-    b.from_string(word);
+    b.create_from_string(word, &player1, &player2);
     other_bullets.push_back(b);
   }
 
   c_sock->send(player1.to_string());
-  player2.from_string(c_sock->recv());
+  player2.create_from_string(c_sock->recv());
 
-  // std::stringstream ss_send;
-  // for (Bot &b : bots) {
-  //   ss_send << b.to_string() << '\n';
-  // }
-  // c_sock->send(ss_send.str());
+  if (isServer) {
+    std::stringstream ss_send;
+    for (Bot &b : unsynced_bots) {
+      ss_send << b.to_string() << '\n';
+    }
+    unsynced_bots.clear();
+    c_sock->send(ss_send.str());
 
-  // std::stringstream ss_recv(c_sock->recv());
-  // char delim = '\n';
-  // std::string word;
-  // int index = 0;
-  // while (std::getline(ss_recv, word, delim)) {
-  //   bots[index].from_string(word);
-  // }
+    cout << "heere" << c_sock->recv() << endl;
+
+    std::stringstream ss_send2;
+    int index = 0;
+    for (Bot &b : bots) {
+      ss_send2 << b.to_update(index++) << '\n';
+    }
+    c_sock->send(ss_send2.str());
+  } else {
+    std::stringstream ss_recv(c_sock->recv());
+    char delim = '\n';
+    std::string word;
+
+    while (std::getline(ss_recv, word, delim)) {
+      Bot b;
+      b.init({0, 0, 0, 0});
+      b.create_from_string(word);
+      bots.push_back(b);
+    }
+
+    c_sock->send("recv");
+
+    std::stringstream ss_recv2(c_sock->recv());
+    int index = 0;
+    while (std::getline(ss_recv2, word, delim)) {
+      std::stringstream ss(word);
+      int index;
+      ss >> index;
+      bots[index].update_from_string(word);
+    }
+  }
 }
 
 void Game::render() {

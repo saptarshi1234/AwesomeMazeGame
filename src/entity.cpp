@@ -192,18 +192,10 @@ void Entity::setDirection(Direction d) {
   is_moving = true;
 }
 
-std::string Entity::to_string() {
-  std::stringstream ss;
-  char space = ' ';
-  ss << location.x << space << location.y << space << location.h << space
-     << location.w << space << is_moving << space << dir;
-  return ss.str();
-}
-
 Direction Entity::getRevertDir() { return revert_dir; }
 void Entity::setRevertDir(Direction d) { revert_dir = d; }
 
-void Entity::from_string(std::string s) {
+void Entity::create_from_string(std::string s) {
   int int_dir;
   std::stringstream ss(s);
   ss >> location.x;
@@ -214,4 +206,28 @@ void Entity::from_string(std::string s) {
   ss >> int_dir;
 
   dir = Direction(int_dir);
+}
+
+void Entity::update_from_string(std::string s) {
+  std::stringstream ss(s);
+  int int_dir;
+  ss >> int_dir;
+  ss >> is_moving;
+  ss >> int_dir;
+
+  dir = Direction(int_dir);
+}
+
+std::string Entity::to_string() {
+  std::stringstream ss;
+  char space = ' ';
+  ss << location.x << space << location.y << space << location.h << space
+     << location.w << space << is_moving << space << dir;
+  return ss.str();
+}
+
+std::string Entity::to_update() {
+  std::stringstream ss;
+  ss << dir;
+  return ss.str();
 }

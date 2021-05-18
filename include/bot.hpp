@@ -16,4 +16,10 @@ class Bot : public Player {
   void setUpdateFreq(int f);
   bool shouldFire();
   bool shouldUpdate();
+
+  // std::string to_string();
+  std::string to_update(int index);
+
+  // void update_from_string(std::string s);
+  // void create_from_string(std::string s);
 };

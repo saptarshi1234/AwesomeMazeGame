@@ -5,6 +5,9 @@
 #include <iostream>
 #include <sstream>
 
+using std::cout;
+using std::endl;
+
 void CustomSocket::send(std::string data) { std::cout << "wrong" << std::endl; }
 std::string CustomSocket::recv() {
   std::cout << "wrong" << std::endl;
@@ -51,7 +54,9 @@ std::string Client::recv() {
 
   char buf[msg_len];
   ::read(sock, buf, msg_len);
-  return buf;
+
+  std::string ret(buf, msg_len);
+  return ret;
 }
 
 Server::Server() {
@@ -112,5 +117,7 @@ std::string Server::recv() {
 
   char buf[msg_len];
   ::read(new_socket, buf, msg_len);
-  return buf;
+
+  std::string ret(buf, msg_len);
+  return ret;
 }

@@ -57,6 +57,10 @@ class Entity {
   void setLocation(SDL_Rect rect);
   void setRevertDir(Direction d);
   Direction getRevertDir();
+
   std::string to_string();
-  void from_string(std::string s);
+  std::string to_update();
+
+  void update_from_string(std::string s);
+  void create_from_string(std::string s);
 };

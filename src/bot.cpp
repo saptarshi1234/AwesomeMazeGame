@@ -114,3 +114,10 @@ bool Bot::shouldUpdate() {
   waitUpdate = (waitUpdate + 1) % updateFreq;
   return (waitUpdate == 0);
 }
+
+std::string Bot::to_update(int index) {
+  std::stringstream ss;
+  char space = ' ';
+  ss << index << space << is_moving << space << dir;
+  return ss.str();
+}

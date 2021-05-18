@@ -68,10 +68,7 @@ void Player::setHP(double h) {
       (int)(Params::ACTUAL_CELL_SIZE * 16 / 10 * hp / Params::MAX_HP);
 }
 void Player::setBulletPower(double x) { bullet_power = x; }
-void Player::raiseScore(int s) {
-  score += s * score_multiplier;
-  ;
-}
+void Player::raiseScore(int s) { score += s * score_multiplier; }
 double Player::getHP() { return hp; }
 double Player::getBulletPower() { return bullet_power; }
 int Player::getScore() { return score; }

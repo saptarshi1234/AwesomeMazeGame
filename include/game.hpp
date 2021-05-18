@@ -41,6 +41,7 @@ class Game {
   Player player1, player2;
   std::vector<Bullet> bullets;
   std::vector<Bullet> unsynced_bullets;
+  std::vector<Bot> unsynced_bots;
   std::vector<Bullet> other_bullets;
   std::vector<Item> items;
   std::vector<Bot> bots;

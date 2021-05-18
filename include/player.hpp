@@ -41,4 +41,8 @@ class Player : public Entity {
   std::vector<int> getCollectedItems();
   void move(Maze *maze);
   SDL_Rect getCropArea();
+
+  // std::string to_string();
+  // void update_from_string(std::string s);
+  // void create_from_string(std::string s);
 };

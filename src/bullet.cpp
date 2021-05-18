@@ -6,23 +6,6 @@
 void Bullet::init(SDL_Rect loc, bool fired_by, Player *player, double p) {
   physicalLocation = loc;
 
-  // switch (player->getDirection()) {
-  //   case TOP:
-  //     location.y -= shift;
-  //     break;
-  //   case RIGHT:
-  //     location.x += shift;
-  //     break;
-  //   case BOTTOM:
-  //     location.y += shift;
-  //     break;
-  //   case LEFT:
-  //     location.x -= shift;
-  //     break;
-  //   default:
-  //     break;
-  // }
-
   int xx = loc.x + loc.w / 2 - loc.w / 10;
   int yy = loc.y + loc.h / 2 - loc.h / 10;
   SDL_Rect loc2 = {xx, yy, loc.w / 5, loc.h / 5};
@@ -34,7 +17,6 @@ void Bullet::init(SDL_Rect loc, bool fired_by, Player *player, double p) {
   power = p * Params::BULLET_POWER_UNIT;
   velocity = 15;
   layers.push_back({TextureManager::getTex(TextureID::BULLET), {0, 0}});
-  // layers.push_back({TextureManager::getTex(TextureID::BULLET), {0, 0}});
 }
 
 void Bullet::setDirection(Direction dir) {
@@ -129,4 +111,34 @@ bool Bullet::hitTarget(Player &p) {
     location.y = final_y;
   }
   return true;
+}
+
+std::string Bullet::to_string(Player *p1, Player *p2) {
+  char space = ' ';
+  std::stringstream ss;
+  auto loc = physicalLocation;
+
+  ss << loc.x << space << loc.y << space << dir << space << firedByPlayer
+     << space << !(p1 == shooter) << space << power;
+  return ss.str();
+}
+
+void Bullet::create_from_string(std::string s, Player *p1, Player *p2) {
+  int int_dir;
+  bool is_shooter;
+
+  std::stringstream ss(s);
+  ss >> location.x;
+  ss >> location.y;
+
+  init({location.x, location.y, p1->getLocation().w, p1->getLocation().h},
+       false, p1, 0);
+
+  ss >> int_dir;
+  ss >> firedByPlayer;
+  ss >> is_shooter;
+  ss >> power;
+
+  shooter = is_shooter ? p1 : p2;
+  setDirection(Direction(int_dir));
 }
