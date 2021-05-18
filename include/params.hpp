@@ -4,9 +4,9 @@ namespace Params {
 const double BULLET_POWER_UNIT = 50;
 const int WALL_WIDTH = 2;
 const int PATH_WIDTH = 2;
-const int ACTUAL_CELL_SIZE = 15;
-const int NUM_CELLS_X = 16;
-const int NUM_CELLS_Y = 16;
+const int ACTUAL_CELL_SIZE = 16;
+const int NUM_CELLS_X = 15;
+const int NUM_CELLS_Y = 15;
 const int MAX_HP = 1000;
 const int POWERUP_TIME = 100;
 const int SCREEN_WIDTH =

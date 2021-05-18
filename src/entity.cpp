@@ -56,11 +56,13 @@ void Entity::move(Maze* maze) {
     int tempX = location.x, tempY = location.y, x = location.x,
         fx = x + location.w, y = location.y, fy = y + location.h;
     bool x_free = false, y_free = false;
+    int k = 1;
     switch (dir) {
       case TOP:
         tempY -= velocity;
-        fy = y;
-        y = tempY;
+        fy = tempY - 1;
+        y -= 1;
+        k = -1;
         x_free = true;
         break;
       case RIGHT:
@@ -76,9 +78,10 @@ void Entity::move(Maze* maze) {
         x_free = true;
         break;
       case LEFT:
+        x -= 1;
         tempX -= velocity;
-        fx = x;
-        x = tempX;
+        fx = tempX - 1;
+        k = -1;
         y_free = true;
         break;
 
@@ -86,30 +89,49 @@ void Entity::move(Maze* maze) {
         break;
     }
     int min_ = -1, max_ = -1;
+    int limit_x = 0, limit_y = 0;
     if (tempX != location.x || tempY != location.y) {
-      for (int i = x; i < fx; i++) {
-        for (int j = y; j < fy; j++) {
-          if (i < 0 || i >= Params::SCREEN_WIDTH || j < 0 ||
-              j >= Params::SCREEN_HEIGHT || !notWall(maze, i, j)) {
-            if ((x_free && i >= x + location.w / 5 &&
-                 i < fx - location.w / 5) ||
-                (y_free && j >= y + location.h / 5 &&
-                 j < fy - location.h / 5)) {
-              is_moving = false;
-              break;
-            }
-          } else {
-            if (x_free &&
-                ((dir == TOP && j == y) || (dir == BOTTOM && j == fy - 1))) {
-              if (min_ == -1) min_ = i;
-              max_ = i;
-            }
-            if (y_free &&
-                ((dir == LEFT && i == x) || (dir == RIGHT && i == fx - 1))) {
-              if (min_ == -1) min_ = j;
-              max_ = j;
+      if (y_free) {
+        int i = x;
+        while (i != fx) {
+          for (int j = y; j < fy; j++) {
+            if (i < 0 || i >= Params::SCREEN_WIDTH || j < 0 ||
+                j >= Params::SCREEN_HEIGHT || !notWall(maze, i, j)) {
+              if (j >= y + location.h / 5 && j < fy - location.h / 5) {
+                is_moving = false;
+                break;
+              }
+            } else {
+              if (i == fx - k) {
+                if (min_ == -1) min_ = j;
+                max_ = j;
+              }
             }
           }
+          if (!is_moving) break;
+          i += k;
+          limit_x += k;
+        }
+      } else {
+        int j = y;
+        while (j != fy) {
+          for (int i = x; i < fx; i++) {
+            if (i < 0 || i >= Params::SCREEN_WIDTH || j < 0 ||
+                j >= Params::SCREEN_HEIGHT || !notWall(maze, i, j)) {
+              if (i >= x + location.w / 5 && i < fx - location.w / 5) {
+                is_moving = false;
+                break;
+              }
+            } else {
+              if (j == fy - k) {
+                if (min_ == -1) min_ = i;
+                max_ = i;
+              }
+            }
+          }
+          if (!is_moving) break;
+          j += k;
+          limit_y += k;
         }
       }
       if (is_moving) {
@@ -124,55 +146,57 @@ void Entity::move(Maze* maze) {
           else if (tempY + location.h - 1 != max_)
             tempY = max_ + 1 - location.h;
         }
-        location.x = tempX;
-        location.y = tempY;
-        moves++;
       }
+      location.x += limit_x;
+      location.y += limit_y;
+      if (limit_x != 0 || limit_y != 0) moves++;
     }
   }
 }
 
 bool Entity::canMove(Maze* maze) {
   if (is_moving) {
-    int tempX = location.x, tempY = location.y, x = location.x,
-        fx = x + location.w, y = location.y, fy = y + location.h;
+    int x = location.x, fx = x + location.w, y = location.y,
+        fy = y + location.h;
+    bool x_free = true;
     switch (dir) {
       case TOP:
-        tempY -= velocity;
-        fy = y;
-        y = tempY;
-        fx -= location.w / 2;
-        x += location.w / 2;
+        y -= 1;
+        fx -= location.w / 5;
+        x += location.w / 5;
         break;
       case BOTTOM:
-        tempY += velocity;
         y = fy;
-        fy = y + velocity;
-        fx -= location.w / 2;
-        x += location.w / 2;
+        fx -= location.w / 5;
+        x += location.w / 5;
         break;
       case LEFT:
-        tempX -= velocity;
-        fx = x;
-        x = tempX;
-        fy -= location.h / 2;
-        y += location.h / 2;
+        x -= 1;
+        fy -= location.h / 5;
+        y += location.h / 5;
+        x_free = false;
         break;
       case RIGHT:
-        tempX += velocity;
         x = fx;
-        fx = x + velocity;
-        fy -= location.h / 2;
-        y += location.h / 2;
+        fy -= location.h / 5;
+        y += location.h / 5;
+        x_free = false;
         break;
       default:
         break;
     }
-    if (tempX != location.x || tempY != location.y) {
-      for (int i = x; i < fx; i++) {
+    if (x != location.x || y != location.y) {
+      if (x_free) {
+        for (int i = x; i < fx; i++) {
+          if (i < 0 || i >= Params::SCREEN_WIDTH || y < 0 ||
+              y >= Params::SCREEN_HEIGHT || !notWall(maze, i, y)) {
+            return false;
+          }
+        }
+      } else {
         for (int j = y; j < fy; j++) {
-          if (i < 0 || i >= Params::SCREEN_WIDTH || j < 0 ||
-              j >= Params::SCREEN_HEIGHT || !notWall(maze, i, j)) {
+          if (x < 0 || x >= Params::SCREEN_WIDTH || j < 0 ||
+              j >= Params::SCREEN_HEIGHT || !notWall(maze, x, j)) {
             return false;
           }
         }
