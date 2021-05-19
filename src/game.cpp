@@ -275,7 +275,6 @@ void Game::updateBots() {
 
       Item item;
       item.init({x + width / 4, y + width / 4, width / 2, width / 2}, type);
-
       items.push_back(item);
     }
     // for (int i = 0; i < bots.size(); i++) {

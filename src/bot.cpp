@@ -111,94 +111,120 @@ void Bot::update(SDL_Rect loc1, SDL_Rect loc2, Maze* maze) {
     else
       loc = loc2;
   }
+  bool moving = is_moving;
   dist = maze->dist(location.x, location.y, loc.x, loc.y);
   int movable[] = {0, 0, 0, 0};
   int prob[] = {0, 0, 0, 0};
   int count = 0;
   Direction curr_dir = Entity::getDirection();
-  Direction p_dir = convInt(
-      maze->dirFromTo(location.x, location.y, loc.x, loc.y, convDir(curr_dir)));
-  Direction p_dirF = p_dir;
-  Entity::setDirection(p_dir);
-  bool found = canMove(maze);
-  if (found) {
-    count++;
-    movable[convDir(p_dir)] = 1;
-    prob[convDir(p_dir)] = 90;
-  }
-  if (curr_dir != p_dir) {
-    Entity::setDirection(curr_dir);
-    if (canMove(maze)) {
+  if (dist != -1) {
+    Direction p_dir = convInt(maze->dirFromTo(location.x, location.y, loc.x,
+                                              loc.y, convDir(curr_dir)));
+    Direction p_dirF = p_dir;
+    Entity::setDirection(p_dir);
+    bool found = canMove(maze);
+    if (found) {
       count++;
-      movable[convDir(curr_dir)] = 1;
-      prob[convDir(curr_dir)] = 2;
-      if (!found && maze->dist(location.x + dX(curr_dir, velocity),
-                               location.y + dY(curr_dir, velocity), loc.x,
-                               loc.y) <= dist) {
-        found = true;
-        p_dirF = curr_dir;
-        prob[convDir(p_dirF)] = 90;
+      movable[convDir(p_dir)] = 1;
+      prob[convDir(p_dir)] = 90;
+    }
+    if (curr_dir != p_dir) {
+      Entity::setDirection(curr_dir);
+      if (canMove(maze)) {
+        count++;
+        movable[convDir(curr_dir)] = 1;
+        prob[convDir(curr_dir)] = 2;
+        if (!found && maze->dist(location.x + dX(curr_dir, velocity),
+                                 location.y + dY(curr_dir, velocity), loc.x,
+                                 loc.y) <= dist) {
+          found = true;
+          p_dirF = curr_dir;
+          prob[convDir(p_dirF)] = 90;
+        }
       }
     }
-  }
 
-  for (int i = 0; i < 4; i++) {
-    if (i == convDir(p_dir) || i == convDir(curr_dir)) continue;
-    Direction d = convInt(i);
-    Entity::setDirection(d);
-    if (canMove(maze)) {
-      movable[i] = 1;
-      prob[i] = 2;
-      count++;
-      if (!found && i + convDir(curr_dir) % 2 != 0 &&
-          maze->dist(location.x + dX(d, velocity), location.y + dY(d, velocity),
+    for (int i = 0; i < 4; i++) {
+      if (i == convDir(p_dir) || i == convDir(curr_dir)) continue;
+      Direction d = convInt(i);
+      Entity::setDirection(d);
+      if (canMove(maze)) {
+        movable[i] = 1;
+        prob[i] = 2;
+        count++;
+        if (!found && i + convDir(curr_dir) % 2 != 0 &&
+            maze->dist(location.x + dX(d, velocity),
+                       location.y + dY(d, velocity), loc.x, loc.y) <= dist) {
+          found = true;
+          p_dirF = d;
+          prob[convDir(p_dirF)] = 90;
+        }
+      }
+    }
+
+    int opp = convDir(curr_dir) - 2;
+    if (opp < 0) opp = convDir(curr_dir) + 2;
+    prob[opp] = 0;
+    if (!found) {
+      Direction d = convInt(opp);
+      if (maze->dist(location.x + dX(d, velocity), location.y + dY(d, velocity),
                      loc.x, loc.y) <= dist) {
         found = true;
         p_dirF = d;
-        prob[convDir(p_dirF)] = 90;
+        if (prob[convDir(curr_dir)] == 0) {
+          if (dist < 15) prob[opp] = 90;
+        }
       }
     }
-  }
-
-  int opp = convDir(curr_dir) - 2;
-  if (opp < 0) opp = convDir(curr_dir) + 2;
-  prob[opp] = 0;
-  if (!found) {
-    Direction d = convInt(opp);
-    if (maze->dist(location.x + dX(d, velocity), location.y + dY(d, velocity),
-                   loc.x, loc.y) <= dist) {
-      found = true;
-      p_dirF = d;
-      if (prob[convDir(curr_dir)] == 0) {
-        if (dist < 20) prob[opp] = 90;
+    if (dist < 10 || count == 4) {
+      if (maze->inLine(location.x, location.y, loc.x, loc.y, convDir(p_dirF))) {
+        Entity::setDirection(p_dirF);
+        int o = rand() % 10;
+        if (!moving || dist == 1 || o >= dist) {
+          is_moving = false;
+        }
+        return;
       }
-    }
-  }
-  if (dist < 10 || count == 4) {
-    if (dist == 1) {
       Entity::setDirection(p_dirF);
-      if (p_dir == p_dirF) is_moving = false;
       return;
     }
-    Entity::setDirection(p_dirF);
-    return;
-  }
 
-  if (dist >= 20) {
-    if (prob[convDir(curr_dir)] > 0 && curr_dir != p_dirF &&
-        convDir(p_dirF) != opp) {
-      prob[p_dirF] = 20;
+    if (dist >= 15) {
+      if (prob[convDir(curr_dir)] > 0 && curr_dir != p_dirF &&
+          convDir(p_dirF) != opp) {
+        prob[p_dirF] = 20;
+      }
+      for (int i = 0; i < 4; i++) {
+        if (prob[i] > 0 && prob[i] < 90) {
+          if (convDir(curr_dir) == i) {
+            prob[convDir(curr_dir)] = 90;
+          } else if (i == opp) {
+            if (prob[convDir(curr_dir)] == 0) {
+              prob[i] = 20;
+            }
+          } else
+            prob[i] = 20;
+        }
+      }
+    }
+  } else {
+    int opp = convDir(curr_dir) - 2;
+    if (opp < 0) opp = convDir(curr_dir) + 2;
+    for (int i = 0; i < 4; i++) {
+      Entity::setDirection(convInt(i));
+      if (canMove(maze)) {
+        movable[i] = 1;
+      }
     }
     for (int i = 0; i < 4; i++) {
-      if (prob[i] > 0 && prob[i] < 90) {
-        if (convDir(curr_dir) == i) {
-          prob[convDir(curr_dir)] = 90;
-        } else if (i == opp) {
-          if (prob[convDir(curr_dir)] == 0) {
-            prob[i] = 20;
-          }
-        } else
+      if (movable[i] == 1) {
+        if (convInt(i) == curr_dir) {
+          prob[i] = 90;
+        } else if (i == opp && movable[convDir(curr_dir)] == 0) {
+          prob[i] == 20;
+        } else {
           prob[i] = 20;
+        }
       }
     }
   }

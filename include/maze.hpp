@@ -44,4 +44,5 @@ class Maze {
   void calcDistances();
   void setPixelV(std::vector<std::vector<int>> v);
   int dirFromTo(int x1, int x2, int y1, int y2, int preferableDir /*=-1*/);
+  bool inLine(int x1, int y1, int x2, int y2, int Dir);
 };
