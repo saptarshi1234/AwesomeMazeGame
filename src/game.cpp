@@ -255,23 +255,6 @@ void Game::updateBots() {
       bots.push_back(b);
       // unsynced_bots.push_back(b);
     }
-
-    // spawn collectibles
-    auto type = static_cast<Item::ItemType>(rand() % Item::numTypes);
-    bool generate = rand() % 20 == 0;
-    int width = Params::PATH_WIDTH * w;
-    if (generate) {
-      int row = rand() % Params::NUM_CELLS_X;
-      int col = rand() % Params::NUM_CELLS_Y;
-      int x = w * (row * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
-      int y = w * (col * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
-
-      Item item;
-      item.init({x + width / 4, y + width / 4, width / 2, width / 2}, type);
-
-      items.push_back(item);
-    }
-
     for (int i = 0; i < bots.size(); i++) {
       if (bots[i].shouldUpdate()) {
         bots[i].update(player1.getLocation(), player2.getLocation(), &maze);
@@ -295,6 +278,22 @@ void Game::updateBots() {
       }
     }
   } else {
+    // spawn collectibles
+    int w = Params::ACTUAL_CELL_SIZE;
+    auto type = static_cast<Item::ItemType>(rand() % Item::numTypes);
+    bool generate = rand() % 100 == 0;
+    int width = Params::PATH_WIDTH * w;
+    if (generate) {
+      int row = rand() % Params::NUM_CELLS_X;
+      int col = rand() % Params::NUM_CELLS_Y;
+      int x = w * (row * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
+      int y = w * (col * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
+
+      Item item;
+      item.init({x + width / 4, y + width / 4, width / 2, width / 2}, type);
+
+      items.push_back(item);
+    }
     for (int i = 0; i < bots.size(); i++) {
       bots[i].move(&maze);
     }
@@ -335,6 +334,18 @@ void Game::sync() {
     }
     c_sock->send(ss_send.str());
 
+    // items recv
+    std::stringstream ss_recv(c_sock->recv());
+    char delim = '\n';
+    std::string word;
+
+    items.clear();
+    while (std::getline(ss_recv, word, delim)) {
+      Item item;
+      item.from_string(word);
+      items.push_back(item);
+    }
+
   } else {
     std::stringstream ss_recv(c_sock->recv());
     char delim = '\n';
@@ -352,6 +363,13 @@ void Game::sync() {
       }
       bots.push_back(b);
     }
+
+    // items send
+    std::stringstream ss_send;
+    for (Item &item : items) {
+      ss_send << item.to_string() << '\n';
+    }
+    c_sock->send(ss_send.str());
   }
 }
 
@@ -421,6 +439,7 @@ void Game::render() {
   win.render(player2);
 
   win.renderPlayerDetails(player1);
+  // win.renderPlayerDetails(player2);
 
   for (auto &bot : bots) {
     win.render(bot);

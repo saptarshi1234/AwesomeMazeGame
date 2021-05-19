@@ -16,6 +16,9 @@ class Item : public Entity {
   SDL_Rect getLocation();
   virtual SDL_Rect getPhysicalLocation();
 
+  std::string to_string();
+  void from_string(std::string s);
+
  private:
   ItemType type;
 };

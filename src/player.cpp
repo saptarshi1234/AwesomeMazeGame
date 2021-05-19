@@ -44,23 +44,23 @@ Bullet Player::fireBullet() {
   b.setDirection(this->dir);
 
   firing = 1;
-  int recoil = 5, shift = 5;
-  switch (dir) {
-    case TOP:
-      layers[1].offset = {0, recoil};
-      break;
-    case RIGHT:
-      layers[1].offset = {-recoil, 0};
-      break;
-    case BOTTOM:
-      layers[1].offset = {0, -recoil};
-      break;
-    case LEFT:
-      layers[1].offset = {recoil, 0};
-      break;
-    default:
-      break;
-  }
+  // int recoil = 5, shift = 5;
+  // switch (dir) {
+  //   case TOP:
+  //     layers[1].offset = {0, recoil};
+  //     break;
+  //   case RIGHT:
+  //     layers[1].offset = {-recoil, 0};
+  //     break;
+  //   case BOTTOM:
+  //     layers[1].offset = {0, -recoil};
+  //     break;
+  //   case LEFT:
+  //     layers[1].offset = {recoil, 0};
+  //     break;
+  //   default:
+  //     break;
+  // }
 
   bullet_fired = true;
   return b;
