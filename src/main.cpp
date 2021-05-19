@@ -25,6 +25,8 @@ struct Clock {
 
 int main(int argc, char* argv[]) {
   bool isServer = true;
+  bool single_player = false;
+
   char* ip = "127.0.0.1";
 
   cout << argc << endl;
@@ -62,46 +64,53 @@ int main(int argc, char* argv[]) {
   SDL_Rect server_loc = server.getSize();
   SDL_Rect client_loc = client.getSize();
 
-  server_loc.x = (logo_loc.w - server_loc.w) / 2;
-  client_loc.x = (logo_loc.w - client_loc.w) / 2;
-
-  server_loc.y = 5 * logo_loc.h / 8;
-  client_loc.y = server_loc.y + 1.2 * server_loc.h;
+  int x = (logo_loc.w - server_loc.w) / 2;
+  int y1 = 5 * logo_loc.h / 8;
+  int offset = server_loc.h * 0.5;
 
   bool received_key = false;
+  int choice_index = 1;
 
   while (!received_key) {
-    window.render(logo_loc, logo.getSize(), logo.tex);
-    window.render(server_loc, server.getSize(), server.tex);
-    window.render(client_loc, client.getSize(), client.tex);
+    window.clearWindow();
 
-    // window.render({0, 0, Params::SCREEN_WIDTH, Params::SCREEN_HEIGHT}, )
+    window.render(logo_loc, logo.getSize(), logo.tex);
+    window.displayText(x, y1, offset, choice_index);
+
     window.display();
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
       if (event.type == SDL_QUIT) {
+        window.destroy();
+        TTF_Quit();
         SDL_Quit();
-        break;
+        exit(0);
       }
 
       if (event.type == SDL_KEYDOWN) {
         switch (event.key.keysym.sym) {
-          case SDLK_s:
-            isServer = true;
-            received_key = true;
+          case SDLK_UP:
+            choice_index--;
+            if (choice_index < 1) choice_index = 1;
             break;
-          case SDLK_c:
-            isServer = false;
+          case SDLK_DOWN:
+            choice_index++;
+            if (choice_index > 3) choice_index = 3;
+            break;
+          case SDLK_RETURN:
+          case SDLK_RETURN2:
+            single_player = choice_index == 1;
+            isServer = choice_index == 2;
             received_key = true;
             break;
         }
       }
-      // SDL_Delay(100);
     }
-    window.clearWindow();
+    SDL_Delay(100);
   }
-  cout << isServer << endl;
-  Game game(window, isServer, ip);
+  cout << "single player" << single_player << endl;
+  cout << "server" << isServer << endl;
+  Game game(window, isServer, single_player, ip);
 
   srand((unsigned int)time(NULL));
   game.initialize();
@@ -135,6 +144,7 @@ int main(int argc, char* argv[]) {
 
   game.quit();
   SDL_Quit();
+  TTF_Quit();
 
   return 0;
 }

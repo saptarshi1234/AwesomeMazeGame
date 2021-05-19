@@ -14,8 +14,9 @@
 using std::cout;
 using std::endl;
 
-Game::Game(WindowManager win, bool isServer, char *ip)
-    : win(win), isServer(isServer) {
+Game::Game(WindowManager win, bool isServer, bool single, char *ip)
+    : win(win), isServer(isServer), single_player(single) {
+  if (single) return;
   if (isServer) {
     cout << "Server" << endl;
     server.initialize();
@@ -77,7 +78,7 @@ void Game::initialize() {
   maze.setPathLength(Params::PATH_WIDTH);
   maze.setWallLength(Params::WALL_WIDTH);
 
-  if (isServer) {
+  if (isServer || single_player) {
     maze.generate();
     maze.render();
     maze.calcDistances();
@@ -99,18 +100,22 @@ void Game::loadGame() {
   int w = Params::ACTUAL_CELL_SIZE;
   int p = Params::PATH_WIDTH;
   int ww = Params::WALL_WIDTH;
-  if (isServer) {
+  if (single_player) {
     player1.init({w, w, p * w, p * w});
-    player2.init({w, w, p * w, p * w});
-    server.send(player1.to_string());
-    player2.create_from_string(server.recv());
-
   } else {
-    player1.init({Params::SCREEN_WIDTH - (p + 1) * w, w, p * w, p * w});
-    player2.init({Params::SCREEN_WIDTH - (p + 1) * w, w, p * w, p * w});
+    if (isServer) {
+      player1.init({w, w, p * w, p * w});
+      player2.init({w, w, p * w, p * w});
+      server.send(player1.to_string());
+      player2.create_from_string(server.recv());
 
-    client.send(player1.to_string());
-    player2.create_from_string(client.recv());
+    } else {
+      player1.init({Params::SCREEN_WIDTH - (p + 1) * w, w, p * w, p * w});
+      player2.init({Params::SCREEN_WIDTH - (p + 1) * w, w, p * w, p * w});
+
+      client.send(player1.to_string());
+      player2.create_from_string(client.recv());
+    }
   }
 
   running = true;
@@ -231,7 +236,7 @@ void Game::handleEvents() {
 }
 
 void Game::updateBots() {
-  if (isServer) {
+  if (isServer || single_player) {
     // spawn bots at random
     int w = Params::ACTUAL_CELL_SIZE;
     int k = rand() % Params::MAX_BOTS;
@@ -261,7 +266,8 @@ void Game::updateBots() {
         it = bots.erase(it) - 1;
       }
     }
-  } else {
+  }
+  if (!isServer || single_player) {
     // spawn collectibles
     int w = Params::ACTUAL_CELL_SIZE;
     auto type = static_cast<Item::ItemType>(rand() % Item::numTypes);
@@ -277,15 +283,14 @@ void Game::updateBots() {
       item.init({x + width / 4, y + width / 4, width / 2, width / 2}, type);
       items.push_back(item);
     }
-    // for (int i = 0; i < bots.size(); i++) {
-    //   bots[i].move(&maze);
-    // }
   }
   player1.move(&maze);
   player1.updateItems();
 }
 
 void Game::sync() {
+  if (single_player) return;
+
   c_sock->send(player1.to_string());
   player2.create_from_string(c_sock->recv());
   if (player2.bullet_fired) {
@@ -342,17 +347,19 @@ void Game::sync() {
 }
 
 void Game::update() {
-  if (isServer)
-    player1.checkCollision(&player2);
-  else
-    player2.checkCollision(&player1);
+  if (!single_player) {
+    if (isServer)
+      player1.checkCollision(&player2);
+    else
+      player2.checkCollision(&player1);
+  }
 
   for (int i = 0; i < bots.size(); i++) {
     if (isServer) {
       player1.checkCollision(&bots[i]);
-      player2.checkCollision(&bots[i]);
+      if (!single_player) player2.checkCollision(&bots[i]);
     } else {
-      player2.checkCollision(&bots[i]);
+      if (!single_player) player2.checkCollision(&bots[i]);
       player1.checkCollision(&bots[i]);
     }
   }
@@ -369,7 +376,7 @@ void Game::update() {
         bots[i].setHP(bots[i].getHP());
       } else if (i == bots.size())
         hit = bullet_it->hitTarget(player1);
-      else
+      else if (!single_player)
         hit = bullet_it->hitTarget(player2);
       if (hit) break;
     }
@@ -398,11 +405,13 @@ void Game::update() {
       continue;
     }
 
-    bool b2 = it->checkCollected(player2);
-    if (b2) {
-      player2.collectItem(*it);
-      it = items.erase(it) - 1;
-      continue;
+    if (!single_player) {
+      bool b2 = it->checkCollected(player2);
+      if (b2) {
+        player2.collectItem(*it);
+        it = items.erase(it) - 1;
+        continue;
+      }
     }
   }
 }
@@ -417,9 +426,9 @@ void Game::render() {
     }
   }
   win.render(player1);
-  win.render(player2);
+  if (!single_player) win.render(player2);
 
-  win.renderPlayerDetails(player1, player2);
+  win.renderPlayerDetails(player1, player2, single_player);
   // win.renderPlayerDetails(player2);
 
   for (auto &bot : bots) {
