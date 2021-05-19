@@ -1,5 +1,7 @@
 #include "game.hpp"
 
+#include <SDL2/SDL_mixer.h>
+
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
@@ -10,6 +12,7 @@
 #include "entity.hpp"
 #include "maze.hpp"
 #include "params.hpp"
+#include "sounds.hpp"
 #include "window.hpp"
 
 using std::cout;
@@ -450,7 +453,9 @@ void Game::update() {
     }
   }
 
-  // TODO add clock
+  if (player1.explosion_status == 1) {
+    Mix_PlayChannel(-1, SoundManager::getSound(SoundId::DEATH), 0);
+  }
 }
 
 void Game::render() {
@@ -519,7 +524,7 @@ void Game::modifyTime(int time) {
     }
   }
 }
-// tank destroy before targetHit
-// not move/shoot while destroying
-// power-ups timer
-// power-ups logic
+
+// HP powerUP
+// background music
+// screens manage

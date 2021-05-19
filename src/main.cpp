@@ -127,6 +127,10 @@ int main(int argc, char* argv[]) {
     }
     cout << "single player" << single_player << endl;
     cout << "server" << isServer << endl;
+
+    // SDL_Texture *overlay = TextureManager::get(TextureID::OVERLAY);
+    // window.render(overlay, )
+
     Game game(window, isServer, single_player, ip);
 
     srand((unsigned int)time(NULL));

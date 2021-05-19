@@ -5,8 +5,8 @@ class Player;
 
 class Item : public Entity {
  public:
-  enum ItemType { MULTIPLIER = 0, INVISIBLE, POWERUP, SHIELD };
-  const static int numTypes = 4;
+  enum ItemType { MULTIPLIER = 0, INVISIBLE, POWERUP, SHIELD, HP };
+  const static int numTypes = 5;
   int timeLeft = 10;
 
   Item();

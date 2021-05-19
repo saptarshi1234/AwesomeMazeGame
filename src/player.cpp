@@ -163,6 +163,9 @@ void Player::collectItem(Item& item) {
       collected[item.getType()] = Params::POWERUP_TIME;
       is_shielded = true;
       break;
+    case Item::ItemType::HP:
+      hp = std::max(0.0 + Params::MAX_HP, hp + Params::HP_INCREASE);
+      setHP(hp);
   }
 }
 

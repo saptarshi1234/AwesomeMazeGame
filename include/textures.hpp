@@ -14,6 +14,7 @@ enum TextureID {
   BULLET,
 
   GROUND,
+  OVERLAY,
   EXPLOSION,
 
   CLIENT,
@@ -27,6 +28,7 @@ enum TextureID {
   INVISIBLE,
   POWERUP,
   SHIELD,
+  HP,
 
   SCORE
 };
