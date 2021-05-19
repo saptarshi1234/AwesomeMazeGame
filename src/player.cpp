@@ -83,27 +83,29 @@ void Player::move(Maze* maze) {
   if (explosion_status == 0) {
     Entity::move(maze);
   }
-  if (firing > 0) firing++;
-  if (firing == 4) {
-    layers[1].offset = {0, 0};
-    firing = 0;
-  }
-
-  if (explosion_status > 0) {
-    layers[2].toShow = true;
-    if (explosion_status == 2) {
-      layers[0].toShow = false;
-      layers[1].toShow = false;
-    } else if (explosion_status == 1) {
-      is_moving = false;
+  if (!is_bot) {
+    if (firing > 0) firing++;
+    if (firing == 4) {
+      layers[1].offset = {0, 0};
+      firing = 0;
     }
-    layers[2].crop_details.first = explosion_status - 1;
-    explosion_status++;
 
-    if (explosion_status == 8) {
-      explosion_status = -1;
-      // TODO replace
-      layers[2].toShow = false;
+    if (explosion_status > 0) {
+      layers[2].toShow = true;
+      if (explosion_status == 2) {
+        layers[0].toShow = false;
+        layers[1].toShow = false;
+      } else if (explosion_status == 1) {
+        is_moving = false;
+      }
+      layers[2].crop_details.first = explosion_status - 1;
+      explosion_status++;
+
+      if (explosion_status == 8) {
+        explosion_status = -1;
+        // TODO replace
+        layers[2].toShow = false;
+      }
     }
   }
 }
@@ -178,6 +180,12 @@ void Player::create_from_string(std::string s) {
   ss >> location.y;
   ss >> location.h;
   ss >> location.w;
+
+  ss >> prev_location.x;
+  ss >> prev_location.y;
+  ss >> prev_location.h;
+  ss >> prev_location.w;
+
   ss >> is_moving;
   ss >> bullet_fired;
   ss >> explosion_status;
@@ -201,9 +209,22 @@ void Player::update_from_string(std::string s) {
 std::string Player::to_string() {
   std::stringstream ss;
   char space = ' ';
-  ss << location.x << space << location.y << space << location.h << space
-     << location.w << space << is_moving << space << bullet_fired << space
-     << explosion_status << space << hp << space << dir;
+  ss << location.x << space;
+  ss << location.y << space;
+  ss << location.h << space;
+  ss << location.w << space;
+
+  ss << prev_location.x << space;
+  ss << prev_location.y << space;
+  ss << prev_location.h << space;
+  ss << prev_location.w << space;
+
+  ss << is_moving << space;
+  ss << bullet_fired << space;
+  ss << explosion_status << space;
+  ss << hp;
+  ss << space;
+  ss << dir;
   return ss.str();
 }
 

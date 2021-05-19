@@ -211,14 +211,6 @@ void Game::handleEvents() {
           if (!space_down) {
             Bullet b = player1.fireBullet();
             bullets.push_back(b);
-            for (int i = 0; i < bots.size(); i++) {
-              if (i < 10 && bots[i].shouldFire()) {
-                Bullet b = bots[i].fireBullet();
-                bullets.push_back(b);
-              }
-              bots[i].move(&maze);
-            }
-            // player1.bullet_fired = true;
             space_down = true;
           }
           break;
@@ -256,21 +248,13 @@ void Game::updateBots() {
       // unsynced_bots.push_back(b);
     }
     for (int i = 0; i < bots.size(); i++) {
-      if (bots[i].shouldUpdate()) {
-        bots[i].update(player1.getLocation(), player2.getLocation(), &maze);
-      }
+      bots[i].update(player1.getLocation(), player2.getLocation(), &maze);
       if (i < 10 && bots[i].shouldFire()) {
         Bullet b = bots[i].fireBullet();
         bullets.push_back(b);
       }
       bots[i].move(&maze);
     }
-
-    player1.move(&maze);
-    player1.updateItems();
-
-    // player2.move(&maze);
-    // player2.updateItems();
 
     for (auto it = bots.begin(); it != bots.end(); it++) {
       if (it->getHP() <= 0 && it->explosion_status == -1) {
@@ -281,7 +265,7 @@ void Game::updateBots() {
     // spawn collectibles
     int w = Params::ACTUAL_CELL_SIZE;
     auto type = static_cast<Item::ItemType>(rand() % Item::numTypes);
-    bool generate = rand() % 100 == 0;
+    bool generate = rand() % 40 == 0;
     int width = Params::PATH_WIDTH * w;
     if (generate) {
       int row = rand() % Params::NUM_CELLS_X;
@@ -290,31 +274,14 @@ void Game::updateBots() {
       int y = w * (col * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
 
       Item item;
-      item.init({x + width / 4, y + width / 4, width / 2, width / 2}, type);
-
       items.push_back(item);
     }
-    for (int i = 0; i < bots.size(); i++) {
-      bots[i].move(&maze);
-    }
-    player1.move(&maze);
-    player1.updateItems();
+    // for (int i = 0; i < bots.size(); i++) {
+    //   bots[i].move(&maze);
+    // }
   }
-
-  if (isServer)
-    player1.checkCollision(&player2);
-  else
-    player2.checkCollision(&player1);
-
-  for (int i = 0; i < bots.size(); i++) {
-    if (isServer) {
-      player1.checkCollision(&bots[i]);
-      player2.checkCollision(&bots[i]);
-    } else {
-      player2.checkCollision(&bots[i]);
-      player1.checkCollision(&bots[i]);
-    }
-  }
+  player1.move(&maze);
+  player1.updateItems();
 }
 
 void Game::sync() {
@@ -374,10 +341,23 @@ void Game::sync() {
 }
 
 void Game::update() {
-  if (!isServer) {
-    for (int i = 0; i < bots.size(); i++) {
-      bots[i].move(&maze);
+  if (isServer)
+    player1.checkCollision(&player2);
+  else
+    player2.checkCollision(&player1);
+
+  for (int i = 0; i < bots.size(); i++) {
+    if (isServer) {
+      player1.checkCollision(&bots[i]);
+      player2.checkCollision(&bots[i]);
+    } else {
+      player2.checkCollision(&bots[i]);
+      player1.checkCollision(&bots[i]);
     }
+  }
+
+  for (int i = 0; i < bots.size(); i++) {
+    bots[i].updateMove();
   }
   for (auto bullet_it = bullets.begin(); bullet_it != bullets.end();
        bullet_it++) {

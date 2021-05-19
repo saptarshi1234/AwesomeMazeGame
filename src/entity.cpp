@@ -52,6 +52,7 @@ bool notWall(Maze* maze, int x, int y) {
 
 void Entity::move(Maze* maze) {
   prev_location = location;
+  int factor = 4;
   if (is_moving) {
     int tempX = location.x, tempY = location.y, x = location.x,
         fx = x + location.w, y = location.y, fy = y + location.h;
@@ -97,7 +98,8 @@ void Entity::move(Maze* maze) {
           for (int j = y; j < fy; j++) {
             if (i < 0 || i >= Params::SCREEN_WIDTH || j < 0 ||
                 j >= Params::SCREEN_HEIGHT || !notWall(maze, i, j)) {
-              if (j >= y + location.h / 5 && j < fy - location.h / 5) {
+              if (j >= y + location.h / factor &&
+                  j < fy - location.h / factor) {
                 is_moving = false;
                 break;
               }
@@ -118,7 +120,8 @@ void Entity::move(Maze* maze) {
           for (int i = x; i < fx; i++) {
             if (i < 0 || i >= Params::SCREEN_WIDTH || j < 0 ||
                 j >= Params::SCREEN_HEIGHT || !notWall(maze, i, j)) {
-              if (i >= x + location.w / 5 && i < fx - location.w / 5) {
+              if (i >= x + location.w / factor &&
+                  i < fx - location.w / factor) {
                 is_moving = false;
                 break;
               }
@@ -146,15 +149,20 @@ void Entity::move(Maze* maze) {
           else if (tempY + location.h - 1 != max_)
             tempY = max_ + 1 - location.h;
         }
+        location.x = tempX;
+        location.y = tempY;
+      } else {
+        location.x += limit_x;
+        location.y += limit_y;
       }
-      location.x += limit_x;
-      location.y += limit_y;
       if (limit_x != 0 || limit_y != 0) moves++;
     }
   }
 }
 
 bool Entity::canMove(Maze* maze) {
+  int factor = 4;
+
   if (is_moving) {
     int x = location.x, fx = x + location.w, y = location.y,
         fy = y + location.h;
@@ -163,27 +171,27 @@ bool Entity::canMove(Maze* maze) {
       case TOP:
         fy = y;
         y = fy - 3;
-        fx -= location.w / 5;
-        x += location.w / 5;
+        fx -= location.w / factor;
+        x += location.w / factor;
         break;
       case BOTTOM:
         y = fy;
         fy = y + 3;
-        fx -= location.w / 5;
-        x += location.w / 5;
+        fx -= location.w / factor;
+        x += location.w / factor;
         break;
       case LEFT:
         fx = x;
         x = fx - 3;
-        fy -= location.h / 5;
-        y += location.h / 5;
+        fy -= location.h / factor;
+        y += location.h / factor;
         x_free = false;
         break;
       case RIGHT:
         x = fx;
         fx = x + 3;
-        fy -= location.h / 5;
-        y += location.h / 5;
+        fy -= location.h / factor;
+        y += location.h / factor;
         x_free = false;
         break;
       default:
