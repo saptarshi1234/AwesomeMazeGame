@@ -265,7 +265,7 @@ void Game::updateBots() {
     // spawn collectibles
     int w = Params::ACTUAL_CELL_SIZE;
     auto type = static_cast<Item::ItemType>(rand() % Item::numTypes);
-    bool generate = rand() % 40 == 0;
+    bool generate = rand() % 20 == 0;
     int width = Params::PATH_WIDTH * w;
     if (generate) {
       int row = rand() % Params::NUM_CELLS_X;
@@ -420,7 +420,7 @@ void Game::render() {
   win.render(player1);
   win.render(player2);
 
-  win.renderPlayerDetails(player1);
+  win.renderPlayerDetails(player1, player2);
   // win.renderPlayerDetails(player2);
 
   for (auto &bot : bots) {

@@ -37,7 +37,7 @@ void TextureManager::initialize(WindowManager win) {
   tex_map[TextureID::INVISIBLE] =
       win.loadTexture("res/textures/tanks/others/inv.png");
   tex_map[TextureID::POWERUP] =
-      win.loadTexture("res/textures/tanks/others/fire.png");
+      win.loadTexture("res/textures/tanks/others/fire2.png");
   tex_map[TextureID::SHIELD] =
       win.loadTexture("res/textures/tanks/others/shield.png");
 }

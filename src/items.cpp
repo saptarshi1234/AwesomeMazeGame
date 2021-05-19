@@ -22,7 +22,7 @@ void Item::init(SDL_Rect loc, ItemType type) {
                             {0, 0},
                             {0, 8},
                             true,
-                            {rect.w, rect.h * 2}};
+                            {rect.w, rect.h}};
   layer_choices[SHIELD] = {
       TextureManager::getTex(TextureID::SHIELD), {0, 0}, {0, 1}};
 

@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "params.hpp"
 #include "textures.hpp"
 
 WindowManager::WindowManager() {}
@@ -16,6 +17,7 @@ WindowManager::WindowManager(const char* title, int h, int w) {
 
   renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
   font32 = TTF_OpenFont("res/fonts/cocogoose.ttf", 32);
+  font16 = TTF_OpenFont("res/fonts/cocogoose.ttf", 16);
 }
 
 SDL_Texture* WindowManager::loadTexture(char* file) {
@@ -108,27 +110,44 @@ void WindowManager::render(Entity& entity) {
   }
 }
 
-void WindowManager::renderPlayerDetails(Player& p) {
+void WindowManager::renderPlayerDetails(Player& p1, Player& p2) {
   SDL_Color white = {255, 255, 255};
   SDL_Color black = {0, 0, 0};
-  int score = p.getScore();
-  renderText({65, 23}, std::to_string(score).c_str(), font32, white);
+  int score1 = p1.getScore();
+  int x1 = Params::SCREEN_WIDTH + 10;
+  int x2 = Params::SCREEN_WIDTH + Params::WIDTH_OFFSET / 2;
+  int y1 = 10;
+  int y2 = 30;
+  renderText({x1, y1}, "You : ", font16, white);
+  renderText({x2, y1}, std::to_string(score1).c_str(), font16, white);
+
+  int score2 = p2.getScore();
+  renderText({x1, y2}, "They :", font16, white);
+  renderText({x2, y2}, std::to_string(score2).c_str(), font16, white);
 
   LayerDetails bar = {TextureManager::getTex(TextureID::HEALTH_BAR)};
   LayerDetails body = {TextureManager::getTex(TextureID::HEALTH_BODY)};
 
-  int w = Params::WIDTH_OFFSET * 4 / 5;
-  int h = Params::ACTUAL_CELL_SIZE / 4;
-  int x = Params::SCREEN_WIDTH + (Params::WIDTH_OFFSET - w) / 2;
-  int y = 50;
+  int icon_size = 20;
 
-  auto collectedItems = p.getCollectedItems();
+  int w = (Params::WIDTH_OFFSET - icon_size) * 4 / 5;
+  int h = Params::ACTUAL_CELL_SIZE / 4;
+  int x = Params::SCREEN_WIDTH + icon_size +
+          (Params::WIDTH_OFFSET - icon_size - w) / 2;
+  int y = y2 + 50;
+
+  auto collectedItems = p1.getCollectedItems();
   for (int key = 0; key < collectedItems.size(); key++) {
     int status = collectedItems[key];
     if (status == -1) continue;
 
-    int yy = y + key * 10;
+    int yy = y + key * 30;
     int ww = w * status / Params::POWERUP_TIME;
+
+    Item item;
+    item.init({Params::SCREEN_WIDTH + 5, yy - 10, 20, 20}, Item::ItemType(key));
+
+    render(item);
 
     render({x, yy, w, h}, bar.getSize(), bar.tex);
     render({x, yy, ww, h}, body.getSize(), body.tex);

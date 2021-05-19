@@ -14,7 +14,7 @@ class WindowManager {
   void render(Entity& e);
   void renderText(std::pair<int, int> loc, const char* p_text, TTF_Font* font,
                   SDL_Color textColor);
-  void renderPlayerDetails(Player& p);
+  void renderPlayerDetails(Player& p1, Player& p2);
   void clearWindow();
   void destroy();
   SDL_Texture* loadTexture(char* file);
@@ -24,4 +24,5 @@ class WindowManager {
   SDL_Window* window;
   SDL_Renderer* renderer;
   TTF_Font* font32;
+  TTF_Font* font16;
 };
