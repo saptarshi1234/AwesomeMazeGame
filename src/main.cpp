@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
   bool isServer = true;
   bool single_player = false;
 
-  char* ip = "127.0.0.1";
+  const char* ip = "127.0.0.1";
 
   cout << argc << endl;
   if (argc > 1) {
@@ -119,7 +119,92 @@ int main(int argc, char* argv[]) {
     }
     cout << "single player" << single_player << endl;
     cout << "server" << isServer << endl;
-    Game game(window, isServer, single_player, ip);
+    Game game;
+    if (!single_player && !isServer) {
+      Entity ip_screen;
+      ip_screen.init({0, 0, Params::TOTAL_SCREEN_WIDTH, Params::SCREEN_HEIGHT});
+      LayerDetails id_bg = {TextureManager::getTex(TextureID::IP)};
+
+      SDL_Rect loc = ip_screen.getLocation();
+      x = loc.x + (loc.w) * 3 / 20;
+      int offset_x = loc.w / 10;
+      int y = loc.y + loc.h / 8;
+      int offset_y = 2 * loc.h / 7;
+
+      std::string input_ip = "";
+      std::string wrong_ip;
+      bool check_wrong_ip = false;
+
+      received_key = false;
+      SDL_StartTextInput();
+      while (!received_key) {
+        window.clearWindow();
+        window.render(loc, id_bg.getSize(), id_bg.tex);
+        if (check_wrong_ip) {
+          window.displayIP(x, y, offset_x, offset_y, input_ip,
+                           wrong_ip == input_ip);
+          if (input_ip != wrong_ip) {
+            check_wrong_ip = false;
+          }
+        } else {
+          window.displayIP(x, y, offset_x, offset_y, input_ip, false);
+        }
+
+        window.display();
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+          if (event.type == SDL_QUIT) {
+            window.destroy();
+            TTF_Quit();
+            SDL_Quit();
+            exit(0);
+          }
+          if (event.type == SDL_KEYDOWN) {
+            switch (event.key.keysym.sym) {
+              case SDLK_RETURN:
+              case SDLK_RETURN2:
+                if (input_ip == "1") {
+                  input_ip = "127.0.0.1";
+                }
+                try {
+                  game =
+                      Game(window, isServer, single_player, input_ip.c_str());
+                  received_key = true;
+                } catch (const char* e) {
+                  check_wrong_ip = true;
+                  wrong_ip = input_ip;
+                }
+                break;
+              case SDLK_BACKSPACE:
+                if (input_ip.length() > 0) {
+                  input_ip.pop_back();
+                }
+                break;
+              case SDLK_c:
+                if (SDL_GetModState() & KMOD_CTRL) {
+                  SDL_SetClipboardText(input_ip.c_str());
+                }
+                break;
+              case SDLK_v:
+                if (SDL_GetModState() & KMOD_CTRL) {
+                  input_ip = SDL_GetClipboardText();
+                }
+                break;
+            }
+          } else if (event.type == SDL_TEXTINPUT) {
+            if (!(SDL_GetModState() & KMOD_CTRL &&
+                  (event.text.text[0] == 'c' || event.text.text[0] == 'C' ||
+                   event.text.text[0] == 'v' || event.text.text[0] == 'V'))) {
+              input_ip += event.text.text;
+            }
+          }
+        }
+        SDL_Delay(100);
+      }
+      SDL_StopTextInput();
+    } else {
+      game = Game(window, isServer, single_player, ip);
+    }
 
     srand((unsigned int)time(NULL));
     game.initialize();
@@ -156,13 +241,14 @@ int main(int argc, char* argv[]) {
       score1 = game.player1.getScore();
     } else {
       score1 = game.player1.getScore();
-      score1 = game.player2.getScore();
+      score2 = game.player2.getScore();
     }
     cout << score1 << " " << score2;
     Entity score_screen;
     score_screen.init(
         {Params::TOTAL_SCREEN_WIDTH / 8, Params::SCREEN_HEIGHT / 8,
          6 * Params::TOTAL_SCREEN_WIDTH / 8, 6 * Params::SCREEN_HEIGHT / 8});
+
     LayerDetails score = {TextureManager::getTex(TextureID::SCORE)};
     SDL_Rect loc = score_screen.getLocation();
     x = loc.x + (loc.w) * 6 / 20;

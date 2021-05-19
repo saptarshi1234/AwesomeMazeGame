@@ -142,6 +142,7 @@ void WindowManager::displayFinalScore(int x, int y, int offset_x, int offset_y,
   TTF_Font* font = TTF_OpenFont("res/fonts/cocogoose.ttf", 24);
   SDL_Color white = {255, 255, 255};
   SDL_Color winner = {0, 255, 0};
+  SDL_Color loser = {255, 148, 148};
   SDL_Color game_over = {255, 0, 0};
 
   renderText({x, y}, "GAME OVER", head_font, game_over);
@@ -160,7 +161,7 @@ void WindowManager::displayFinalScore(int x, int y, int offset_x, int offset_y,
       renderText(
           {score1 > score2 ? x - offset_x / 2 : x - offset_x, y + 4 * offset_y},
           score1 > score2 ? "Yay! You Won!" : "Oh No! You Lost!", head_font,
-          score1 > score2 ? winner : game_over);
+          score1 > score2 ? winner : loser);
     } else {
       renderText({x + 6 * offset_x / 5, y + 4 * offset_y}, "TIE!", head_font,
                  winner);
@@ -171,6 +172,32 @@ void WindowManager::displayFinalScore(int x, int y, int offset_x, int offset_y,
              font16, white);
 
   TTF_CloseFont(font);
+  TTF_CloseFont(head_font);
+}
+
+void WindowManager::displayIP(int x, int y, int offset_x, int offset_y,
+                              std::string ip, bool wrong) {
+  TTF_Font* head_font = TTF_OpenFont("res/fonts/cocogoose.ttf", 36);
+  TTF_Font* font = TTF_OpenFont("res/fonts/cocogoose.ttf", 24);
+  SDL_Color white = {255, 255, 255};
+  SDL_Color green = {0, 255, 0};
+  SDL_Color error = {255, 148, 148};
+  SDL_Color red = {255, 0, 0};
+
+  renderText({x, y}, "ENTER SERVER'S IP ADDRESS", head_font, red);
+
+  renderText({x + 2 * offset_x, y + offset_y / 4}, "(Enter 1 for localhost)",
+             font16, white);
+  if (ip.length() > 0) {
+    renderText({x + 2 * offset_x, y + offset_y}, ip.c_str(), font,
+               wrong ? error : green);
+  }
+  if (wrong) {
+    renderText({x + 11 * offset_x / 5, y + 7 * offset_y / 5},
+               "[Invalid IP address]", font16, error);
+  }
+  TTF_CloseFont(font);
+  TTF_CloseFont(head_font);
 }
 
 void WindowManager::renderPlayerDetails(Player& p1, Player& p2, bool single) {

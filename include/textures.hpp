@@ -27,7 +27,8 @@ enum TextureID {
   POWERUP,
   SHIELD,
 
-  SCORE
+  SCORE,
+  IP
 };
 
 class TextureManager {

@@ -13,8 +13,8 @@
 
 using std::cout;
 using std::endl;
-
-Game::Game(WindowManager win, bool isServer, bool single, char *ip)
+Game::Game() {}
+Game::Game(WindowManager win, bool isServer, bool single, const char *ip)
     : win(win), isServer(isServer), single_player(single) {
   if (single) return;
   if (isServer) {

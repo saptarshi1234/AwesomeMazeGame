@@ -19,6 +19,8 @@ class WindowManager {
   void renderPlayerDetails(Player& p1, Player& p2, bool single);
   void displayFinalScore(int x, int y, int offset_x, int offset_y, int score1,
                          int score2, bool single_player);
+  void displayIP(int x, int y, int offset_x, int offset_y, std::string ip,
+                 bool wrong);
   void clearWindow();
   void destroy();
   SDL_Texture* loadTexture(char* file);

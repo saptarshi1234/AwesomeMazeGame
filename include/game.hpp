@@ -27,7 +27,8 @@ class Game {
   bool space_down;
 
  public:
-  Game(WindowManager win, bool isServer, bool single, char* ip);
+  Game();
+  Game(WindowManager win, bool isServer, bool single, const char* ip);
 
   void initialize();
   void loadGame();
