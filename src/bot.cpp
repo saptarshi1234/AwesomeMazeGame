@@ -128,7 +128,7 @@ void Bot::update(SDL_Rect loc1, SDL_Rect loc2, bool b1, bool b2, Maze* maze) {
   int prob[] = {0, 0, 0, 0};
   int count = 0;
   Direction curr_dir = Entity::getDirection();
-  if (dist != -1) {
+  if (dist1 != INT32_MAX || dist2 != INT32_MAX) {
     Direction p_dir = convInt(maze->dirFromTo(location.x, location.y, loc.x,
                                               loc.y, convDir(curr_dir)));
     Direction p_dirF = p_dir;
@@ -219,20 +219,24 @@ void Bot::update(SDL_Rect loc1, SDL_Rect loc2, bool b1, bool b2, Maze* maze) {
       }
     }
   } else {
+    int count = 0;
     int opp = convDir(curr_dir) - 2;
     if (opp < 0) opp = convDir(curr_dir) + 2;
     for (int i = 0; i < 4; i++) {
       Entity::setDirection(convInt(i));
       if (canMove(maze)) {
         movable[i] = 1;
+        count++;
       }
     }
     for (int i = 0; i < 4; i++) {
       if (movable[i] == 1) {
         if (convInt(i) == curr_dir) {
           prob[i] = 90;
-        } else if (i == opp && movable[convDir(curr_dir)] == 0) {
-          prob[i] == 20;
+        } else if (i == opp) {
+          if (count == 1) {
+            prob[i] == 0;
+          }
         } else {
           prob[i] = 20;
         }

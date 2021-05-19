@@ -144,11 +144,13 @@ void Player::collectItem(Item& item) {
       break;
     case Item::ItemType::MULTIPLIER:
       score_multiplier = 2;
+      collected[item.getType()] = 2 * Params::POWERUP_TIME;
       break;
     case Item::ItemType::POWERUP:
       this->bullet_power *= 2;
       break;
     case Item::ItemType::SHIELD:
+      collected[item.getType()] = 2 * Params::POWERUP_TIME;
       is_shielded = true;
       break;
   }
@@ -163,6 +165,7 @@ void Player::updateItems() {
         case Item::ItemType::INVISIBLE:
           layers[0].tex = F1_tex;
           layers[1].tex = gun;
+          is_invisible = false;
           break;
         case Item::ItemType::MULTIPLIER:
           score_multiplier = 1;
@@ -328,13 +331,30 @@ void Player::checkCollision(Player* p) {
   v_y += (y2 - p_loc.y);
   v2_x = p_loc.x - x2;
   v2_y = p_loc.y - y2;
-
+  double W = (double)location.w + p_loc.w;
+  double H = (double)location.h + p_loc.h;
+  double X = (double)(2 * x2 - location.w) / 2;
+  double Y = (double)(2 * y2 - location.h) / 2;
+  if (v1_x == 0) {
+    W -= ((double)location.w) / 2;
+    X += ((double)location.w) / 4;
+  }
+  if (v1_y == 0) {
+    H -= ((double)location.h) / 2;
+    Y += ((double)location.h) / 4;
+  }
+  if (v2_x == 0) {
+    W -= ((double)p_loc.w) / 2;
+    X += ((double)p_loc.w) / 4;
+  }
+  if (v2_y == 0) {
+    H -= ((double)p_loc.h) / 2;
+    Y += ((double)p_loc.h) / 4;
+  }
   vector<double> c1 = {(double)(2 * x1 + location.w) / 2,
                        (double)(2 * y1 + location.h) / 2};
   vector<double> dir = {(double)v_x, (double)v_y};
-  SDL_FRect obj = {(double)(2 * x2 - location.w) / 2,
-                   (double)(2 * y2 - location.h) / 2,
-                   (double)location.w + p_loc.w, (double)location.h + p_loc.h};
+  SDL_FRect obj = {X, Y, W, H};
   double t, nx, ny;
   vector<double> change1, change2;
   bool b = rayRectCollision(c1, dir, obj, t, nx, ny);

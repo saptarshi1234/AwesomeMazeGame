@@ -253,8 +253,13 @@ void Game::updateBots() {
       // unsynced_bots.push_back(b);
     }
     for (int i = 0; i < bots.size(); i++) {
-      bots[i].update(player1.getLocation(), player2.getLocation(),
-                     player1.isInvisible(), player2.isInvisible(), &maze);
+      if (single_player) {
+        bots[i].update(player1.getLocation(), player2.getLocation(),
+                       player1.isInvisible(), true, &maze);
+      } else {
+        bots[i].update(player1.getLocation(), player2.getLocation(),
+                       player1.isInvisible(), player2.isInvisible(), &maze);
+      }
       if (i < 10 && bots[i].shouldFire()) {
         Bullet b = bots[i].fireBullet();
         bullets.push_back(b);
