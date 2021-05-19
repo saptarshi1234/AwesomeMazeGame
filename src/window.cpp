@@ -109,8 +109,21 @@ void WindowManager::render(Entity& entity) {
     render(dst, src, layer.tex);
   }
 }
+void WindowManager::displayText(int x, int y, int offset, int index) {
+  TTF_Font* font = TTF_OpenFont("res/fonts/cocogoose.ttf", 24);
+  SDL_Color white = {255, 255, 255};
+  SDL_Color selected = {0, 255, 0};
 
-void WindowManager::renderPlayerDetails(Player& p1, Player& p2) {
+  renderText({x, y}, "1 Player", font, index == 1 ? selected : white);
+  renderText({x, y + offset}, "2 Player : Server", font,
+             index == 2 ? selected : white);
+  renderText({x, y + 2 * offset}, "2 Player : Client", font,
+             index == 3 ? selected : white);
+
+  TTF_CloseFont(font);
+}
+
+void WindowManager::renderPlayerDetails(Player& p1, Player& p2, bool single) {
   SDL_Color white = {255, 255, 255};
   SDL_Color black = {0, 0, 0};
   int score1 = p1.getScore();
@@ -121,9 +134,11 @@ void WindowManager::renderPlayerDetails(Player& p1, Player& p2) {
   renderText({x1, y1}, "You : ", font16, white);
   renderText({x2, y1}, std::to_string(score1).c_str(), font16, white);
 
-  int score2 = p2.getScore();
-  renderText({x1, y2}, "They :", font16, white);
-  renderText({x2, y2}, std::to_string(score2).c_str(), font16, white);
+  if (!single) {
+    int score2 = p2.getScore();
+    renderText({x1, y2}, "They :", font16, white);
+    renderText({x2, y2}, std::to_string(score2).c_str(), font16, white);
+  }
 
   LayerDetails bar = {TextureManager::getTex(TextureID::HEALTH_BAR)};
   LayerDetails body = {TextureManager::getTex(TextureID::HEALTH_BODY)};

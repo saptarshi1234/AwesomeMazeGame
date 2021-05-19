@@ -21,12 +21,13 @@ class Game {
   Client client;
   CustomSocket* c_sock;
   int num_other_bullets;
+  bool single_player;
 
   std::vector<Direction> dkey_stack;
   bool space_down;
 
  public:
-  Game(WindowManager win, bool isServer, char* ip);
+  Game(WindowManager win, bool isServer, bool single, char* ip);
 
   void initialize();
   void loadGame();

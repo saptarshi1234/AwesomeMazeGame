@@ -4,8 +4,10 @@
 #include <iostream>
 #include <vector>
 
+#include "SDL2/SDL_mixer.h"
 #include "bullet.hpp"
 #include "items.hpp"
+#include "sounds.hpp"
 #include "textures.hpp"
 using namespace std;
 void Player::init(SDL_Rect loc) {
@@ -63,6 +65,7 @@ Bullet Player::fireBullet() {
   // }
 
   bullet_fired = true;
+  if (!is_bot) Mix_PlayChannel(-1, SoundManager::getSound(SoundId::FIRE), 0);
   return b;
 }
 
@@ -131,6 +134,8 @@ void Player::updateState() {
 }
 void Player::collectItem(Item& item) {
   collected[item.getType()] = Params::POWERUP_TIME;
+  Mix_PlayChannel(-1, SoundManager::getSound(SoundId::POWERUP_FX), 0);
+
   switch (item.getType()) {
     case Item::ItemType::INVISIBLE:
       layers[0].tex = TextureManager::getTex(TextureID::TANK_INV);

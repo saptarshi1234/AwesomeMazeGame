@@ -14,7 +14,9 @@ class WindowManager {
   void render(Entity& e);
   void renderText(std::pair<int, int> loc, const char* p_text, TTF_Font* font,
                   SDL_Color textColor);
-  void renderPlayerDetails(Player& p1, Player& p2);
+  void displayText(int x, int y, int offset, int index);
+
+  void renderPlayerDetails(Player& p1, Player& p2, bool single);
   void clearWindow();
   void destroy();
   SDL_Texture* loadTexture(char* file);
