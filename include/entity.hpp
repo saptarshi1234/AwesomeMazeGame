@@ -33,6 +33,7 @@ class Entity {
   int velocity;
   SDL_Rect prev_location;
   Direction dir;
+  bool is_invisible = false;
   bool is_moving;
 
  public:
@@ -54,6 +55,8 @@ class Entity {
   bool canMove(Maze* maze);
   void stopMoving();
   bool isMoving();
+  bool isInvisible();
+  void makeInvisible();
   void setDirection(Direction d);
   void setLocation(SDL_Rect rect);
   void setPrevLocation(SDL_Rect loc);

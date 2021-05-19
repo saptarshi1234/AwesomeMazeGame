@@ -12,7 +12,7 @@ void Bullet::init(SDL_Rect loc, bool fired_by, Player *player, double p) {
 
   Entity::init(loc2);
 
-  firedByPlayer = fired_by;
+  fired_by_player = fired_by;
   shooter = player;
   power = p * Params::BULLET_POWER_UNIT;
   velocity = 15;
@@ -52,7 +52,7 @@ bool Bullet::hitTarget(Player &p) {
   if (&p == shooter) {
     return false;
   }
-  if (p.isBot() && !firedByPlayer) {
+  if (p.isBot() && !fired_by_player) {
     return false;
   }
   Direction dir = Entity::getDirection();
@@ -96,24 +96,23 @@ bool Bullet::hitTarget(Player &p) {
     return false;
   }
   destroy = true;
-  if (p.explosion_status != 0) {
-    return true;
-  }
-  if (p.getHP() <= power) {
-    if (!p.isBot()) {
-      p.raiseScore(-1000);
-      if (firedByPlayer) shooter->raiseScore(2 * (p.getHP() + 50));
-    } else if (firedByPlayer)
-      shooter->raiseScore(p.getHP() + 50);
-    p.explosion_status = 1;
-    p.setHP(0);
+  if (p.explosion_status == 0 && !p.isShielded()) {
+    if (p.getHP() <= power) {
+      if (!p.isBot()) {
+        p.raiseScore(-1000);
+        if (fired_by_player) shooter->raiseScore(2 * (p.getHP() + 50));
+      } else if (fired_by_player)
+        shooter->raiseScore(p.getHP() + 50);
+      p.explosion_status = 1;
+      p.setHP(0);
 
-  } else {
-    p.setHP(p.getHP() - power);
-    if (!p.isBot()) {
-      if (firedByPlayer) shooter->raiseScore(2 * power);
-    } else if (firedByPlayer)
-      shooter->raiseScore(power);
+    } else {
+      p.setHP(p.getHP() - power);
+      if (!p.isBot()) {
+        if (fired_by_player) shooter->raiseScore(2 * power);
+      } else if (fired_by_player)
+        shooter->raiseScore(power);
+    }
   }
   if (!(x >= p_loc.x && x < p_loc.x + p_loc.w && y >= p_loc.y &&
         y < p_loc.y + p_loc.h)) {
@@ -123,6 +122,8 @@ bool Bullet::hitTarget(Player &p) {
   return true;
 }
 
+bool Bullet::firedByPlayer() { return fired_by_player; }
+Player *Bullet::shotBy() { return shooter; }
 // std::string Bullet::to_string(Player *p1, Player *p2) {
 //   char space = ' ';
 //   std::stringstream ss;

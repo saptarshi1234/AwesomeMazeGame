@@ -248,7 +248,8 @@ void Game::updateBots() {
       // unsynced_bots.push_back(b);
     }
     for (int i = 0; i < bots.size(); i++) {
-      bots[i].update(player1.getLocation(), player2.getLocation(), &maze);
+      bots[i].update(player1.getLocation(), player2.getLocation(),
+                     player1.isInvisible(), player2.isInvisible(), &maze);
       if (i < 10 && bots[i].shouldFire()) {
         Bullet b = bots[i].fireBullet();
         bullets.push_back(b);
@@ -357,6 +358,14 @@ void Game::update() {
     }
   }
 
+  for (auto bullet_it = bullets.begin(); bullet_it != bullets.end();
+       bullet_it++) {
+    if (bullet_it->destroyBullet()) {
+      bullet_it = bullets.erase(bullet_it);
+      bullet_it--;
+    }
+  }
+
   for (int i = 0; i < bots.size(); i++) {
     bots[i].updateMove();
   }
@@ -382,14 +391,6 @@ void Game::update() {
     }
   }
 
-  for (auto bullet_it = bullets.begin(); bullet_it != bullets.end();
-       bullet_it++) {
-    if (bullet_it->destroyBullet()) {
-      bullet_it = bullets.erase(bullet_it);
-      bullet_it--;
-    }
-  }
-
   for (auto it = items.begin(); it != items.end(); it++) {
     bool b1 = it->checkCollected(player1);
     if (b1) {
@@ -401,6 +402,10 @@ void Game::update() {
     bool b2 = it->checkCollected(player2);
     if (b2) {
       player2.collectItem(*it);
+      it = items.erase(it) - 1;
+      continue;
+    }
+    if (it->shouldDestroy()) {
       it = items.erase(it) - 1;
       continue;
     }
@@ -417,7 +422,7 @@ void Game::render() {
     }
   }
   win.render(player1);
-  win.render(player2);
+  if (!player2.isInvisible()) win.render(player2);
 
   win.renderPlayerDetails(player1, player2);
   // win.renderPlayerDetails(player2);
@@ -427,6 +432,10 @@ void Game::render() {
   }
 
   for (auto &bullet : bullets) {
+    if (bullet.isInvisible() && bullet.firedByPlayer() &&
+        bullet.shotBy() != &player1) {
+      continue;
+    }
     win.render(bullet);
   }
 

@@ -42,7 +42,7 @@ Bullet Player::fireBullet() {
   Bullet b;
   b.init(location, !is_bot, this, bullet_power);
   b.setDirection(this->dir);
-
+  if (this->is_invisible) b.makeInvisible();
   firing = 1;
   // int recoil = 5, shift = 5;
   // switch (dir) {
@@ -135,6 +135,7 @@ void Player::collectItem(Item& item) {
     case Item::ItemType::INVISIBLE:
       layers[0].tex = TextureManager::getTex(TextureID::TANK_INV);
       layers[1].tex = TextureManager::getTex(TextureID::GUN_INV);
+      is_invisible = true;
       break;
     case Item::ItemType::MULTIPLIER:
       score_multiplier = 2;
@@ -143,6 +144,7 @@ void Player::collectItem(Item& item) {
       this->bullet_power *= 2;
       break;
     case Item::ItemType::SHIELD:
+      is_shielded = true;
       break;
   }
 }
@@ -164,12 +166,15 @@ void Player::updateItems() {
           this->bullet_power /= 2;
           break;
         case Item::ItemType::SHIELD:
+          is_shielded = false;
           break;
       }
       collected[key] = -1;
     }
   }
 }
+
+bool Player::isShielded() { return is_shielded; }
 
 std::vector<int> Player::getCollectedItems() { return collected; }
 

@@ -129,9 +129,9 @@ std::vector<std::vector<int>> Maze::render() {
       if (maze[i][j].right) w += wallLength;
       int temp = rand() % 100;
       int temp2 = rand() % 100;
-      if (i != mazeWidth - 1 && temp < 15) w = pathLength + wallLength;
+      if (i != mazeWidth - 1 && temp < 20) w = pathLength + wallLength;
 
-      if (j != mazeHeight - 1 && temp2 < 15) h = pathLength + wallLength;
+      if (j != mazeHeight - 1 && temp2 < 20) h = pathLength + wallLength;
 
       for (int x = startX; x < startX + w; x++) {
         for (int y = startY; y < startY + h; y++) {
@@ -187,6 +187,7 @@ std::vector<std::vector<int>> Maze::getPixelV() { return pixelV; }
 
 void Maze::setPixelV(std::vector<std::vector<int>> v) { pixelV = v; }
 
+// using Djikstra
 void Maze::calcDistances() {
   distances.resize(nodes.size());
   int nodeW = nodes.size();

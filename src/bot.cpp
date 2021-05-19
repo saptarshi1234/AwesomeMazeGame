@@ -93,23 +93,34 @@ void Bot::setHP(double h) {
       (int)(Params::ACTUAL_CELL_SIZE * 16 / 10 * hp / Params::MAX_BOT_HP);
 }
 
-void Bot::update(SDL_Rect loc1, SDL_Rect loc2, Maze* maze) {
+void Bot::update(SDL_Rect loc1, SDL_Rect loc2, bool b1, bool b2, Maze* maze) {
   int dist1 = maze->dist(location.x, location.y, loc1.x, loc1.y);
   int dist2 = maze->dist(location.x, location.y, loc2.x, loc2.y);
-  if (dist1 == -1) dist1 = INT32_MAX;
-  if (dist2 == -1) dist2 = INT32_MAX;
+  if (dist1 == -1 || b1) dist1 = INT32_MAX;
+  if (dist2 == -1 || b2) dist2 = INT32_MAX;
   SDL_Rect loc;
   int dist;
-  if (dist1 > dist2)
+  if (dist1 - 3 > dist2) {
     loc = loc2;
-  else if (dist2 > dist1)
+    chosen = -1;
+  } else if (dist2 - 3 > dist1) {
+    chosen = -1;
     loc = loc1;
-  else {
-    int t = rand() % 2;
-    if (t == 0)
+  } else {
+    if (chosen == 1) {
       loc = loc1;
-    else
+    } else if (chosen == 2) {
       loc = loc2;
+    } else {
+      int t = rand() % 2;
+      if (t == 0) {
+        loc = loc1;
+        chosen = 1;
+      } else {
+        loc = loc2;
+        chosen = 2;
+      }
+    }
   }
   bool moving = is_moving;
   dist = maze->dist(location.x, location.y, loc.x, loc.y);

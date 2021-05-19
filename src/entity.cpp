@@ -229,6 +229,8 @@ std::string Entity::to_string() {
   return ss.str();
 }
 
+bool Entity::isInvisible() { return is_invisible; }
+void Entity::makeInvisible() { is_invisible = true; }
 SDL_Rect Entity::getPrevLocation() { return prev_location; }
 void Entity::setPrevLocation(SDL_Rect loc) { prev_location = loc; }
 

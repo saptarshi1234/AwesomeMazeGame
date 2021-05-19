@@ -1,5 +1,7 @@
 #include "items.hpp"
 
+#include <random>
+
 #include "params.hpp"
 #include "player.hpp"
 #include "textures.hpp"
@@ -8,6 +10,7 @@ Item::Item() {}
 
 void Item::init(SDL_Rect loc, ItemType type) {
   Entity::init(loc);
+  itemDestroyCounter = 80 + (rand() % 20);
   this->type = type;
 
   SDL_Rect rect = getPhysicalLocation();
@@ -35,34 +38,12 @@ Item::ItemType Item::getType() { return type; }
 SDL_Rect Item::getPhysicalLocation() { return location; }
 
 bool Item::checkCollected(Player &p) {
-  auto cell1 = p.getLocation();
-  auto cell2 = p.getLocation();
+  auto p_loc = p.getLocation();
 
-  int w = Params::ACTUAL_CELL_SIZE * Params::PATH_WIDTH;
-
-  switch (p.getDirection()) {
-    case TOP:
-      cell2.y -= w;
-      break;
-    case RIGHT:
-      cell2.x += w;
-      break;
-    case BOTTOM:
-      cell2.y += w;
-      break;
-    case LEFT:
-      cell2.x -= w;
-      break;
-    default:
-      break;
-  }
-
-  int curr_x = location.x - w / 4;
-  int curr_y = location.y - w / 4;
-
-  if ((cell1.x == curr_x && cell1.y == curr_y) ||
-      (cell2.x == curr_x && cell2.y == curr_y))
+  if (location.x < p_loc.x + p_loc.w && location.x + location.w > p_loc.x &&
+      location.y < p_loc.y + p_loc.h && location.y + location.h > p_loc.y) {
     return true;
+  }
   return false;
 }
 
@@ -85,4 +66,9 @@ void Item::from_string(std::string s) {
   ss >> type_int;
 
   init(location, ItemType(type_int));
+}
+
+bool Item::shouldDestroy() {
+  itemDestroyCounter--;
+  return itemDestroyCounter <= 0;
 }

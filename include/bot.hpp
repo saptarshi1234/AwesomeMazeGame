@@ -8,13 +8,14 @@ class Bot : public Player {
   int fireFreq;
   int updateFreq;
   Direction last_direction;
+  int chosen = -1;
 
  public:
   Bot();
   void setHP(double h);
   void updateMove();
   void init(SDL_Rect loc);
-  void update(SDL_Rect loc1, SDL_Rect loc2, Maze* maze);
+  void update(SDL_Rect loc1, SDL_Rect loc2, bool b1, bool b2, Maze* maze);
   void setFireFreq(int f);
   void setUpdateFreq(int f);
   bool shouldFire();

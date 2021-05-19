@@ -19,9 +19,11 @@ class Player : public Entity {
   int score = 0;
   int score_multiplier = 1;
   double bullet_power = 1;
+  bool is_shielded = false;
   double hp = Params::MAX_HP;
   std::vector<int> collected;
   bool collided;
+  int invDestructionCounter = 50;
 
  public:
   // Player();
@@ -34,6 +36,7 @@ class Player : public Entity {
   void setBulletPower(double x);
   void raiseScore(int s);
   double getHP();
+  bool isShielded();
   double getBulletPower();
   int getScore();
   bool isBot();

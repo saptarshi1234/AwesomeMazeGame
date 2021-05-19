@@ -15,10 +15,12 @@ class Item : public Entity {
   bool checkCollected(Player &p);
   SDL_Rect getLocation();
   virtual SDL_Rect getPhysicalLocation();
+  bool shouldDestroy();
 
   std::string to_string();
   void from_string(std::string s);
 
  private:
   ItemType type;
+  int itemDestroyCounter;
 };
