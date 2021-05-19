@@ -211,14 +211,6 @@ void Game::handleEvents() {
           if (!space_down) {
             Bullet b = player1.fireBullet();
             bullets.push_back(b);
-            for (int i = 0; i < bots.size(); i++) {
-              if (i < 10 && bots[i].shouldFire()) {
-                Bullet b = bots[i].fireBullet();
-                bullets.push_back(b);
-              }
-              bots[i].move(&maze);
-            }
-            // player1.bullet_fired = true;
             space_down = true;
           }
           break;
@@ -255,10 +247,25 @@ void Game::updateBots() {
       bots.push_back(b);
       // unsynced_bots.push_back(b);
     }
+    for (int i = 0; i < bots.size(); i++) {
+      bots[i].update(player1.getLocation(), player2.getLocation(), &maze);
+      if (i < 10 && bots[i].shouldFire()) {
+        Bullet b = bots[i].fireBullet();
+        bullets.push_back(b);
+      }
+      bots[i].move(&maze);
+    }
 
+    for (auto it = bots.begin(); it != bots.end(); it++) {
+      if (it->getHP() <= 0 && it->explosion_status == -1) {
+        it = bots.erase(it) - 1;
+      }
+    }
+  } else {
     // spawn collectibles
+    int w = Params::ACTUAL_CELL_SIZE;
     auto type = static_cast<Item::ItemType>(rand() % Item::numTypes);
-    bool generate = rand() % 20 == 0;
+    bool generate = rand() % 40 == 0;
     int width = Params::PATH_WIDTH * w;
     if (generate) {
       int row = rand() % Params::NUM_CELLS_X;
@@ -271,51 +278,12 @@ void Game::updateBots() {
 
       items.push_back(item);
     }
-
-    for (int i = 0; i < bots.size(); i++) {
-      if (bots[i].shouldUpdate()) {
-        bots[i].update(player1.getLocation(), player2.getLocation(), &maze);
-      }
-      if (i < 10 && bots[i].shouldFire()) {
-        Bullet b = bots[i].fireBullet();
-        bullets.push_back(b);
-      }
-      bots[i].move(&maze);
-    }
-
-    player1.move(&maze);
-    player1.updateItems();
-
-    // player2.move(&maze);
-    // player2.updateItems();
-
-    for (auto it = bots.begin(); it != bots.end(); it++) {
-      if (it->getHP() <= 0 && it->explosion_status == -1) {
-        it = bots.erase(it) - 1;
-      }
-    }
-  } else {
-    for (int i = 0; i < bots.size(); i++) {
-      bots[i].move(&maze);
-    }
-    player1.move(&maze);
-    player1.updateItems();
+    // for (int i = 0; i < bots.size(); i++) {
+    //   bots[i].move(&maze);
+    // }
   }
-
-  if (isServer)
-    player1.checkCollision(&player2);
-  else
-    player2.checkCollision(&player1);
-
-  for (int i = 0; i < bots.size(); i++) {
-    if (isServer) {
-      player1.checkCollision(&bots[i]);
-      player2.checkCollision(&bots[i]);
-    } else {
-      player2.checkCollision(&bots[i]);
-      player1.checkCollision(&bots[i]);
-    }
-  }
+  player1.move(&maze);
+  player1.updateItems();
 }
 
 void Game::sync() {
@@ -335,6 +303,18 @@ void Game::sync() {
     }
     c_sock->send(ss_send.str());
 
+    // items recv
+    std::stringstream ss_recv(c_sock->recv());
+    char delim = '\n';
+    std::string word;
+
+    items.clear();
+    while (std::getline(ss_recv, word, delim)) {
+      Item item;
+      item.from_string(word);
+      items.push_back(item);
+    }
+
   } else {
     std::stringstream ss_recv(c_sock->recv());
     char delim = '\n';
@@ -352,14 +332,34 @@ void Game::sync() {
       }
       bots.push_back(b);
     }
+
+    // items send
+    std::stringstream ss_send;
+    for (Item &item : items) {
+      ss_send << item.to_string() << '\n';
+    }
+    c_sock->send(ss_send.str());
   }
 }
 
 void Game::update() {
-  if (!isServer) {
-    for (int i = 0; i < bots.size(); i++) {
-      bots[i].move(&maze);
+  if (isServer)
+    player1.checkCollision(&player2);
+  else
+    player2.checkCollision(&player1);
+
+  for (int i = 0; i < bots.size(); i++) {
+    if (isServer) {
+      player1.checkCollision(&bots[i]);
+      player2.checkCollision(&bots[i]);
+    } else {
+      player2.checkCollision(&bots[i]);
+      player1.checkCollision(&bots[i]);
     }
+  }
+
+  for (int i = 0; i < bots.size(); i++) {
+    bots[i].updateMove();
   }
   for (auto bullet_it = bullets.begin(); bullet_it != bullets.end();
        bullet_it++) {
@@ -421,6 +421,7 @@ void Game::render() {
   win.render(player2);
 
   win.renderPlayerDetails(player1);
+  // win.renderPlayerDetails(player2);
 
   for (auto &bot : bots) {
     win.render(bot);

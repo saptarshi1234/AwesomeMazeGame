@@ -286,3 +286,29 @@ std::string Bot::to_update(int index) {
 
 bool Bot::directionChanged() { return last_direction != dir; }
 // invisibility case remain
+
+void Bot::updateMove() {
+  if (firing > 0) firing++;
+  if (firing == 4) {
+    layers[1].offset = {0, 0};
+    firing = 0;
+  }
+
+  if (explosion_status > 0) {
+    layers[2].toShow = true;
+    if (explosion_status == 2) {
+      layers[0].toShow = false;
+      layers[1].toShow = false;
+    } else if (explosion_status == 1) {
+      is_moving = false;
+    }
+    layers[2].crop_details.first = explosion_status - 1;
+    explosion_status++;
+
+    if (explosion_status == 8) {
+      explosion_status = -1;
+      // TODO replace
+      layers[2].toShow = false;
+    }
+  }
+}

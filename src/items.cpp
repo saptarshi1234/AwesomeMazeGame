@@ -65,3 +65,24 @@ bool Item::checkCollected(Player &p) {
     return true;
   return false;
 }
+
+std::string Item::to_string() {
+  std::stringstream ss;
+  char space = ' ';
+  ss << location.x << space << location.y << space << location.w << space
+     << location.h << space << type;
+  return ss.str();
+}
+
+void Item::from_string(std::string s) {
+  std::stringstream ss(s);
+  int type_int;
+
+  ss >> location.x;
+  ss >> location.y;
+  ss >> location.w;
+  ss >> location.h;
+  ss >> type_int;
+
+  init(location, ItemType(type_int));
+}
