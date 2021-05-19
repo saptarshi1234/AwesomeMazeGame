@@ -82,8 +82,8 @@ Bot::Bot() {
 }
 
 void Bot::init(SDL_Rect loc) {
-  Player::init(loc);
   is_bot = true;
+  Player::init(loc);
   hp = 100;
 }
 

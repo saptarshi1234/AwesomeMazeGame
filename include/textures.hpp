@@ -8,6 +8,7 @@ enum TextureID {
   TANK_F1,
   TANK_F2,
   TANK_INV,
+  BOT_BODY,
   GUN,
   GUN_INV,
   BULLET,

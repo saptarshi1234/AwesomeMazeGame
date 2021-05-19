@@ -1,6 +1,7 @@
 #include "game.hpp"
 
 #include <algorithm>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -13,6 +14,8 @@
 
 using std::cout;
 using std::endl;
+using std::setfill;
+using std::setw;
 
 Game::Game(WindowManager win, bool isServer, bool single, char *ip)
     : win(win), isServer(isServer), single_player(single) {
@@ -436,6 +439,8 @@ void Game::update() {
       continue;
     }
   }
+
+  // TODO add clock
 }
 
 void Game::render() {
@@ -452,9 +457,6 @@ void Game::render() {
     if (!player2.isInvisible()) win.render(player2);
   }
 
-  win.renderPlayerDetails(player1, player2, single_player);
-  // win.renderPlayerDetails(player2);
-
   for (auto &bot : bots) {
     win.render(bot);
   }
@@ -470,6 +472,22 @@ void Game::render() {
   for (auto &item : items) {
     win.render(item);
   }
+
+  win.renderPlayerDetails(player1, player2, single_player);
+
+  if (!single_player) {
+    TTF_Font *font = TTF_OpenFont("res/fonts/cocogoose.ttf", 24);
+    SDL_Color white = {255, 255, 255};
+    int sec = (Params::GAME_DURATION * 1000 - time_elapsed) / 1000;
+    int min = sec / 60;
+    sec %= 60;
+    std::stringstream time_ss;
+    time_ss << setw(2) << setfill('0') << min << ":" << setw(2) << setfill('0')
+            << sec;
+    std::pair<int, int> loc = {Params::SCREEN_WIDTH + Params::WIDTH_OFFSET / 5,
+                               Params::SCREEN_HEIGHT * 9 / 10};
+    win.renderText(loc, time_ss.str().c_str(), font, white);
+  }
 }
 void Game::wait(int delay) { SDL_Delay(delay); }
 
@@ -483,6 +501,14 @@ void Game::quit() {
 
 bool Game::isRunning() { return running; };
 
+void Game::modifyTime(int time) {
+  if (!single_player) {
+    time_elapsed = time;
+    if (time >= 1000 * Params::GAME_DURATION) {
+      running = false;
+    }
+  }
+}
 // tank destroy before targetHit
 // not move/shoot while destroying
 // power-ups timer

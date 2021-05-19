@@ -18,6 +18,8 @@ void TextureManager::initialize(WindowManager win) {
       win.loadTexture("res/textures/tanks/body/HULL_F2.png");
   tex_map[TextureID::TANK_INV] =
       win.loadTexture("res/textures/tanks/body/HULL_blurred.png");
+  tex_map[TextureID::BOT_BODY] =
+      win.loadTexture("res/textures/tanks/body/Bot_body2.png");
   tex_map[TextureID::GUN_INV] =
       win.loadTexture("res/textures/tanks/others/guns_blurred.png");
 

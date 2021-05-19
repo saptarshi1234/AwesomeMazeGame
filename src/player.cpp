@@ -19,12 +19,20 @@ void Player::init(SDL_Rect loc) {
   int offX = Params::ACTUAL_CELL_SIZE / 2;
 
   Entity::init(loc);
+  SDL_Texture* body;
   F1_tex = TextureManager::getTex(TextureID::TANK_F1);
   F2_tex = TextureManager::getTex(TextureID::TANK_F2);
-  gun = TextureManager::getTex(TextureID::GUN);
+
+  if (is_bot) {
+    body = TextureManager::getTex(TextureID::BOT_BODY);
+    gun = nullptr;
+  } else {
+    body = F1_tex;
+    gun = TextureManager::getTex(TextureID::GUN);
+  }
   layers = {
-      {F1_tex, {0, 0}},
-      {TextureManager::getTex(TextureID::GUN), {0, 0}},
+      {body, {0, 0}},
+      {gun, {0, 0}},
       {TextureManager::getTex(TextureID::EXPLOSION), {0, 0}, {0, 8}, false},
       {TextureManager::getTex(TextureID::HEALTH_BAR),
        {-offX, -offX},

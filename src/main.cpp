@@ -17,12 +17,20 @@ const char* window_name = "GAME";
 struct Clock {
   int last_tick_time = 0;
   int delta = 0;
+  int initial;
+  int started = false;
 
   void tick() {
     int tick_time = SDL_GetTicks();
+    if (!started) {
+      started = true;
+      initial = tick_time;
+    }
     delta = tick_time - last_tick_time;
     last_tick_time = tick_time;
   }
+
+  int getElapsed() { return SDL_GetTicks() - initial; }
 };
 
 int main(int argc, char* argv[]) {
@@ -139,6 +147,8 @@ int main(int argc, char* argv[]) {
       game.updateBots();
       game.sync();
       game.update();
+
+      game.modifyTime(stats_clk.getElapsed());
 
       window.clearWindow();
 
