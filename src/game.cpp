@@ -301,12 +301,22 @@ void Game::updateBots() {
       running = false;
     } else if (isServer) {
       player1.respawn({w, w, p * w, p * w});
+
     } else {
       player1.respawn({Params::SCREEN_WIDTH - (p + 1) * w, w, p * w, p * w});
     }
   }
+  if (!single_player && player2.explosion_status == -1) {
+    if (isServer) {
+      player2.respawn({Params::SCREEN_WIDTH - (p + 1) * w, w, p * w, p * w});
+    } else {
+      player2.respawn({w, w, p * w, p * w});
+    }
+  }
   player1.move(&maze);
   player1.updateItems();
+
+  if (!single_player) player2.updateItems();
 }
 
 void Game::sync() {

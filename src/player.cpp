@@ -149,18 +149,18 @@ void Player::collectItem(Item& item) {
       layers[0].tex = TextureManager::getTex(TextureID::TANK_INV);
       layers[1].tex = TextureManager::getTex(TextureID::GUN_INV);
       is_invisible = true;
-      collected[item.getType()] = 2 * Params::POWERUP_TIME / 2;
+      collected[item.getType()] = Params::POWERUP_TIME;
       break;
     case Item::ItemType::MULTIPLIER:
       score_multiplier = 2;
-      collected[item.getType()] = 2 * Params::POWERUP_TIME;
+      collected[item.getType()] = Params::POWERUP_TIME;
       break;
     case Item::ItemType::POWERUP:
       this->bullet_power *= 2;
-      collected[item.getType()] = 3 * Params::POWERUP_TIME / 2;
+      collected[item.getType()] = Params::POWERUP_TIME;
       break;
     case Item::ItemType::SHIELD:
-      collected[item.getType()] = 3 * Params::POWERUP_TIME / 2;
+      collected[item.getType()] = Params::POWERUP_TIME;
       is_shielded = true;
       break;
   }
@@ -214,6 +214,7 @@ void Player::create_from_string(std::string s) {
   ss >> explosion_status;
   ss >> hp;
   ss >> int_dir;
+  ss >> is_invisible;
 
   dir = Direction(int_dir);
   // setDirection(Direction(int_dir));
@@ -245,9 +246,10 @@ std::string Player::to_string() {
   ss << is_moving << space;
   ss << bullet_fired << space;
   ss << explosion_status << space;
-  ss << hp;
-  ss << space;
-  ss << dir;
+  ss << hp << space;
+  ss << dir << space;
+  ss << is_invisible;
+
   return ss.str();
 }
 
