@@ -1,10 +1,12 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_ttf.h>
 
 #include <iostream>
 
 #include "game.hpp"
 #include "params.hpp"
+#include "sounds.hpp"
 #include "window.hpp"
 
 using std::cout;
@@ -44,6 +46,10 @@ int main(int argc, char* argv[]) {
     std::cout << "could not iniitialize SDL";
   TTF_Init();
   std::cout << "SDL loaded" << std::endl;
+  Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
+  SoundManager::initialize();
+
+  srand((unsigned)time(0));
 
   WindowManager window(window_name, Params::SCREEN_HEIGHT,
                        Params::TOTAL_SCREEN_WIDTH);
