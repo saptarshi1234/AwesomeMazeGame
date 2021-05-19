@@ -1,6 +1,9 @@
 #include "game.hpp"
 
+#include <SDL2/SDL_mixer.h>
+
 #include <algorithm>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -9,10 +12,14 @@
 #include "entity.hpp"
 #include "maze.hpp"
 #include "params.hpp"
+#include "sounds.hpp"
 #include "window.hpp"
 
 using std::cout;
 using std::endl;
+using std::setfill;
+using std::setw;
+
 Game::Game() {}
 Game::Game(WindowManager win, bool isServer, bool single, const char *ip)
     : win(win), isServer(isServer), single_player(single) {
@@ -298,12 +305,22 @@ void Game::updateBots() {
       running = false;
     } else if (isServer) {
       player1.respawn({w, w, p * w, p * w});
+
     } else {
       player1.respawn({Params::SCREEN_WIDTH - (p + 1) * w, w, p * w, p * w});
     }
   }
+  if (!single_player && player2.explosion_status == -1) {
+    if (isServer) {
+      player2.respawn({Params::SCREEN_WIDTH - (p + 1) * w, w, p * w, p * w});
+    } else {
+      player2.respawn({w, w, p * w, p * w});
+    }
+  }
   player1.move(&maze);
   player1.updateItems();
+
+  if (!single_player) player2.updateItems();
 }
 
 void Game::sync() {
@@ -436,6 +453,10 @@ void Game::update() {
       continue;
     }
   }
+
+  if (player1.explosion_status == 1) {
+    Mix_PlayChannel(-1, SoundManager::getSound(SoundId::DEATH), 0);
+  }
 }
 
 void Game::render() {
@@ -452,9 +473,6 @@ void Game::render() {
     if (!player2.isInvisible()) win.render(player2);
   }
 
-  win.renderPlayerDetails(player1, player2, single_player);
-  // win.renderPlayerDetails(player2);
-
   for (auto &bot : bots) {
     win.render(bot);
   }
@@ -470,6 +488,22 @@ void Game::render() {
   for (auto &item : items) {
     win.render(item);
   }
+
+  win.renderPlayerDetails(player1, player2, single_player);
+
+  if (!single_player) {
+    TTF_Font *font = TTF_OpenFont("res/fonts/cocogoose.ttf", 24);
+    SDL_Color white = {255, 255, 255};
+    int sec = (Params::GAME_DURATION * 1000 - time_elapsed) / 1000;
+    int min = sec / 60;
+    sec %= 60;
+    std::stringstream time_ss;
+    time_ss << setw(2) << setfill('0') << min << ":" << setw(2) << setfill('0')
+            << sec;
+    std::pair<int, int> loc = {Params::SCREEN_WIDTH + Params::WIDTH_OFFSET / 5,
+                               Params::SCREEN_HEIGHT * 9 / 10};
+    win.renderText(loc, time_ss.str().c_str(), font, white);
+  }
 }
 void Game::wait(int delay) { SDL_Delay(delay); }
 
@@ -483,7 +517,15 @@ void Game::quit() {
 
 bool Game::isRunning() { return running; };
 
-// tank destroy before targetHit
-// not move/shoot while destroying
-// power-ups timer
-// power-ups logic
+void Game::modifyTime(int time) {
+  if (!single_player) {
+    time_elapsed = time;
+    if (time >= 1000 * Params::GAME_DURATION) {
+      running = false;
+    }
+  }
+}
+
+// HP powerUP
+// background music
+// screens manage

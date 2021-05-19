@@ -8,11 +8,13 @@ enum TextureID {
   TANK_F1,
   TANK_F2,
   TANK_INV,
+  BOT_BODY,
   GUN,
   GUN_INV,
   BULLET,
 
   GROUND,
+  OVERLAY,
   EXPLOSION,
 
   CLIENT,
@@ -26,6 +28,7 @@ enum TextureID {
   INVISIBLE,
   POWERUP,
   SHIELD,
+  HP,
 
   SCORE,
   IP

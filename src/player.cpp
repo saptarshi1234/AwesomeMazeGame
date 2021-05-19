@@ -19,12 +19,20 @@ void Player::init(SDL_Rect loc) {
   int offX = Params::ACTUAL_CELL_SIZE / 2;
 
   Entity::init(loc);
+  SDL_Texture* body;
   F1_tex = TextureManager::getTex(TextureID::TANK_F1);
   F2_tex = TextureManager::getTex(TextureID::TANK_F2);
-  gun = TextureManager::getTex(TextureID::GUN);
+
+  if (is_bot) {
+    body = TextureManager::getTex(TextureID::BOT_BODY);
+    gun = nullptr;
+  } else {
+    body = F1_tex;
+    gun = TextureManager::getTex(TextureID::GUN);
+  }
   layers = {
-      {F1_tex, {0, 0}},
-      {TextureManager::getTex(TextureID::GUN), {0, 0}},
+      {body, {0, 0}},
+      {gun, {0, 0}},
       {TextureManager::getTex(TextureID::EXPLOSION), {0, 0}, {0, 8}, false},
       {TextureManager::getTex(TextureID::HEALTH_BAR),
        {-offX, -offX},
@@ -141,20 +149,23 @@ void Player::collectItem(Item& item) {
       layers[0].tex = TextureManager::getTex(TextureID::TANK_INV);
       layers[1].tex = TextureManager::getTex(TextureID::GUN_INV);
       is_invisible = true;
-      collected[item.getType()] = 2 * Params::POWERUP_TIME / 2;
+      collected[item.getType()] = Params::POWERUP_TIME;
       break;
     case Item::ItemType::MULTIPLIER:
       score_multiplier = 2;
-      collected[item.getType()] = 2 * Params::POWERUP_TIME;
+      collected[item.getType()] = Params::POWERUP_TIME;
       break;
     case Item::ItemType::POWERUP:
       this->bullet_power *= 2;
-      collected[item.getType()] = 3 * Params::POWERUP_TIME / 2;
+      collected[item.getType()] = Params::POWERUP_TIME;
       break;
     case Item::ItemType::SHIELD:
-      collected[item.getType()] = 3 * Params::POWERUP_TIME / 2;
+      collected[item.getType()] = Params::POWERUP_TIME;
       is_shielded = true;
       break;
+    case Item::ItemType::HP:
+      hp = std::max(0.0 + Params::MAX_HP, hp + Params::HP_INCREASE);
+      setHP(hp);
   }
 }
 
@@ -206,6 +217,7 @@ void Player::create_from_string(std::string s) {
   ss >> explosion_status;
   ss >> hp;
   ss >> int_dir;
+  ss >> is_invisible;
 
   dir = Direction(int_dir);
   // setDirection(Direction(int_dir));
@@ -237,9 +249,10 @@ std::string Player::to_string() {
   ss << is_moving << space;
   ss << bullet_fired << space;
   ss << explosion_status << space;
-  ss << hp;
-  ss << space;
-  ss << dir;
+  ss << hp << space;
+  ss << dir << space;
+  ss << is_invisible;
+
   return ss.str();
 }
 

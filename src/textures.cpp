@@ -10,6 +10,8 @@ void TextureManager::initialize(WindowManager win) {
       win.loadTexture("res/textures/background/ground.png");
   tex_map[TextureID::EXPLOSION] =
       win.loadTexture("res/textures/tanks/others/explosion.png");
+  tex_map[TextureID::OVERLAY] =
+      win.loadTexture("res/textures/background/overlay.png");
 
   // TODO
   tex_map[TextureID::TANK_F1] =
@@ -18,6 +20,8 @@ void TextureManager::initialize(WindowManager win) {
       win.loadTexture("res/textures/tanks/body/HULL_F2.png");
   tex_map[TextureID::TANK_INV] =
       win.loadTexture("res/textures/tanks/body/HULL_blurred.png");
+  tex_map[TextureID::BOT_BODY] =
+      win.loadTexture("res/textures/tanks/body/Bot_body2.png");
   tex_map[TextureID::GUN_INV] =
       win.loadTexture("res/textures/tanks/others/guns_blurred.png");
 
@@ -40,6 +44,8 @@ void TextureManager::initialize(WindowManager win) {
       win.loadTexture("res/textures/tanks/others/fire2.png");
   tex_map[TextureID::SHIELD] =
       win.loadTexture("res/textures/tanks/others/shield.png");
+  tex_map[TextureID::HP] = win.loadTexture("res/textures/tanks/others/hp.jpeg");
+
   tex_map[TextureID::SCORE] =
       win.loadTexture("res/textures/background/score.png");
   tex_map[TextureID::IP] = win.loadTexture("res/textures/background/ip.png");

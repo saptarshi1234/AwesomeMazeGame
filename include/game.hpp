@@ -22,6 +22,7 @@ class Game {
   CustomSocket* c_sock;
   int num_other_bullets;
   bool single_player;
+  int time_elapsed;
 
   std::vector<Direction> dkey_stack;
   bool space_down;
@@ -40,6 +41,7 @@ class Game {
   void wait(int);
   void quit();
   bool isRunning();
+  void modifyTime(int time);
 
   Player player1, player2;
   std::vector<Bullet> bullets;

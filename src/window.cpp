@@ -234,7 +234,7 @@ void WindowManager::renderPlayerDetails(Player& p1, Player& p2, bool single) {
   auto collectedItems = p1.getCollectedItems();
   for (int key = 0; key < collectedItems.size(); key++) {
     int status = collectedItems[key];
-    if (status == -1) continue;
+    if (status == -1 || key == 4) continue;
 
     int yy = y + key * 30;
     int ww = w * status / Params::POWERUP_TIME;

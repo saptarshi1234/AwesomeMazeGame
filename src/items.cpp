@@ -28,6 +28,7 @@ void Item::init(SDL_Rect loc, ItemType type) {
                             {rect.w, rect.h}};
   layer_choices[SHIELD] = {
       TextureManager::getTex(TextureID::SHIELD), {0, 0}, {0, 1}};
+  layer_choices[HP] = {TextureManager::getTex(TextureID::HP), {0, 0}, {0, 1}};
 
   layer_choices[POWERUP].vertical_crop = false;
 
