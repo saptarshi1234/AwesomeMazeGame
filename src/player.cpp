@@ -80,7 +80,9 @@ bool Player::isBot() { return is_bot; }
 
 void Player::move(Maze* maze) {
   collided = false;
-  Entity::move(maze);
+  if (explosion_status == 0) {
+    Entity::move(maze);
+  }
   if (firing > 0) firing++;
   if (firing == 4) {
     layers[1].offset = {0, 0};

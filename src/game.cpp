@@ -80,6 +80,7 @@ void Game::initialize() {
   if (isServer) {
     maze.generate();
     maze.render();
+    maze.calcDistances();
     maze.addPadding();
 
     std::string s = serialize(maze.getPixelV());
@@ -273,7 +274,7 @@ void Game::updateBots() {
 
     for (int i = 0; i < bots.size(); i++) {
       if (bots[i].shouldUpdate()) {
-        bots[i].update(player1.getLocation(), &maze);
+        bots[i].update(player1.getLocation(), player2.getLocation(), &maze);
       }
       if (i < 10 && bots[i].shouldFire()) {
         Bullet b = bots[i].fireBullet();
@@ -441,3 +442,8 @@ void Game::quit() {
 }
 
 bool Game::isRunning() { return running; };
+
+// tank destroy before targetHit
+// not move/shoot while destroying
+// power-ups timer
+// power-ups logic

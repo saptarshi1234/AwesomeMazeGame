@@ -161,23 +161,27 @@ bool Entity::canMove(Maze* maze) {
     bool x_free = true;
     switch (dir) {
       case TOP:
-        y -= 1;
+        fy = y;
+        y = fy - 3;
         fx -= location.w / 5;
         x += location.w / 5;
         break;
       case BOTTOM:
         y = fy;
+        fy = y + 3;
         fx -= location.w / 5;
         x += location.w / 5;
         break;
       case LEFT:
-        x -= 1;
+        fx = x;
+        x = fx - 3;
         fy -= location.h / 5;
         y += location.h / 5;
         x_free = false;
         break;
       case RIGHT:
         x = fx;
+        fx = x + 3;
         fy -= location.h / 5;
         y += location.h / 5;
         x_free = false;
@@ -186,17 +190,10 @@ bool Entity::canMove(Maze* maze) {
         break;
     }
     if (x != location.x || y != location.y) {
-      if (x_free) {
-        for (int i = x; i < fx; i++) {
-          if (i < 0 || i >= Params::SCREEN_WIDTH || y < 0 ||
-              y >= Params::SCREEN_HEIGHT || !notWall(maze, i, y)) {
-            return false;
-          }
-        }
-      } else {
+      for (int i = x; i < fx; i++) {
         for (int j = y; j < fy; j++) {
-          if (x < 0 || x >= Params::SCREEN_WIDTH || j < 0 ||
-              j >= Params::SCREEN_HEIGHT || !notWall(maze, x, j)) {
+          if (i < 0 || i >= Params::SCREEN_WIDTH || j < 0 ||
+              j >= Params::SCREEN_HEIGHT || !notWall(maze, i, j)) {
             return false;
           }
         }

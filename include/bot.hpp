@@ -13,7 +13,7 @@ class Bot : public Player {
   Bot();
   void setHP(double h);
   void init(SDL_Rect loc);
-  void update(SDL_Rect loc, Maze* maze);
+  void update(SDL_Rect loc1, SDL_Rect loc2, Maze* maze);
   void setFireFreq(int f);
   void setUpdateFreq(int f);
   bool shouldFire();
