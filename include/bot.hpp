@@ -11,6 +11,7 @@ class Bot : public Player {
 
  public:
   Bot();
+  void setHP(double h);
   void init(SDL_Rect loc);
   void update(SDL_Rect loc, Maze* maze);
   void setFireFreq(int f);

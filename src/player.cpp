@@ -61,6 +61,8 @@ Bullet Player::fireBullet() {
     default:
       break;
   }
+
+  bullet_fired = true;
   return b;
 }
 
@@ -84,11 +86,6 @@ void Player::move(Maze* maze) {
     layers[1].offset = {0, 0};
     firing = 0;
   }
-  // if (moves % 2 == 0) {
-  //   layers[0].tex = F1_tex;
-  // } else {
-  //   layers[0].tex = F2_tex;
-  // }
 
   if (explosion_status > 0) {
     layers[2].toShow = true;
@@ -109,6 +106,25 @@ void Player::move(Maze* maze) {
   }
 }
 
+void Player::updateState() {
+  if (firing == 4) {
+    layers[1].offset = {0, 0};
+  }
+
+  if (explosion_status > 0) {
+    layers[2].toShow = true;
+    if (explosion_status == 2) {
+      layers[0].toShow = false;
+      layers[1].toShow = false;
+
+      layers[2].crop_details.first = explosion_status - 1;
+
+      if (explosion_status == 8) {
+        layers[2].toShow = false;
+      }
+    }
+  }
+}
 void Player::collectItem(Item& item) {
   collected[item.getType()] = Params::POWERUP_TIME;
   switch (item.getType()) {
@@ -162,16 +178,18 @@ void Player::create_from_string(std::string s) {
   ss >> location.w;
   ss >> is_moving;
   ss >> bullet_fired;
+  ss >> explosion_status;
+  ss >> hp;
   ss >> int_dir;
 
-  setDirection(Direction(int_dir));
+  dir = Direction(int_dir);
+  // setDirection(Direction(int_dir));
 }
 
 void Player::update_from_string(std::string s) {
   std::stringstream ss(s);
   int int_dir;
   ss >> int_dir;
-  // ss >> is_moving;
   ss >> int_dir;
 
   // dir = Direction(int_dir);
@@ -183,7 +201,7 @@ std::string Player::to_string() {
   char space = ' ';
   ss << location.x << space << location.y << space << location.h << space
      << location.w << space << is_moving << space << bullet_fired << space
-     << dir;
+     << explosion_status << space << hp << space << dir;
   return ss.str();
 }
 

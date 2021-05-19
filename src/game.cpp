@@ -217,8 +217,7 @@ void Game::handleEvents() {
               }
               bots[i].move(&maze);
             }
-            player1.bullet_fired = true;
-            // unsynced_bullets.push_back(b);
+            // player1.bullet_fired = true;
             space_down = true;
           }
           break;
@@ -232,8 +231,7 @@ void Game::handleEvents() {
       if (event.button.button == SDL_BUTTON_LEFT) {
         Bullet b = player1.fireBullet();
         bullets.push_back(b);
-        player1.bullet_fired = true;
-        // unsynced_bullets.push_back(b);
+        // player1.bullet_fired = true;
       }
     }
   }
@@ -251,8 +249,10 @@ void Game::updateBots() {
       int x = w * (row * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
       int y = w * (col * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
       b.init({x, y, Params::PATH_WIDTH * w - 1, Params::PATH_WIDTH * w - 1});
+      b.setDirection(b.getDirection());
+
       bots.push_back(b);
-      unsynced_bots.push_back(b);
+      // unsynced_bots.push_back(b);
     }
 
     // spawn collectibles
@@ -275,121 +275,32 @@ void Game::updateBots() {
       if (bots[i].shouldUpdate()) {
         bots[i].update(player1.getLocation(), &maze);
       }
-    }
-  }
-
-  for (auto it = bots.begin(); it != bots.end(); it++) {
-    if (it->getHP() <= 0 && it->explosion_status == -1) {
-      it = bots.erase(it) - 1;
-    }
-  }
-  if (player1.getHP() <= 0) {
-    ;
-  }
-}
-
-void Game::sync() {
-  // std::stringstream ss_send;
-  // for (Bullet &b : unsynced_bullets) {
-  //   ss_send << b.to_string(&player1, &player2) << '\n';
-  // }
-  // // cout << '\n' << ss_send.str() << endl;
-  // c_sock->send(ss_send.str());
-  // unsynced_bullets.clear();
-
-  // auto s = c_sock->recv();
-  // std::stringstream ss_recv(s);
-  // char delim = '\n';
-  // std::string word;
-  // while (std::getline(ss_recv, word, delim)) {
-  //   Bullet b;
-  //   b.create_from_string(word, &player1, &player2);
-  //   other_bullets.push_back(b);
-  // }
-
-  c_sock->send(player1.to_string());
-  player2.create_from_string(c_sock->recv());
-  if (player2.bullet_fired) {
-    Bullet b = player2.fireBullet();
-    bullets.push_back(b);
-  }
-  player1.bullet_fired = false;
-
-  if (isServer) {
-    std::stringstream ss_send;
-    for (Bot &b : unsynced_bots) {
-      ss_send << b.to_string() << '\n';
-    }
-    unsynced_bots.clear();
-    c_sock->send(ss_send.str());
-
-    c_sock->recv();
-
-    std::stringstream ss_send2;
-    int index = 0;
-    for (Bot &b : bots) {
-      if (b.directionChanged()) {
-        ss_send2 << b.to_update(index) << '\n';
+      if (i < 10 && bots[i].shouldFire()) {
+        Bullet b = bots[i].fireBullet();
+        bullets.push_back(b);
       }
-      index++;
+      bots[i].move(&maze);
     }
-    c_sock->send(ss_send2.str());
+
+    player1.move(&maze);
+    player1.updateItems();
+
+    // player2.move(&maze);
+    // player2.updateItems();
+
+    for (auto it = bots.begin(); it != bots.end(); it++) {
+      if (it->getHP() <= 0 && it->explosion_status == -1) {
+        it = bots.erase(it) - 1;
+      }
+    }
   } else {
-    std::stringstream ss_recv(c_sock->recv());
-    char delim = '\n';
-    std::string word;
-
-    while (std::getline(ss_recv, word, delim)) {
-      Bot b;
-      b.init({0, 0, 0, 0});
-      b.create_from_string(word);
-      bots.push_back(b);
+    for (int i = 0; i < bots.size(); i++) {
+      bots[i].move(&maze);
     }
-
-    c_sock->send("recv");
-
-    std::stringstream ss_recv2(c_sock->recv());
-    int index = 0;
-    while (std::getline(ss_recv2, word, delim)) {
-      std::stringstream ss(word);
-      int index;
-      ss >> index;
-      bots[index].update_from_string(word);
-    }
-  }
-}
-
-void Game::update() {
-  for (int i = 0; i < bots.size(); i++) {
-    if (i < 10 && bots[i].shouldFire()) {
-      Bullet b = bots[i].fireBullet();
-      bullets.push_back(b);
-    }
-    bots[i].move(&maze);
+    player1.move(&maze);
+    player1.updateItems();
   }
 
-  for (auto bullet_it = bullets.begin(); bullet_it != bullets.end();
-       bullet_it++) {
-    if (bullet_it->destroyBullet()) {
-      bullet_it = bullets.erase(bullet_it);
-      bullet_it--;
-    }
-  }
-
-  // for (auto bullet_it = other_bullets.begin(); bullet_it !=
-  // other_bullets.end();
-  //      bullet_it++) {
-  //   if (bullet_it->destroyBullet()) {
-  //     bullet_it = other_bullets.erase(bullet_it);
-  //     bullet_it--;
-  //   }
-  // }
-
-  player1.move(&maze);
-  player1.updateItems();
-
-  player2.move(&maze);
-  player2.updateItems();
   if (isServer)
     player1.checkCollision(&player2);
   else
@@ -404,30 +315,59 @@ void Game::update() {
       player1.checkCollision(&bots[i]);
     }
   }
+}
 
-  for (auto it = items.begin(); it != items.end(); it++) {
-    bool b1 = it->checkCollected(player1);
-    if (b1) {
-      player1.collectItem(*it);
-      it = items.erase(it) - 1;
-      continue;
+void Game::sync() {
+  c_sock->send(player1.to_string());
+  player2.create_from_string(c_sock->recv());
+  if (player2.bullet_fired) {
+    Bullet b = player2.fireBullet();
+    bullets.push_back(b);
+  }
+  player1.bullet_fired = false;
+
+  if (isServer) {
+    std::stringstream ss_send;
+    for (Bot &b : bots) {
+      ss_send << b.to_string() << '\n';
+      b.bullet_fired = false;
     }
+    c_sock->send(ss_send.str());
 
-    bool b2 = it->checkCollected(player2);
-    if (b2) {
-      player1.collectItem(*it);
-      it = items.erase(it) - 1;
-      continue;
+  } else {
+    std::stringstream ss_recv(c_sock->recv());
+    char delim = '\n';
+    std::string word;
+
+    bots.clear();
+
+    while (std::getline(ss_recv, word, delim)) {
+      Bot b;
+      b.init({0, 0, 0, 0});
+      b.create_from_string(word);
+      b.setHP(b.getHP());
+      if (b.bullet_fired) {
+        bullets.push_back(b.fireBullet());
+      }
+      bots.push_back(b);
     }
   }
+}
 
+void Game::update() {
+  if (!isServer) {
+    for (int i = 0; i < bots.size(); i++) {
+      bots[i].move(&maze);
+    }
+  }
   for (auto bullet_it = bullets.begin(); bullet_it != bullets.end();
        bullet_it++) {
     bool hit = false;
     for (int i = 0; i < bots.size() + 2; i++) {
-      if (i < bots.size())
+      if (i < bots.size()) {
         hit = bullet_it->hitTarget(bots[i]);
-      else if (i == bots.size())
+        bots[i].setHP(bots[i].getHP());
+      } else if (i == bots.size())
         hit = bullet_it->hitTarget(player1);
       else
         hit = bullet_it->hitTarget(player2);
@@ -442,27 +382,29 @@ void Game::update() {
     }
   }
 
-  // for (auto bullet_it = other_bullets.begin(); bullet_it !=
-  // other_bullets.end();
-  //      bullet_it++) {
-  //   bool hit = false;
-  //   for (int i = 0; i < bots.size() + 2; i++) {
-  //     if (i < bots.size())
-  //       hit = bullet_it->hitTarget(bots[i]);
-  //     else if (i == bots.size())
-  //       hit = bullet_it->hitTarget(player1);
-  //     else
-  //       hit = bullet_it->hitTarget(player2);
-  //     if (hit) break;
-  //   }
-  //   if (!hit) {
-  //     bullet_it->move(&maze);
-  //     if (!bullet_it->isMoving()) {
-  //       bullet_it = other_bullets.erase(bullet_it);
-  //       bullet_it--;
-  //     }
-  //   }
-  // }
+  for (auto bullet_it = bullets.begin(); bullet_it != bullets.end();
+       bullet_it++) {
+    if (bullet_it->destroyBullet()) {
+      bullet_it = bullets.erase(bullet_it);
+      bullet_it--;
+    }
+  }
+
+  for (auto it = items.begin(); it != items.end(); it++) {
+    bool b1 = it->checkCollected(player1);
+    if (b1) {
+      player1.collectItem(*it);
+      it = items.erase(it) - 1;
+      continue;
+    }
+
+    bool b2 = it->checkCollected(player2);
+    if (b2) {
+      player2.collectItem(*it);
+      it = items.erase(it) - 1;
+      continue;
+    }
+  }
 }
 
 void Game::render() {
@@ -486,9 +428,7 @@ void Game::render() {
   for (auto &bullet : bullets) {
     win.render(bullet);
   }
-  // for (auto &b : other_bullets) {
-  //   win.render(b);
-  // }
+
   for (auto &item : items) {
     win.render(item);
   }

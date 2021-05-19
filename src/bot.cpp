@@ -57,6 +57,12 @@ void Bot::init(SDL_Rect loc) {
   hp = 100;
 }
 
+void Bot::setHP(double h) {
+  hp = h;
+  layers[4].dstSize.first =
+      (int)(Params::ACTUAL_CELL_SIZE * 16 / 10 * hp / Params::MAX_BOT_HP);
+}
+
 void Bot::update(SDL_Rect loc, Maze* maze) {
   int probs[] = {2, 2, 2, 2};
   Direction dir = Entity::getDirection();
@@ -120,7 +126,6 @@ bool Bot::shouldUpdate() {
 std::string Bot::to_update(int index) {
   std::stringstream ss;
   char space = ' ';
-  // ss << index << space << is_moving << space << dir;
   ss << index << space << dir;
 
   return ss.str();

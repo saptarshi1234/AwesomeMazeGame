@@ -41,6 +41,7 @@ class Player : public Entity {
   void collectItem(Item &item);
   std::vector<int> getCollectedItems();
   void move(Maze *maze);
+  void updateState();
   void checkCollision(Player *p);
   SDL_Rect getCropArea();
 
