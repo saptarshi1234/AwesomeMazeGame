@@ -409,6 +409,7 @@ void Player::checkCollision(Player* p) {
 void Player::respawn(SDL_Rect loc) {
   location = loc;
   hp = Params::MAX_HP;
+  score -= 1000;
   for (int key = 0; key < collected.size(); key++) {
     switch (key) {
       case Item::ItemType::INVISIBLE:

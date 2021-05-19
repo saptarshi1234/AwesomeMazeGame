@@ -40,6 +40,8 @@ void TextureManager::initialize(WindowManager win) {
       win.loadTexture("res/textures/tanks/others/fire2.png");
   tex_map[TextureID::SHIELD] =
       win.loadTexture("res/textures/tanks/others/shield.png");
+  tex_map[TextureID::SCORE] =
+      win.loadTexture("res/textures/background/score.png");
 }
 
 SDL_Texture* TextureManager::getTex(TextureID tex) { return tex_map[tex]; }

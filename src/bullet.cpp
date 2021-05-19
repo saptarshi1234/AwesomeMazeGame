@@ -99,8 +99,7 @@ bool Bullet::hitTarget(Player &p) {
   if (p.explosion_status == 0 && !p.isShielded()) {
     if (p.getHP() <= power) {
       if (!p.isBot()) {
-        p.raiseScore(-1000);
-        if (fired_by_player) shooter->raiseScore(2 * (p.getHP() + 50));
+        if (fired_by_player) shooter->raiseScore(4 * (p.getHP() + 50));
       } else if (fired_by_player)
         shooter->raiseScore(p.getHP() + 50);
       p.explosion_status = 1;

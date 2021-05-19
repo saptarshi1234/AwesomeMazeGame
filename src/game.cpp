@@ -476,6 +476,9 @@ void Game::wait(int delay) { SDL_Delay(delay); }
 void Game::quit() {
   running = false;
   win.destroy();
+  TTF_Quit();
+  SDL_Quit();
+  exit(0);
 }
 
 bool Game::isRunning() { return running; };

@@ -25,7 +25,9 @@ enum TextureID {
   MULTIPLIER_2X,
   INVISIBLE,
   POWERUP,
-  SHIELD
+  SHIELD,
+
+  SCORE
 };
 
 class TextureManager {

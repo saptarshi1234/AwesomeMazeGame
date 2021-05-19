@@ -1,6 +1,7 @@
 #include "window.hpp"
 
 #include <iostream>
+#include <string>
 
 #include "params.hpp"
 #include "textures.hpp"
@@ -123,6 +124,55 @@ void WindowManager::displayText(int x, int y, int offset, int index) {
   TTF_CloseFont(font);
 }
 
+void WindowManager::displayExitOptions(int x, int y, int offset, int index) {
+  TTF_Font* font = TTF_OpenFont("res/fonts/cocogoose.ttf", 24);
+  SDL_Color white = {255, 255, 255};
+  SDL_Color selected = {0, 255, 0};
+
+  renderText({x, y}, "RESTART", font, index == 1 ? selected : white);
+  renderText({x, y + offset}, "QUIT", font, index == 2 ? selected : white);
+
+  TTF_CloseFont(font);
+}
+
+void WindowManager::displayFinalScore(int x, int y, int offset_x, int offset_y,
+                                      int score1, int score2,
+                                      bool single_player) {
+  TTF_Font* head_font = TTF_OpenFont("res/fonts/cocogoose.ttf", 36);
+  TTF_Font* font = TTF_OpenFont("res/fonts/cocogoose.ttf", 24);
+  SDL_Color white = {255, 255, 255};
+  SDL_Color winner = {0, 255, 0};
+  SDL_Color game_over = {255, 0, 0};
+
+  renderText({x, y}, "GAME OVER", head_font, game_over);
+
+  renderText({x + offset_x, y + 3 * offset_y / 2}, "SCORES", font, white);
+
+  renderText({x, y + 5 * offset_y / 2}, "YOU :", font, white);
+  renderText({x + 5 * offset_x / 2, y + 5 * offset_y / 2},
+             std::to_string(score1).c_str(), font, white);
+
+  if (!single_player) {
+    renderText({x, y + 3 * offset_y}, "THEY :", font, white);
+    renderText({x + 5 * offset_x / 2, y + 3 * offset_y},
+               std::to_string(score2).c_str(), font, white);
+    if (score1 != score2) {
+      renderText(
+          {score1 > score2 ? x - offset_x / 2 : x - offset_x, y + 4 * offset_y},
+          score1 > score2 ? "Yay! You Won!" : "Oh No! You Lost!", head_font,
+          score1 > score2 ? winner : game_over);
+    } else {
+      renderText({x + 6 * offset_x / 5, y + 4 * offset_y}, "TIE!", head_font,
+                 winner);
+    }
+  }
+
+  renderText({x + 24 * offset_x / 5, y + 11 * offset_y / 2}, "PRESS ENTER",
+             font16, white);
+
+  TTF_CloseFont(font);
+}
+
 void WindowManager::renderPlayerDetails(Player& p1, Player& p2, bool single) {
   SDL_Color white = {255, 255, 255};
   SDL_Color black = {0, 0, 0};
@@ -131,12 +181,12 @@ void WindowManager::renderPlayerDetails(Player& p1, Player& p2, bool single) {
   int x2 = Params::SCREEN_WIDTH + Params::WIDTH_OFFSET / 2;
   int y1 = 10;
   int y2 = 30;
-  renderText({x1, y1}, "You : ", font16, white);
+  renderText({x1, y1}, "You :", font16, white);
   renderText({x2, y1}, std::to_string(score1).c_str(), font16, white);
 
   if (!single) {
     int score2 = p2.getScore();
-    renderText({x1, y2}, "They :", font16, white);
+    renderText({x1, y2}, "They:", font16, white);
     renderText({x2, y2}, std::to_string(score2).c_str(), font16, white);
   }
 
