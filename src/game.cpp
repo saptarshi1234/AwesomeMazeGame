@@ -290,6 +290,18 @@ void Game::updateBots() {
       items.push_back(item);
     }
   }
+  int w = Params::ACTUAL_CELL_SIZE;
+  int p = Params::PATH_WIDTH;
+  int ww = Params::WALL_WIDTH;
+  if (player1.explosion_status == -1) {
+    if (single_player) {
+      running = false;
+    } else if (isServer) {
+      player1.respawn({w, w, p * w, p * w});
+    } else {
+      player1.respawn({Params::SCREEN_WIDTH - (p + 1) * w, w, p * w, p * w});
+    }
+  }
   player1.move(&maze);
   player1.updateItems();
 }

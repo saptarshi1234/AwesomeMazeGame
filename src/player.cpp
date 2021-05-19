@@ -141,6 +141,7 @@ void Player::collectItem(Item& item) {
       layers[0].tex = TextureManager::getTex(TextureID::TANK_INV);
       layers[1].tex = TextureManager::getTex(TextureID::GUN_INV);
       is_invisible = true;
+      collected[item.getType()] = 2 * Params::POWERUP_TIME / 2;
       break;
     case Item::ItemType::MULTIPLIER:
       score_multiplier = 2;
@@ -148,9 +149,10 @@ void Player::collectItem(Item& item) {
       break;
     case Item::ItemType::POWERUP:
       this->bullet_power *= 2;
+      collected[item.getType()] = 3 * Params::POWERUP_TIME / 2;
       break;
     case Item::ItemType::SHIELD:
-      collected[item.getType()] = 2 * Params::POWERUP_TIME;
+      collected[item.getType()] = 3 * Params::POWERUP_TIME / 2;
       is_shielded = true;
       break;
   }
@@ -304,6 +306,8 @@ bool rayRectCollision(vector<double> point, vector<double> dir, SDL_FRect obj,
   return false;
 }
 
+// void getRayRect(SDL_Rect loc, SDL_Rect p_loc, v1_x
+
 void Player::checkCollision(Player* p) {
   SDL_Rect p_loc = p->getLocation();
   SDL_Rect prev_loc = p->getPrevLocation();
@@ -317,54 +321,56 @@ void Player::checkCollision(Player* p) {
   else
     loc = prev_location;
   int x1 = loc.x, y1 = loc.y, x2 = prev_loc.x, y2 = prev_loc.y;
-  int v_x = 0, v_y = 0, v1_x = 0, v2_x = 0, v1_y = 0, v2_y = 0;
+  int v1[2] = {location.x - x1, location.y - y1};
+  int v2[2] = {p_loc.x - x2, p_loc.y - y2};
+  int v[2] = {v1[0] - v2[0], v1[1] - v2[1]};
+
   // if (x1 < x2 + p_loc.w && x1 + location.w > x2 && y1 < y2 + p_loc.h &&
   //     y1 + location.h > y2) {
   //   int t = 0;
-  // }
-  int v2 = p->getVelocity();
-  v_x = location.x - x1;
-  v_y = location.y - y1;
-  v1_x = v_x;
-  v1_y = v_y;
-  v_x += (x2 - p_loc.x);
-  v_y += (y2 - p_loc.y);
-  v2_x = p_loc.x - x2;
-  v2_y = p_loc.y - y2;
+
+  int vel2 = p->getVelocity();
+  // v[0] = location.x - x1;
+  // v[1] = location.y - y1;
+  // v1 = v;
+  // v[0] += (x2 - p_loc.x);
+  // v[1] += (y2 - p_loc.y);
+  // v2[0] = p_loc.x - x2;
+  // v2[1] = p_loc.y - y2;
   double W = (double)location.w + p_loc.w;
   double H = (double)location.h + p_loc.h;
   double X = (double)(2 * x2 - location.w) / 2;
   double Y = (double)(2 * y2 - location.h) / 2;
-  if (v1_x == 0) {
+  if (v1[0] == 0) {
     W -= ((double)location.w) / 2;
     X += ((double)location.w) / 4;
   }
-  if (v1_y == 0) {
+  if (v1[1] == 0) {
     H -= ((double)location.h) / 2;
     Y += ((double)location.h) / 4;
   }
-  if (v2_x == 0) {
+  if (v2[0] == 0) {
     W -= ((double)p_loc.w) / 2;
     X += ((double)p_loc.w) / 4;
   }
-  if (v2_y == 0) {
+  if (v2[1] == 0) {
     H -= ((double)p_loc.h) / 2;
     Y += ((double)p_loc.h) / 4;
   }
   vector<double> c1 = {(double)(2 * x1 + location.w) / 2,
                        (double)(2 * y1 + location.h) / 2};
-  vector<double> dir = {(double)v_x, (double)v_y};
+  vector<double> dir = {(double)v[0], (double)v[1]};
   SDL_FRect obj = {X, Y, W, H};
   double t, nx, ny;
   vector<double> change1, change2;
   bool b = rayRectCollision(c1, dir, obj, t, nx, ny);
   if (!b) return;
   bool stopP1 = false, stopP2 = false;
-  if (v1_x * v2_x > 0 || v1_y * v2_y > 0) {
-    change1 = {(double)v1_x * t + (double)(v1_x + v2_x) * (1 - t) / 2,
-               (double)v1_y * t + (double)(v1_y + v2_y) * (1 - t) / 2};
-    change2 = {(double)v2_x * t + (double)(v1_x + v2_x) * (1 - t) / 2,
-               (double)v2_y * t + (double)(v1_y + v2_y) * (1 - t) / 2};
+  if (v1[0] * v2[0] > 0 || v1[1] * v2[1] > 0) {
+    change1 = {(double)v1[0] * t + (double)(v1[0] + v2[0]) * (1 - t) / 2,
+               (double)v1[1] * t + (double)(v1[1] + v2[1]) * (1 - t) / 2};
+    change2 = {(double)v2[0] * t + (double)(v1[0] + v2[0]) * (1 - t) / 2,
+               (double)v2[1] * t + (double)(v1[1] + v2[1]) * (1 - t) / 2};
     x1 += (int)change1[0];
     y1 += (int)change1[1];
     x2 += (int)change2[0];
@@ -375,21 +381,21 @@ void Player::checkCollision(Player* p) {
     stopP1 = true;
     stopP2 = true;
   } else {
-    change1 = {(double)v1_x * t, (double)v1_y * t};
-    change2 = {(double)v2_x * t, (double)v2_y * t};
-    if (v1_x * nx < 0) {
+    change1 = {(double)v1[0] * t, (double)v1[1] * t};
+    change2 = {(double)v2[0] * t, (double)v2[1] * t};
+    if (v1[0] * nx < 0) {
       location.x = x1 + ((int)change1[0]);
       stopP1 = true;
     }
-    if (v1_y * ny < 0) {
+    if (v1[1] * ny < 0) {
       location.y = y1 + ((int)change1[1]);
       stopP1 = true;
     }
-    if (v2_x * nx > 0) {
+    if (v2[0] * nx > 0) {
       p_loc.x = x2 + ((int)change2[0]);
       stopP2 = true;
     }
-    if (v2_y * ny > 0) {
+    if (v2[1] * ny > 0) {
       p_loc.y = y2 + ((int)change2[1]);
       stopP2 = true;
     }
@@ -398,4 +404,50 @@ void Player::checkCollision(Player* p) {
   }
   if (stopP2) p->setPrevLocation(p->getLocation());
   if (stopP1) collided = true;
+}
+
+void Player::respawn(SDL_Rect loc) {
+  location = loc;
+  hp = Params::MAX_HP;
+  for (int key = 0; key < collected.size(); key++) {
+    switch (key) {
+      case Item::ItemType::INVISIBLE:
+        layers[0].tex = F1_tex;
+        layers[1].tex = gun;
+        is_invisible = false;
+        break;
+      case Item::ItemType::MULTIPLIER:
+        score_multiplier = 1;
+        break;
+      case Item::ItemType::POWERUP:
+        this->bullet_power = 1;
+        break;
+      case Item::ItemType::SHIELD:
+        is_shielded = false;
+        break;
+    }
+    collected[key] = -1;
+  }
+  int w = 2 * Params::ACTUAL_CELL_SIZE * 8 / 10;
+  int h = 2 * Params::ACTUAL_CELL_SIZE / 10;
+
+  int offX = Params::ACTUAL_CELL_SIZE / 2;
+  F1_tex = TextureManager::getTex(TextureID::TANK_F1);
+  F2_tex = TextureManager::getTex(TextureID::TANK_F2);
+  gun = TextureManager::getTex(TextureID::GUN);
+  layers = {
+      {F1_tex, {0, 0}},
+      {TextureManager::getTex(TextureID::GUN), {0, 0}},
+      {TextureManager::getTex(TextureID::EXPLOSION), {0, 0}, {0, 8}, false},
+      {TextureManager::getTex(TextureID::HEALTH_BAR),
+       {-offX, -offX},
+       {0, 1},
+       true,
+       {w, h}},
+      {TextureManager::getTex(TextureID::HEALTH_BODY),
+       {-offX, -offX},
+       {0, 1},
+       true,
+       {w, h}}};
+  explosion_status = 0;
 }

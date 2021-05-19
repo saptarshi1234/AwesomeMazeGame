@@ -23,7 +23,6 @@ class Player : public Entity {
   double hp = Params::MAX_HP;
   std::vector<int> collected;
   bool collided;
-  int invDestructionCounter = 50;
 
  public:
   // Player();
@@ -40,6 +39,7 @@ class Player : public Entity {
   double getBulletPower();
   int getScore();
   bool isBot();
+  void respawn(SDL_Rect loc);
   void updateItems();
   void collectItem(Item &item);
   std::vector<int> getCollectedItems();
