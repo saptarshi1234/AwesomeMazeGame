@@ -272,6 +272,7 @@ void Maze::calcDistances() {
     cout << endl;
   }
 }
+
 int Maze::dist(int x1, int y1, int x2, int y2) {
   int xV1 = y1 / Params::ACTUAL_CELL_SIZE - 1;
   int yV1 = x1 / Params::ACTUAL_CELL_SIZE - 1;
@@ -328,4 +329,50 @@ int Maze::dirFromTo(int x1, int y1, int x2, int y2, int preferableDir = -1) {
   if (v.size() == 0) return -1;
   int in = rand() % v.size();
   return v[in];
+}
+
+bool Maze::inLine(int x1, int y1, int x2, int y2, int Dir) {
+  int xV1 = y1 / Params::ACTUAL_CELL_SIZE - 1;
+  int yV1 = x1 / Params::ACTUAL_CELL_SIZE - 1;
+  int xV2 = y2 / Params::ACTUAL_CELL_SIZE - 1;
+  int yV2 = x2 / Params::ACTUAL_CELL_SIZE - 1;
+  xV1 /= pathLength;
+  xV2 /= pathLength;
+  yV1 /= pathLength;
+  yV2 /= pathLength;
+  if (xV1 < 0 || xV1 >= nodes.size() || xV2 < 0 || xV2 >= nodes.size() ||
+      yV1 < 0 || yV1 >= nodes[0].size() || yV2 < 0 || yV2 >= nodes[0].size()) {
+    return false;
+  }
+  int del_x = 0, del_y = 0;
+  switch (Dir) {
+    case 0:
+      del_x = -1;
+      break;
+    case 1:
+      del_y = -1;
+      break;
+    case 2:
+      del_x = 1;
+      break;
+    case 3:
+      del_y = 1;
+      break;
+  }
+  int x = xV1;
+  int y = yV1;
+  int d = distances[xV1][yV1][xV2][yV2];
+  int temp_d = d;
+  for (int i = 0; i < d; i++) {
+    x = x + del_x;
+    y = y + del_y;
+    if (x < 0 || y < 0 || x >= nodes.size() || y >= nodes[0].size()) {
+      return false;
+    }
+    if (distances[x][y][xV2][yV2] != temp_d - 1) {
+      return false;
+    }
+    temp_d = distances[x][y][xV2][yV2];
+  }
+  return true;
 }
