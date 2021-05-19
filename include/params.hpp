@@ -12,7 +12,7 @@ const int MAX_BOT_HP = 100;
 
 const int POWERUP_TIME = 300;
 const int GAME_DURATION = 180;
-const int HP_INCREASE = 500;
+const int HP_INCREASE = 250;
 const int SCREEN_WIDTH =
     (2 + NUM_CELLS_X * PATH_WIDTH + (NUM_CELLS_X - 1) * WALL_WIDTH) *
     ACTUAL_CELL_SIZE;

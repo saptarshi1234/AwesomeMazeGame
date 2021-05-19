@@ -44,7 +44,8 @@ void TextureManager::initialize(WindowManager win) {
       win.loadTexture("res/textures/tanks/others/fire2.png");
   tex_map[TextureID::SHIELD] =
       win.loadTexture("res/textures/tanks/others/shield.png");
-  tex_map[TextureID::HP] = win.loadTexture("res/textures/tanks/others/hp.jpeg");
+  tex_map[TextureID::HP] =
+      win.loadTexture("res/textures/tanks/others/hp2.jpeg");
 
   tex_map[TextureID::SCORE] =
       win.loadTexture("res/textures/background/score.png");
