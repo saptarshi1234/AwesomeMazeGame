@@ -14,7 +14,7 @@ class WindowManager {
   void render(Entity& e);
   void renderText(std::pair<int, int> loc, const char* p_text, TTF_Font* font,
                   SDL_Color textColor);
-  void displayText(int x, int y, int offset, int index);
+  void displayText(int x, int y, int offset, int index, bool sound);
   void displayExitOptions(int x, int y, int offset, int index);
   void renderPlayerDetails(Player& p1, Player& p2, bool single);
   void displayFinalScore(int x, int y, int offset_x, int offset_y, int score1,

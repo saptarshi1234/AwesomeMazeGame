@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
   SoundManager::initialize();
 
   srand((unsigned)time(0));
-
+  bool sound = true;
   WindowManager window(window_name, Params::SCREEN_HEIGHT,
                        Params::TOTAL_SCREEN_WIDTH);
   TextureManager::initialize(window);
@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
       window.clearWindow();
 
       window.render(logo_loc, logo.getSize(), logo.tex);
-      window.displayText(x, y1, offset, choice_index);
+      window.displayText(x, y1, offset, choice_index, sound);
 
       window.display();
       SDL_Event event;
@@ -104,13 +104,17 @@ int main(int argc, char* argv[]) {
               break;
             case SDLK_DOWN:
               choice_index++;
-              if (choice_index > 3) choice_index = 3;
+              if (choice_index > 4) choice_index = 4;
               break;
             case SDLK_RETURN:
             case SDLK_RETURN2:
               single_player = choice_index == 1;
               isServer = choice_index == 2;
-              received_key = true;
+              if (choice_index == 4) {
+                sound = !(sound);
+              } else {
+                received_key = true;
+              }
               break;
           }
         }

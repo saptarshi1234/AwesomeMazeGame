@@ -110,7 +110,8 @@ void WindowManager::render(Entity& entity) {
     render(dst, src, layer.tex);
   }
 }
-void WindowManager::displayText(int x, int y, int offset, int index) {
+void WindowManager::displayText(int x, int y, int offset, int index,
+                                bool sound) {
   TTF_Font* font = TTF_OpenFont("res/fonts/cocogoose.ttf", 24);
   SDL_Color white = {255, 255, 255};
   SDL_Color selected = {0, 255, 0};
@@ -120,6 +121,8 @@ void WindowManager::displayText(int x, int y, int offset, int index) {
              index == 2 ? selected : white);
   renderText({x, y + 2 * offset}, "2 Player : Client", font,
              index == 3 ? selected : white);
+  renderText({x, y + 3 * offset}, sound ? "Sound: On" : "Sound: Off", font,
+             index == 4 ? selected : white);
 
   TTF_CloseFont(font);
 }
