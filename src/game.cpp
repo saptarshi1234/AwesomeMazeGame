@@ -91,9 +91,11 @@ void Game::initialize() {
     maze.calcDistances();
     maze.addPadding();
 
-    std::string s = serialize(maze.getPixelV());
-    server.send(s);
-    cout << s << endl;
+    if (!single_player) {
+      std::string s = serialize(maze.getPixelV());
+      server.send(s);
+      cout << s << endl;
+    }
 
   } else {
     auto data = client.recv();
@@ -245,19 +247,20 @@ void Game::handleEvents() {
 void Game::updateBots() {
   if (isServer || single_player) {
     // spawn bots at random
-    int w = Params::ACTUAL_CELL_SIZE;
-    int k = rand() % Params::MAX_BOTS;
-    if (k >= bots.size()) {
-      int row = rand() % Params::NUM_CELLS_X;
-      int col = rand() % Params::NUM_CELLS_Y;
-      Bot b;
-      int x = w * (row * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
-      int y = w * (col * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
-      b.init({x, y, Params::PATH_WIDTH * w - 1, Params::PATH_WIDTH * w - 1});
-      b.setDirection(b.getDirection());
+    if (time_elapsed > 6000 || single_player) {
+      int w = Params::ACTUAL_CELL_SIZE;
+      int k = rand() % Params::MAX_BOTS;
+      if (k >= bots.size()) {
+        int row = rand() % Params::NUM_CELLS_X;
+        int col = rand() % Params::NUM_CELLS_Y;
+        Bot b;
+        int x = w * (row * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
+        int y = w * (col * (Params::PATH_WIDTH + Params::WALL_WIDTH) + 1);
+        b.init({x, y, Params::PATH_WIDTH * w - 1, Params::PATH_WIDTH * w - 1});
+        b.setDirection(b.getDirection());
 
-      bots.push_back(b);
-      // unsynced_bots.push_back(b);
+        bots.push_back(b);
+      }
     }
     for (int i = 0; i < bots.size(); i++) {
       if (single_player) {

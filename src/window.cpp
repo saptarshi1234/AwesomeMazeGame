@@ -136,9 +136,11 @@ void WindowManager::renderCenter(std::pair<int, int> l, const char* p_text,
 void WindowManager::displayText(int x, int y, int offset, int index,
                                 bool sound) {
   TTF_Font* font = TTF_OpenFont("res/fonts/cocogoose.ttf", 24);
+
   SDL_Color white = {255, 255, 255};
   SDL_Color selected = {0, 255, 0};
 
+  renderText({x - 30, y - 5 + offset * (index - 1)}, ">", font32, selected);
   renderText({x, y}, "1 Player", font, index == 1 ? selected : white);
   renderText({x, y + offset}, "2 Player : Server", font,
              index == 2 ? selected : white);
