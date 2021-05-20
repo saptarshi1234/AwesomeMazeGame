@@ -20,7 +20,7 @@ class WindowManager {
   void displayFinalScore(int x, int y, int offset_x, int offset_y, int score1,
                          int score2, bool single_player);
   void displayIP(int x, int y, int offset_x, int offset_y, std::string ip,
-                 bool wrong);
+                 bool wrong, bool connect_err);
   void clearWindow();
   void destroy();
   SDL_Texture* loadTexture(char* file);

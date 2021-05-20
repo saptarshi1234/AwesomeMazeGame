@@ -7,9 +7,20 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include <exception>
 #include <string>
 
 #define PORT 8080
+
+class InvalidIP : public std::exception {
+ public:
+  const char *what() const throw() { return "IP address is not valid"; }
+};
+
+class ConnectionError : public std::exception {
+ public:
+  const char *what() const throw() { return "Could not connect to address"; }
+};
 
 class CustomSocket {
  public:

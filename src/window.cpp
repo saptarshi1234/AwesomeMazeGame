@@ -179,7 +179,7 @@ void WindowManager::displayFinalScore(int x, int y, int offset_x, int offset_y,
 }
 
 void WindowManager::displayIP(int x, int y, int offset_x, int offset_y,
-                              std::string ip, bool wrong) {
+                              std::string ip, bool wrong, bool connect_err) {
   TTF_Font* head_font = TTF_OpenFont("res/fonts/cocogoose.ttf", 36);
   TTF_Font* font = TTF_OpenFont("res/fonts/cocogoose.ttf", 24);
   SDL_Color white = {255, 255, 255};
@@ -198,6 +198,10 @@ void WindowManager::displayIP(int x, int y, int offset_x, int offset_y,
   if (wrong) {
     renderText({x + 11 * offset_x / 5, y + 7 * offset_y / 5},
                "[Invalid IP address]", font16, error);
+  }
+  if (connect_err) {
+    renderText({x + 11 * offset_x / 5, y + 7 * offset_y / 5},
+               "Failed to establish connection", font16, error);
   }
   TTF_CloseFont(font);
   TTF_CloseFont(head_font);

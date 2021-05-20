@@ -455,7 +455,7 @@ void Game::update() {
   }
 
   if (player1.explosion_status == 1) {
-    Mix_PlayChannel(-1, SoundManager::getSound(SoundId::DEATH), 0);
+    SoundManager::playOnce(SoundId::DEATH);
   }
 }
 

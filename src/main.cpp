@@ -129,8 +129,12 @@ int main(int argc, char* argv[]) {
       }
       SDL_Delay(100);
     }
+    cout << "sound" << sound << endl;
     cout << "single player" << single_player << endl;
     cout << "server" << isServer << endl;
+
+    SoundManager::sound_on = sound;
+
     Game game;
     if (!single_player && !isServer) {
       Entity ip_screen;
@@ -145,7 +149,7 @@ int main(int argc, char* argv[]) {
 
       std::string input_ip = "";
       std::string wrong_ip;
-      bool check_wrong_ip = false;
+      bool check_wrong_ip = false, connect_err = false;
 
       received_key = false;
       SDL_StartTextInput();
@@ -154,12 +158,13 @@ int main(int argc, char* argv[]) {
         window.render(loc, id_bg.getSize(), id_bg.tex);
         if (check_wrong_ip) {
           window.displayIP(x, y, offset_x, offset_y, input_ip,
-                           wrong_ip == input_ip);
+                           wrong_ip == input_ip, connect_err);
           if (input_ip != wrong_ip) {
             check_wrong_ip = false;
           }
         } else {
-          window.displayIP(x, y, offset_x, offset_y, input_ip, false);
+          window.displayIP(x, y, offset_x, offset_y, input_ip, false,
+                           connect_err);
         }
 
         window.display();
@@ -182,9 +187,11 @@ int main(int argc, char* argv[]) {
                   game =
                       Game(window, isServer, single_player, input_ip.c_str());
                   received_key = true;
-                } catch (const char* e) {
+                } catch (InvalidIP e) {
                   check_wrong_ip = true;
                   wrong_ip = input_ip;
+                } catch (ConnectionError e) {
+                  connect_err = true;
                 }
                 break;
               case SDLK_BACKSPACE:

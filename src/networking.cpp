@@ -31,12 +31,10 @@ void Client::initialize() {
 
 void Client::connect(const char *ip_addr) {
   if (inet_pton(AF_INET, ip_addr, &serv_addr.sin_addr) <= 0) {
-    throw("\nInvalid address/ Address not supported \n");
-    // exit(EXIT_FAILURE);
+    throw InvalidIP();
   }
   if (::connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-    printf("\nConnection Failed \n");
-    exit(EXIT_FAILURE);
+    throw ConnectionError();
   }
 }
 

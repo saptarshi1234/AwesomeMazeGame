@@ -73,7 +73,7 @@ Bullet Player::fireBullet() {
   // }
 
   bullet_fired = true;
-  if (!is_bot) Mix_PlayChannel(-1, SoundManager::getSound(SoundId::FIRE), 0);
+  if (!is_bot) SoundManager::playOnce(SoundId::FIRE);
   return b;
 }
 
@@ -142,7 +142,7 @@ void Player::updateState() {
 }
 void Player::collectItem(Item& item) {
   collected[item.getType()] = Params::POWERUP_TIME;
-  Mix_PlayChannel(-1, SoundManager::getSound(SoundId::POWERUP_FX), 0);
+  SoundManager::playOnce(SoundId::POWERUP_FX);
 
   switch (item.getType()) {
     case Item::ItemType::INVISIBLE:
