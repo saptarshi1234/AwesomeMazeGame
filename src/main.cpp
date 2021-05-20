@@ -273,8 +273,11 @@ int main(int argc, char* argv[]) {
     score_screen.init(
         {Params::TOTAL_SCREEN_WIDTH / 8, Params::SCREEN_HEIGHT / 8,
          6 * Params::TOTAL_SCREEN_WIDTH / 8, 6 * Params::SCREEN_HEIGHT / 8});
+    overlay_loc = {0, 0, Params::TOTAL_SCREEN_WIDTH, Params::SCREEN_HEIGHT};
 
-    LayerDetails score = {TextureManager::getTex(TextureID::SCORE)};
+    window.render(overlay_loc, overlay.getSize(), overlay.tex);
+
+    LayerDetails ip = {TextureManager::getTex(TextureID::IP)};
     // LayerDetails overlay = {TextureManager::getTex(TextureID::OVERLAY)};
 
     SDL_Rect loc = score_screen.getLocation();
@@ -289,7 +292,7 @@ int main(int argc, char* argv[]) {
 
     while (!received_key) {
       // window.render(TOTAL_SCREEN_SIZE, overlay.getSize(), overlay.tex);
-      window.render(loc, score.getSize(), score.tex);
+      window.render(loc, ip.getSize(), ip.tex);
       window.displayFinalScore(x, y, offset_x, offset_y, score1, score2,
                                single_player);
 
