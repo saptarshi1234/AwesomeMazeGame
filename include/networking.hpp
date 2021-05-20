@@ -21,6 +21,10 @@ class ConnectionError : public std::exception {
  public:
   const char *what() const throw() { return "Could not connect to address"; }
 };
+class DisconnectError : public std::exception {
+ public:
+  const char *what() const throw() { return "Disconnected from address"; }
+};
 
 class CustomSocket {
  public:

@@ -72,8 +72,13 @@ void Client::connect(const char *ip_addr) {
 void Client::send(std::string data) {
   std::stringstream ss;
   ss << std::setw(8) << data.size();
-  ::send(sock, ss.str().c_str(), 8, 0);
-  ::send(sock, data.c_str(), data.size(), 0);
+
+  bool fail1 = ::send(sock, ss.str().c_str(), 8, MSG_NOSIGNAL) == -1;
+  bool fail2 = ::send(sock, data.c_str(), data.size(), MSG_NOSIGNAL) == -1;
+
+  if (fail1 || fail2) throw DisconnectError();
+  // ::send(sock, ss.str().c_str(), 8, 0);
+  // ::send(sock, data.c_str(), data.size(), 0);
 }
 
 std::string Client::recv() {
@@ -135,8 +140,11 @@ void Server::accept() {
 void Server::send(std::string data) {
   std::stringstream ss;
   ss << std::setw(8) << data.size();
-  ::send(new_socket, ss.str().c_str(), 8, 0);
-  ::send(new_socket, data.c_str(), data.size(), 0);
+  bool fail1 = ::send(new_socket, ss.str().c_str(), 8, MSG_NOSIGNAL) == -1;
+  bool fail2 =
+      ::send(new_socket, data.c_str(), data.size(), MSG_NOSIGNAL) == -1;
+
+  if (fail1 || fail2) throw DisconnectError();
 }
 
 std::string Server::recv() {

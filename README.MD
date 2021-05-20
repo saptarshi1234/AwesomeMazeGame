@@ -12,7 +12,7 @@ The SDL2 development libraries for SDL, SDL_ttf, SDL_mixer need to be installed.
 For Ubuntu 20.04, they can be installed using  - 
 
 ``` shell
-$ sudo apt install libsdl2-dev libsdlimage2-dev libsdlttf-dev libsdlmixer2-dev
+$ sudo apt install build-essentials libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev libsdl2-mixer-dev
 ```
 
 Clone the repo and build the game
@@ -26,4 +26,4 @@ The binary file can be found in **output/main**
 ## Resources
 * [Itch.io](https://itch.io/) for game textures.
 * [SoundBible](https://soundbible.com/) for game sounds.
-* [GeeksForGeeks](https://www.geeksforgeeks.org/) for socket programming tutotials.
+* [GeeksForGeeks](https://www.geeksforgeeks.org/) for socket programming tutorials.

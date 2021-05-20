@@ -30,7 +30,7 @@ void TextureManager::initialize(WindowManager win) {
   tex_map[TextureID::SERVER] =
       win.loadTexture("res/textures/background/server.png");
   tex_map[TextureID::LOGO] =
-      win.loadTexture("res/textures/background/logo.png");
+      win.loadTexture("res/textures/background/logo2.png");
   tex_map[TextureID::HEALTH_BAR] =
       win.loadTexture("res/textures/tanks/others/health_bar.png");
   tex_map[TextureID::HEALTH_BODY] =

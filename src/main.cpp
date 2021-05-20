@@ -124,15 +124,16 @@ int main(int argc, char* argv[]) {
     LayerDetails overlay = {TextureManager::getTex(TextureID::OVERLAY)};
 
     // window.clearWindow();
-    std::string current_ip = "Current IP - " + CustomSocket::ip_details();
+    if (!single_player) {
+      std::string current_ip = "Current IP - " + CustomSocket::ip_details();
 
-    window.render(overlay_loc, overlay.getSize(), overlay.tex);
-    window.renderCenter({}, "Waiting for Client to join", font_large,
-                        {255, 255, 255});
-    window.renderCenter({0, 40}, current_ip.c_str(), font_small,
-                        {255, 255, 255});
-    window.display();
-
+      window.render(overlay_loc, overlay.getSize(), overlay.tex);
+      window.renderCenter({}, "Waiting for Client to join", font_large,
+                          {255, 255, 255});
+      window.renderCenter({0, 40}, current_ip.c_str(), font_small,
+                          {255, 255, 255});
+      window.display();
+    }
     cout << "sound" << sound << endl;
     cout << "single player" << single_player << endl;
     cout << "server" << isServer << endl;
@@ -233,6 +234,7 @@ int main(int argc, char* argv[]) {
     game.initialize();
     game.loadGame();
 
+    bool disconnected = false;
     int index = 0, update_freq = 50;
     Clock sleep_clk, stats_clk;
 
@@ -244,9 +246,14 @@ int main(int argc, char* argv[]) {
       game.handleEvents();
       if (!game.isRunning()) break;
 
-      game.updateBots();
-      game.sync();
-      game.update();
+      try {
+        game.updateBots();
+        game.sync();
+        game.update();
+      } catch (DisconnectError e) {
+        disconnected = true;
+        break;
+      }
 
       game.modifyTime(stats_clk.getElapsed());
 
@@ -291,10 +298,19 @@ int main(int argc, char* argv[]) {
                                   Params::SCREEN_HEIGHT};
 
     while (!received_key) {
-      // window.render(TOTAL_SCREEN_SIZE, overlay.getSize(), overlay.tex);
-      window.render(loc, ip.getSize(), ip.tex);
-      window.displayFinalScore(x, y, offset_x, offset_y, score1, score2,
-                               single_player);
+      if (disconnected) {
+        SDL_Color white = {255, 255, 255};
+        window.render(TOTAL_SCREEN_SIZE, overlay.getSize(), overlay.tex);
+        window.renderCenter({}, "Lost connection with player", font_large,
+                            white);
+        window.renderText({x + 24 * offset_x / 5, y + 11 * offset_y / 2},
+                          "PRESS ENTER", font_small, white);
+
+      } else {
+        window.render(loc, ip.getSize(), ip.tex);
+        window.displayFinalScore(x, y, offset_x, offset_y, score1, score2,
+                                 single_player);
+      }
 
       window.display();
       SDL_Event event;
@@ -317,6 +333,7 @@ int main(int argc, char* argv[]) {
       }
       SDL_Delay(100);
     }
+
     Entity exit_screen;
     exit_screen.init({0, 0, Params::TOTAL_SCREEN_WIDTH, Params::SCREEN_HEIGHT});
 
