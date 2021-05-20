@@ -50,6 +50,7 @@ void TextureManager::initialize(WindowManager win) {
   tex_map[TextureID::SCORE] =
       win.loadTexture("res/textures/background/score.png");
   tex_map[TextureID::IP] = win.loadTexture("res/textures/background/ip.png");
+  tex_map[TextureID::IP2] = win.loadTexture("res/textures/background/ip2.png");
 }
 
 SDL_Texture* TextureManager::getTex(TextureID tex) { return tex_map[tex]; }

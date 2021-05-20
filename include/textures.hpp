@@ -29,6 +29,7 @@ enum TextureID {
   POWERUP,
   SHIELD,
   HP,
+  IP2,
 
   SCORE,
   IP

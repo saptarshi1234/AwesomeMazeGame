@@ -235,6 +235,12 @@ void WindowManager::displayIP(int x, int y, int offset_x, int offset_y,
 void WindowManager::renderPlayerDetails(Player& p1, Player& p2, bool single) {
   SDL_Color white = {255, 255, 255};
   SDL_Color black = {0, 0, 0};
+
+  LayerDetails side = {TextureManager::getTex(TextureID::IP2)};
+
+  render({Params::SCREEN_WIDTH, 0, Params::WIDTH_OFFSET, Params::SCREEN_WIDTH},
+         side.getSize(), side.tex);
+
   int score1 = p1.getScore();
   int x1 = Params::SCREEN_WIDTH + 10;
   int x2 = Params::SCREEN_WIDTH + Params::WIDTH_OFFSET / 2;
