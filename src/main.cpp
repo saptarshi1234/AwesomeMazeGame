@@ -12,7 +12,7 @@
 using std::cout;
 using std::endl;
 
-const char* window_name = "GAME";
+const char* window_name = "Tank Wars";
 
 struct Clock {
   int last_tick_time = 0;
@@ -39,17 +39,6 @@ int main(int argc, char* argv[]) {
 
   const char* ip = "127.0.0.1";
 
-  cout << argc << endl;
-  if (argc > 1) {
-    cout << argv[1] << endl;
-    if (strcmp(argv[1], "-c") == 0) {
-      isServer = false;
-      if (argc == 2) {
-        ip = argv[2];
-      }
-    }
-  }
-
   if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0)
     std::cout << "could not iniitialize SDL";
   TTF_Init();
@@ -62,15 +51,15 @@ int main(int argc, char* argv[]) {
   WindowManager window(window_name, Params::SCREEN_HEIGHT,
                        Params::TOTAL_SCREEN_WIDTH);
   TextureManager::initialize(window);
+
+  TTF_Font* font_large = TTF_OpenFont("res/fonts/cocogoose.ttf", 36);
+  TTF_Font* font_small = TTF_OpenFont("res/fonts/cocogoose.ttf", 24);
+
   bool quit = false;
   while (!quit) {
     Entity splash_screen;
     splash_screen.init(
         {0, 0, Params::TOTAL_SCREEN_WIDTH, Params::SCREEN_HEIGHT});
-    // LayerDetails server =
-    // splash_screen.setLayers(
-    //     {{},
-    //      {TextureManager::getTex(TextureID::SERVER), {0, 0}, {0, 1}}});
 
     LayerDetails logo = {TextureManager::getTex(TextureID::LOGO)};
     LayerDetails server = {TextureManager::getTex(TextureID::SERVER)};
@@ -129,6 +118,21 @@ int main(int argc, char* argv[]) {
       }
       SDL_Delay(100);
     }
+
+    SDL_Rect overlay_loc = {0, 0, Params::TOTAL_SCREEN_WIDTH,
+                            Params::SCREEN_HEIGHT};
+    LayerDetails overlay = {TextureManager::getTex(TextureID::OVERLAY)};
+
+    // window.clearWindow();
+    std::string current_ip = "Current IP - " + CustomSocket::ip_details();
+
+    window.render(overlay_loc, overlay.getSize(), overlay.tex);
+    window.renderCenter({}, "Waiting for Client to join", font_large,
+                        {255, 255, 255});
+    window.renderCenter({0, 40}, current_ip.c_str(), font_small,
+                        {255, 255, 255});
+    window.display();
+
     cout << "sound" << sound << endl;
     cout << "single player" << single_player << endl;
     cout << "server" << isServer << endl;
@@ -271,6 +275,8 @@ int main(int argc, char* argv[]) {
          6 * Params::TOTAL_SCREEN_WIDTH / 8, 6 * Params::SCREEN_HEIGHT / 8});
 
     LayerDetails score = {TextureManager::getTex(TextureID::SCORE)};
+    // LayerDetails overlay = {TextureManager::getTex(TextureID::OVERLAY)};
+
     SDL_Rect loc = score_screen.getLocation();
     x = loc.x + (loc.w) * 6 / 20;
     int offset_x = loc.w / 10;
@@ -278,7 +284,11 @@ int main(int argc, char* argv[]) {
     int offset_y = loc.h / 7;
 
     received_key = false;
+    SDL_Rect TOTAL_SCREEN_SIZE = {0, 0, Params::TOTAL_SCREEN_WIDTH,
+                                  Params::SCREEN_HEIGHT};
+
     while (!received_key) {
+      // window.render(TOTAL_SCREEN_SIZE, overlay.getSize(), overlay.tex);
       window.render(loc, score.getSize(), score.tex);
       window.displayFinalScore(x, y, offset_x, offset_y, score1, score2,
                                single_player);
@@ -360,16 +370,3 @@ int main(int argc, char* argv[]) {
 
   return 0;
 }
-
-// TODO
-
-// Akshat
-// * bot AI -
-// * better movements -
-// * bot dies - point table
-
-// Sap
-// * make clean
-// * sprite sheets and animation
-// * startup screen with choices
-// * powerups

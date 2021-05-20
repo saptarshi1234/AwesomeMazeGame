@@ -110,6 +110,29 @@ void WindowManager::render(Entity& entity) {
     render(dst, src, layer.tex);
   }
 }
+
+void WindowManager::renderCenter(std::pair<int, int> l, const char* p_text,
+                                 TTF_Font* font, SDL_Color textColor) {
+  SDL_Surface* surfaceMessage = TTF_RenderText_Blended(font, p_text, textColor);
+  SDL_Texture* message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
+
+  auto [x, y] = l;
+  SDL_Rect src;
+  src.x = 0;
+  src.y = 0;
+  src.w = surfaceMessage->w;
+  src.h = surfaceMessage->h;
+
+  SDL_Rect dst;
+  dst.x = Params::TOTAL_SCREEN_WIDTH / 2 - src.w / 2 + x;
+  dst.y = Params::SCREEN_HEIGHT / 2 - src.h / 2 + y;
+  dst.w = src.w;
+  dst.h = src.h;
+
+  SDL_RenderCopy(renderer, message, &src, &dst);
+  SDL_FreeSurface(surfaceMessage);
+}
+
 void WindowManager::displayText(int x, int y, int offset, int index,
                                 bool sound) {
   TTF_Font* font = TTF_OpenFont("res/fonts/cocogoose.ttf", 24);

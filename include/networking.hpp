@@ -26,6 +26,7 @@ class CustomSocket {
  public:
   virtual void send(std::string data);
   virtual std::string recv();
+  static std::string ip_details();
 };
 
 class Client : public CustomSocket {
