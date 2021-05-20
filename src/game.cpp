@@ -503,7 +503,7 @@ void Game::render() {
     std::stringstream time_ss;
     time_ss << setw(2) << setfill('0') << min << ":" << setw(2) << setfill('0')
             << sec;
-    std::pair<int, int> loc = {Params::SCREEN_WIDTH + Params::WIDTH_OFFSET / 5,
+    std::pair<int, int> loc = {Params::SCREEN_WIDTH + Params::WIDTH_OFFSET / 4,
                                Params::SCREEN_HEIGHT * 9 / 10};
     win.renderText(loc, time_ss.str().c_str(), font, white);
   }
