@@ -218,6 +218,7 @@ void Player::create_from_string(std::string s) {
   ss >> hp;
   ss >> int_dir;
   ss >> is_invisible;
+  ss >> score;
 
   dir = Direction(int_dir);
   // setDirection(Direction(int_dir));
@@ -251,9 +252,10 @@ std::string Player::to_string() {
   ss << explosion_status << space;
   ss << hp << space;
   ss << dir << space;
-  ss << is_invisible;
+  ss << is_invisible << space;
+  ss << score;
 
-  return ss.str();
+    return ss.str();
 }
 
 std::string Player::to_update() {
